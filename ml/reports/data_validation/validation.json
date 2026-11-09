@@ -1,0 +1,229 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "schema_columns",
+      "passed": true,
+      "severity": "error",
+      "detail": "missing=[] unexpected=[]",
+      "data": {}
+    },
+    {
+      "name": "row_count",
+      "passed": true,
+      "severity": "warn",
+      "detail": "rows=654343 expected=654343",
+      "data": {}
+    },
+    {
+      "name": "no_nan",
+      "passed": true,
+      "severity": "error",
+      "detail": "NaN cells=0",
+      "data": {
+        "per_column": {}
+      }
+    },
+    {
+      "name": "waybill_id_unique",
+      "passed": true,
+      "severity": "error",
+      "detail": "duplicates=0",
+      "data": {}
+    },
+    {
+      "name": "no_duplicate_rows",
+      "passed": true,
+      "severity": "error",
+      "detail": "duplicate rows=0",
+      "data": {}
+    },
+    {
+      "name": "dt_range",
+      "passed": true,
+      "severity": "error",
+      "detail": "dt values=[20221017, 20221018, 20221019, 20221020, 20221021, 20221022, 20221023, 20221024]",
+      "data": {}
+    },
+    {
+      "name": "timestamps_plausible",
+      "passed": true,
+      "severity": "warn",
+      "detail": "non-zero timestamps outside Oct 2022",
+      "data": {
+        "counts": {
+          "platform_order_time": 0,
+          "order_push_time": 0,
+          "estimate_meal_prepare_time": 0,
+          "estimate_arrived_time": 0,
+          "dispatch_time": 0,
+          "grab_time": 0,
+          "fetch_time": 0,
+          "arrive_time": 0
+        }
+      }
+    },
+    {
+      "name": "timestamp_zero_counts",
+      "passed": true,
+      "severity": "info",
+      "detail": "0 = event did not happen",
+      "data": {
+        "counts": {
+          "platform_order_time": 0,
+          "order_push_time": 0,
+          "estimate_meal_prepare_time": 9907,
+          "estimate_arrived_time": 0,
+          "dispatch_time": 1,
+          "grab_time": 85797,
+          "fetch_time": 85797,
+          "arrive_time": 85798
+        }
+      }
+    },
+    {
+      "name": "rejected_waybill_consistency",
+      "passed": true,
+      "severity": "error",
+      "detail": "rejected-but-has-times=0; grabbed-without-fetch=0",
+      "data": {
+        "rejected": 85797
+      }
+    },
+    {
+      "name": "one_pickup_per_order",
+      "passed": true,
+      "severity": "error",
+      "detail": "orders=568546 with_pickup=568546 without_pickup=0 multi_pickup=0",
+      "data": {}
+    },
+    {
+      "name": "order_core_attributes_constant",
+      "passed": true,
+      "severity": "error",
+      "detail": "orders whose core attribute differs across waybills",
+      "data": {
+        "counts": {
+          "poi_id": 0,
+          "is_prebook": 0,
+          "sender_lat": 0,
+          "sender_lng": 0
+        }
+      }
+    },
+    {
+      "name": "order_ambiguous_attributes",
+      "passed": true,
+      "severity": "error",
+      "detail": "orders with conflicting t0 or recipient across waybills=88 (0.01548%); excluded in build (tolerance 0.05%)",
+      "data": {
+        "counts": {
+          "platform_order_time": 24,
+          "recipient_lat": 66,
+          "recipient_lng": 66
+        }
+      }
+    },
+    {
+      "name": "da_id_waybill_level",
+      "passed": true,
+      "severity": "info",
+      "detail": "orders whose da_id differs across waybills=1963; build uses the da_id of the FIRST dispatched waybill (closest to t0)",
+      "data": {}
+    },
+    {
+      "name": "chronology",
+      "passed": true,
+      "severity": "error",
+      "detail": "violations (later event earlier than earlier event)",
+      "data": {
+        "counts": {
+          "platform_order_time<=order_push_time": 0,
+          "order_push_time<=dispatch_time": 1,
+          "dispatch_time<=grab_time": 0,
+          "grab_time<=fetch_time": 0,
+          "fetch_time<=arrive_time": 1,
+          "platform_order_time<=fetch_time": 0
+        }
+      }
+    },
+    {
+      "name": "coordinates_present",
+      "passed": true,
+      "severity": "warn",
+      "detail": "zero coordinates",
+      "data": {
+        "counts": {
+          "sender_lat": 0,
+          "sender_lng": 0,
+          "recipient_lat": 0,
+          "recipient_lng": 0
+        }
+      }
+    },
+    {
+      "name": "timezone_is_weekend_agreement",
+      "passed": true,
+      "severity": "error",
+      "detail": "agreement UTC+8=1.00000 (UTC would be 0.98574)",
+      "data": {}
+    },
+    {
+      "name": "dt_vs_local_order_date",
+      "passed": true,
+      "severity": "info",
+      "detail": "share of rows where dt == local date of t0: 0.99716",
+      "data": {}
+    },
+    {
+      "name": "prebook_share",
+      "passed": true,
+      "severity": "info",
+      "detail": "is_prebook share=0.0368",
+      "data": {}
+    }
+  ],
+  "license": [
+    {
+      "clause": "license_cc_by_nc_4",
+      "present": true
+    },
+    {
+      "clause": "no_redistribution",
+      "present": true
+    },
+    {
+      "clause": "non_commercial_only",
+      "present": true
+    },
+    {
+      "clause": "acknowledgement",
+      "present": true
+    }
+  ],
+  "tails": {
+    "n": 406523,
+    "quantiles": {
+      "0.0": 0.26666666666666666,
+      "0.001": 2.033333333333333,
+      "0.01": 3.3666666666666667,
+      "0.5": 13.116666666666667,
+      "0.99": 38.9,
+      "0.999": 58.4,
+      "1.0": 557.2333333333333
+    },
+    "below": {
+      "0.5": 2,
+      "1": 23,
+      "2": 380,
+      "3": 2439
+    },
+    "above": {
+      "60": 352,
+      "90": 48,
+      "120": 19,
+      "180": 9,
+      "240": 7
+    }
+  }
+}
