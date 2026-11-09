@@ -1,7 +1,7 @@
 # HANDOFF — RiderOS AI
 
 > อัปเดตล่าสุด: 2026-11-09 · สถานะ: **Phase 2 อนุมัติแล้ว + Commit แล้ว → งานถัดไปคือ Phase 3 (Flutter) ใน Session ใหม่ — ดู §4** · การตัดสินใจ §3.1 P2a, §3.2 P2b, §3.3 P2c ยืนยันครบ
-> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git: Commit แรก `a7fe027` บน `main` (ยังไม่มี Remote / ยังไม่ Push)
+> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
 
 **Session ใหม่ (Phase 3) ให้อ่านตามลำดับ:** ไฟล์นี้ (โดยเฉพาะ §4) → `docs/DEVELOPMENT_ROADMAP.md` (W6–W8 + Phase 3 Exit Criteria) → `docs/SYSTEM_ARCHITECTURE.md` (§2.1 Flutter, §3 Data Flows, §4 API, §5 Security, §6 Folder Structure `mobile/`) → `backend/README.md` (API Contract จริงที่ App ต้องเรียก) → `docs/PROJECT_PLAN.md` (Scope ของหน้าจอ)
 
