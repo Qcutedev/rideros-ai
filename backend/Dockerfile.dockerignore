@@ -1,0 +1,14 @@
+# Build context is the repository root (the backend installs ../ml as a package).
+# Allow-list: only what the image needs. Datasets, artifacts and .env never enter the image.
+**
+!backend/pyproject.toml
+!backend/uv.lock
+!backend/README.md
+!backend/alembic.ini
+!backend/alembic/
+!backend/app/
+!backend/scripts/
+!ml/pyproject.toml
+!ml/README.md
+!ml/src/
+**/__pycache__/

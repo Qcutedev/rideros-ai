@@ -44,8 +44,14 @@ def library_versions() -> dict[str, str]:
 
 def feature_schema(model_name: str, version: str, columns: list[str], alpha: float) -> dict:
     descriptions = {
-        "poi_id": ("string", "Meituan anonymized merchant id (dataset restaurants only). Unseen ids fall back to prior statistics."),
-        "da_id": ("string", "Business district of the restaurant. Backend uses the POI's reference da_id from restaurant_reference.csv."),
+        "poi_id": (
+            "string",
+            "Meituan anonymized merchant id (dataset restaurants only). Unseen ids fall back to prior statistics.",
+        ),
+        "da_id": (
+            "string",
+            "Business district of the restaurant. Backend uses the POI's reference da_id from restaurant_reference.csv.",
+        ),
         "hour": ("int", "Local hour of the request, 0-23."),
         "minute_sin": ("float", "sin(2*pi*minute_of_day/1440), minute_of_day = hour*60 + minute (local)."),
         "minute_cos": ("float", "cos(2*pi*minute_of_day/1440)."),
@@ -60,7 +66,9 @@ def feature_schema(model_name: str, version: str, columns: list[str], alpha: flo
             "definition": "minutes from order creation (platform_order_time) to rider pickup (fetch_time), non-prebook orders",
             "is_not": ["food preparation time", "rider waiting time at the restaurant"],
         },
-        "inputs": [{"name": c, "dtype": descriptions[c][0], "description": descriptions[c][1]} for c in columns],
+        "inputs": [
+            {"name": c, "dtype": descriptions[c][0], "description": descriptions[c][1]} for c in columns
+        ],
         "builder": "rideros_ml.features.inference.make_feature_row(poi_id, da_id, local_time)",
         "output": {
             "predicted_minutes": "float",
@@ -108,7 +116,9 @@ def model_card(meta: dict, metrics: dict, schema: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_artifact(out_dir: Path, pipeline: Pipeline, meta: dict, metrics: dict, schema: dict, conformal: dict) -> dict:
+def write_artifact(
+    out_dir: Path, pipeline: Pipeline, meta: dict, metrics: dict, schema: dict, conformal: dict
+) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, out_dir / "pipeline.joblib", compress=3)
     joblib.dump(Pipeline(pipeline.steps[:-1]), out_dir / "preprocessor.joblib", compress=3)
@@ -130,7 +140,14 @@ def write_artifact(out_dir: Path, pipeline: Pipeline, meta: dict, metrics: dict,
             **({native: sha256_file(out_dir / native)} if native else {}),
         },
     }
-    for name, obj in [("feature_schema.json", schema), ("conformal.json", conformal), ("metrics.json", metrics), ("metadata.json", meta)]:
-        (out_dir / name).write_text(json.dumps(obj, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+    for name, obj in [
+        ("feature_schema.json", schema),
+        ("conformal.json", conformal),
+        ("metrics.json", metrics),
+        ("metadata.json", meta),
+    ]:
+        (out_dir / name).write_text(
+            json.dumps(obj, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
+        )
     (out_dir / "model_card.md").write_text(model_card(meta, metrics, schema), encoding="utf-8")
     return meta

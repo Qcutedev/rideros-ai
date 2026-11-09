@@ -49,7 +49,6 @@ def tune(kind: str, train, y, val, y_val, columns, seed: int, n_trials: int, tim
         "best_val_mae": study.best_value,
         "n_trials_completed": len(study.trials),
         "trials": [
-            {"number": t.number, "params": t.params, "val_mae": t.value, **t.user_attrs}
-            for t in study.trials
+            {"number": t.number, "params": t.params, "val_mae": t.value, **t.user_attrs} for t in study.trials
         ],
     }

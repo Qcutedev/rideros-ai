@@ -1,6 +1,6 @@
 # DEVELOPMENT_ROADMAP.md — RiderOS AI (Phase 0)
 
-> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 งานครบ 2026-11-09 — รอการอนุมัติ**
+> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09**
 > ระยะเวลา: 13 สัปดาห์ (≈ 3 เดือน) เริ่ม **จันทร์ 2026-11-09** ถ้าอนุมัติ Phase 0 ภายในสัปดาห์นี้
 > MVP (Module 1–3) เสร็จสิ้นปลายสัปดาห์ที่ 9 · RoadContext เป็น Extension
 > ทุก Phase จบด้วย **Phase Report** และ **รอการอนุมัติ** ก่อนเริ่ม Phase ถัดไป
@@ -65,12 +65,14 @@ gantt
 ### Phase 2 — Backend & Database (W3–W5)
 **Deliverables:** Migrations, API ตาม SYSTEM_ARCHITECTURE §4 (ยกเว้น RoadContext), OpenAPI, Tests
 
-**Exit criteria**
-- [ ] `docker compose up` แล้วได้ DB + API ใช้งานได้ภายในคำสั่งเดียว
-- [ ] Coverage ของ `app/modules/**` ≥ 80%
-- [ ] Cross-user Tests ผ่านทุก Endpoint
-- [ ] Auth Tests: Token หมดอายุ, Token ปลอม, Refresh Reuse, Logout
-- [ ] ไม่มี Secret ใน Repository (gitleaks ผ่าน)
+**Exit criteria** (ตรวจ 2026-11-09)
+- [x] `docker compose up` แล้วได้ DB + API ใช้งานได้ภายในคำสั่งเดียว — `docker compose up --build`: Migration `0001 → 0003` + Import ร้าน (4,938 ร้าน / 73,340 cells) + โหลดโมเดล `pickup_o2p` 1.0.0 (ตรวจ SHA-256) → `/ready` ok; Smoke test register → prediction → analytics → shift scenario → DELETE /me ผ่าน
+- [x] Coverage ของ `app/modules/**` ≥ 80% — **99%** (317 tests passed; ต่ำสุด auth 95%)
+- [x] Cross-user Tests ผ่านทุก Endpoint — `backend/tests/api/test_cross_user.py` (TrueProfit, Profile, Pickup restaurants/logs/predictions/wait-stats, Shift scenarios/compare/estimate, DELETE /me ลบข้อมูลครบ)
+- [x] Auth Tests: Token หมดอายุ, Token ปลอม, Refresh Reuse, Logout — `backend/tests/api/test_tokens.py` (expired/forged access, refresh reuse → revoke family, expired refresh, logout) + `test_auth.py`, `test_password_reset.py`, Rate limit ใน `test_rate_limits.py`
+- [x] ไม่มี Secret ใน Repository (gitleaks ผ่าน) — gitleaks v8.30.0 `dir` (168 ไฟล์ที่ Commit ได้) + `git` (History) → no leaks found
+
+**หมายเหตุ:** OpenAPI สร้างอัตโนมัติที่ `/docs` และ `/openapi.json` (ปิดเมื่อ `ENV=production`) · Contract สรุปใน `backend/README.md` · การตัดสินใจ P2a/P2b/P2c ใน `docs/HANDOFF.md` §3.1–3.3
 
 ### Phase 3 — Flutter App (W6–W8)
 **Exit criteria**

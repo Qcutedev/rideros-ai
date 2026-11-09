@@ -36,7 +36,9 @@ def export_restaurant_stats(cfg: Config) -> str:
     hourly_n = df.groupby(["poi_id", "hour"]).size()
     ref["peak_hour"] = hourly_n.groupby(level=0).idxmax().map(lambda t: t[1])
     ref["data_availability"] = pd.cut(
-        ref["n_orders"], [0, 4, cfg.min_orders_for_stats - 1, float("inf")], labels=["insufficient", "limited", "sufficient"]
+        ref["n_orders"],
+        [0, 4, cfg.min_orders_for_stats - 1, float("inf")],
+        labels=["insufficient", "limited", "sufficient"],
     ).astype(str)
 
     time_stats = df.groupby(["poi_id", "day_type", "hour"]).agg(

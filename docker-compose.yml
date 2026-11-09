@@ -1,0 +1,47 @@
+# Local development stack: PostgreSQL + PostGIS and the FastAPI backend.
+#   copy .env.example .env    # then replace every CHANGE-ME
+#   docker compose up --build
+name: rideros
+
+services:
+  db:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rideros}
+      POSTGRES_USER: ${POSTGRES_USER:-rideros}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql/<major>/docker
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: .  # the image also installs ml/ (rideros-ml) for model loading
+      dockerfile: backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENV: ${ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-rideros}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-rideros}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      # ml/artifacts is mounted read-only. Set MODEL_DIR= (empty) in .env to run without the model.
+      MODEL_DIR: ${MODEL_DIR-/artifacts}
+      ACTIVE_MODEL_NAME: ${ACTIVE_MODEL_NAME:-pickup_o2p}
+      ACTIVE_MODEL_VERSION: ${ACTIVE_MODEL_VERSION:-1.0.0}
+      RESTAURANT_STATS_DIR: ${RESTAURANT_STATS_DIR-/artifacts/restaurant_stats/1.0.0}
+    volumes:
+      - ./ml/artifacts:/artifacts:ro
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-8000}:8000"
+
+volumes:
+  db-data:

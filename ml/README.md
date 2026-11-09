@@ -21,8 +21,19 @@ on `PATH`, so call it as `python -m uv`.
 
 ```powershell
 cd ml
-python -m uv sync            # creates .venv from uv.lock (runtime + dev group)
+python -m uv sync            # creates .venv from uv.lock (runtime + dev + train groups)
 ```
+
+Dependencies are split so the backend can install this package for serving only:
+
+- Runtime (`[project] dependencies`): what loading and calling `pipeline.joblib` needs (pandas, numpy, pyarrow,
+  scikit-learn, xgboost, joblib, pyyaml). On Linux it is `xgboost-cpu` (no CUDA/NCCL wheels); elsewhere `xgboost`.
+- `train` group: catboost, optuna, matplotlib (training, tuning and report figures only).
+- `dev` group: pytest, ruff.
+
+`[tool.uv] default-groups = ["dev", "train"]`, so a plain `uv sync` here still installs everything. The backend
+installs `rideros-ml` as a path dependency (`backend/pyproject.toml`) and pins the library versions recorded in
+`metadata.json` -> `libraries`.
 
 ## Pipeline
 

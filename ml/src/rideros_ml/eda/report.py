@@ -55,11 +55,15 @@ def run_eda(cfg: Config) -> str:
     ]
     fig, ax = plt.subplots(figsize=(7, 3.5))
     ax.hist(y.clip(upper=60), bins=120, color="#4C72B0")
-    ax.set(xlabel="order-to-pickup minutes (clipped at 60)", ylabel="orders", title="Target distribution (train)")
+    ax.set(
+        xlabel="order-to-pickup minutes (clipped at 60)", ylabel="orders", title="Target distribution (train)"
+    )
     _save(fig, out / "target_hist.png")
 
     # 2. Time of day
-    by_hour = train.groupby("hour")[TARGET].agg(["count", "median", lambda s: s.quantile(0.25), lambda s: s.quantile(0.75)])
+    by_hour = train.groupby("hour")[TARGET].agg(
+        ["count", "median", lambda s: s.quantile(0.25), lambda s: s.quantile(0.75)]
+    )
     by_hour.columns = ["orders", "median", "p25", "p75"]
     fig, ax1 = plt.subplots(figsize=(8, 3.5))
     ax1.bar(by_hour.index, by_hour["orders"], color="#DDDDDD", label="orders")
@@ -85,10 +89,17 @@ def run_eda(cfg: Config) -> str:
 
     # 3. Weekend
     wk = train.groupby("is_weekend")[TARGET].agg(["count", "mean", "median"]).round(2)
-    md += ["", "## 3. Weekend vs weekday", "", "```", wk.to_string(), "```",
-           "Train covers Mon 17 - Sat 22 Oct (plus a few late-night orders created Sun 16 Oct local time), so every "
-           "weekday appears at most once and Sunday (the validation day) is barely present. Weekday-level effects "
-           "cannot be estimated reliably -> the model uses `is_weekend`, not day-of-week."]
+    md += [
+        "",
+        "## 3. Weekend vs weekday",
+        "",
+        "```",
+        wk.to_string(),
+        "```",
+        "Train covers Mon 17 - Sat 22 Oct (plus a few late-night orders created Sun 16 Oct local time), so every "
+        "weekday appears at most once and Sunday (the validation day) is barely present. Weekday-level effects "
+        "cannot be estimated reliably -> the model uses `is_weekend`, not day-of-week.",
+    ]
 
     # 4. Restaurants (POI)
     poi_n = train.groupby("poi_id").size()
@@ -116,8 +127,11 @@ def run_eda(cfg: Config) -> str:
     sub = train[avail].sample(min(60000, int(avail.sum())), random_state=cfg.training["seed"])
     ax.hexbin(sub[BENCHMARK].clip(0, 60), sub[TARGET].clip(0, 60), gridsize=60, bins="log", cmap="viridis")
     ax.plot([0, 60], [0, 60], color="white", lw=1)
-    ax.set(xlabel="Meituan estimated meal-ready (min after order)", ylabel="actual order-to-pickup (min)",
-           title="Platform estimate vs actual (train)")
+    ax.set(
+        xlabel="Meituan estimated meal-ready (min after order)",
+        ylabel="actual order-to-pickup (min)",
+        title="Platform estimate vs actual (train)",
+    )
     _save(fig, out / "benchmark_vs_actual.png")
     md += [
         "",

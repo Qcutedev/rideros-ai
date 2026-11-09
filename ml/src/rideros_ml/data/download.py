@@ -88,7 +88,9 @@ def download(cfg: Config, *, force: bool = False) -> dict:
     csv_path = out_dir / ds.waybill_csv
     if force or not csv_path.exists():
         extract_member(out_dir / ds.waybill_zip, ds.waybill_csv, csv_path)
-    manifest["extracted"] = {ds.waybill_csv: {"sha256": sha256_file(csv_path), "bytes": csv_path.stat().st_size}}
+    manifest["extracted"] = {
+        ds.waybill_csv: {"sha256": sha256_file(csv_path), "bytes": csv_path.stat().st_size}
+    }
 
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest

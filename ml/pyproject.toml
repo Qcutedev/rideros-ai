@@ -4,24 +4,34 @@ version = "0.1.0"
 description = "RiderOS AI - offline ML pipeline (dataset validation, training, evaluation, export)"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
+# Runtime dependencies = what is needed to load and serve an exported artifact. The backend installs
+# this package for that (pipeline.joblib references rideros_ml classes); training-only libraries live in
+# the `train` group, which `uv sync` here installs by default.
 dependencies = [
     "pandas>=2.2",
     "numpy>=2.1",
     "pyarrow>=18.0",
     "scikit-learn>=1.6",
-    "xgboost>=3.0",
-    "catboost>=1.2.8",
-    "optuna>=4.0",
-    "matplotlib>=3.10",
+    # Same `xgboost` module; the -cpu wheel avoids the ~200 MB NCCL/CUDA dependency on Linux.
+    "xgboost>=3.0; sys_platform != 'linux'",
+    "xgboost-cpu>=3.0; sys_platform == 'linux'",
     "joblib>=1.4",
     "pyyaml>=6.0",
 ]
 
 [dependency-groups]
+train = [
+    "catboost>=1.2.8",
+    "optuna>=4.0",
+    "matplotlib>=3.10",
+]
 dev = [
     "pytest>=8.3",
     "ruff>=0.8",
 ]
+
+[tool.uv]
+default-groups = ["dev", "train"]
 
 [project.scripts]
 rideros-ml = "rideros_ml.cli:main"
@@ -48,3 +58,15 @@ target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Long lines left in these modules are human-readable report/model-card text and log messages
+# (Markdown tables, f-strings). `ruff format` enforces code width; splitting the prose by hand would
+# risk changing the generated reports.
+"src/rideros_ml/models/train.py" = ["E501"]
+"src/rideros_ml/export/artifact.py" = ["E501"]
+"src/rideros_ml/eda/report.py" = ["E501"]
+"src/rideros_ml/data/validate.py" = ["E501"]
+"src/rideros_ml/analytics/restaurant_stats.py" = ["E501"]
+"src/rideros_ml/features/pipelines.py" = ["E501"]
+"src/rideros_ml/models/baselines.py" = ["E501"]

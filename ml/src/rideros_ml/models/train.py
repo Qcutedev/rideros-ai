@@ -11,7 +11,6 @@ import subprocess
 import time
 from datetime import UTC, datetime
 
-import numpy as np
 import pandas as pd
 
 from rideros_ml.config import Config
@@ -27,30 +26,64 @@ from rideros_ml.paths import ARTIFACTS_DIR, PROCESSED_DIR, REPORTS_DIR
 LEAKAGE_REVIEW = [
     # feature, source, known at t0, available to RiderOS at inference, used in deployable model
     ("poi_id", "order", "yes", "yes (dataset restaurant)", "yes"),
-    ("da_id", "first dispatched waybill (~13 s after t0)", "yes (pushed with order)", "yes (POI reference)", "yes"),
+    (
+        "da_id",
+        "first dispatched waybill (~13 s after t0)",
+        "yes (pushed with order)",
+        "yes (POI reference)",
+        "yes",
+    ),
     ("hour / minute_sin / minute_cos", "platform_order_time", "yes", "yes (request time)", "yes"),
     ("is_weekend", "order date", "yes", "yes", "yes"),
-    ("poi_orders_last_30m", "orders at POI in [t0-30m, t0)", "yes", "no (no live platform data)", "ablation only"),
+    (
+        "poi_orders_last_30m",
+        "orders at POI in [t0-30m, t0)",
+        "yes",
+        "no (no live platform data)",
+        "ablation only",
+    ),
     ("da_orders_last_30m", "orders in area in [t0-30m, t0)", "yes", "no", "ablation only"),
-    ("poi_open_orders", "orders at POI created < t0 and fetched > t0", "yes (state at t0)", "no", "ablation only"),
-    ("distance_km", "sender/recipient coords", "yes", "no (rider rarely knows before accepting)", "ablation only"),
+    (
+        "poi_open_orders",
+        "orders at POI created < t0 and fetched > t0",
+        "yes (state at t0)",
+        "no",
+        "ablation only",
+    ),
+    (
+        "distance_km",
+        "sender/recipient coords",
+        "yes",
+        "no (rider rarely knows before accepting)",
+        "ablation only",
+    ),
     ("estimate_meal_prepare_time", "Meituan model output", "yes", "no", "benchmark only"),
     ("estimate_arrived_time", "Meituan promise", "yes", "no", "excluded"),
-    ("dispatch/grab/fetch/arrive times, courier_id, grab_lat/lng", "post-assignment events", "NO", "no", "excluded (leakage)"),
+    (
+        "dispatch/grab/fetch/arrive times, courier_id, grab_lat/lng",
+        "post-assignment events",
+        "NO",
+        "no",
+        "excluded (leakage)",
+    ),
 ]
 
 
 def _git_sha() -> str:
     try:
-        return subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+        ).stdout.strip()
+    except subprocess.CalledProcessError, FileNotFoundError:
         return "no-commit"
 
 
 def _subsample(parts: dict[str, pd.DataFrame], seed: int) -> dict[str, pd.DataFrame]:
     sizes = {"train": 40000, "val": 10000, "test": 10000}
     return {
-        k: v.sample(min(sizes[k], len(v)), random_state=seed).sort_values("platform_order_time").reset_index(drop=True)
+        k: v.sample(min(sizes[k], len(v)), random_state=seed)
+        .sort_values("platform_order_time")
+        .reset_index(drop=True)
         for k, v in parts.items()
     }
 
@@ -79,14 +112,25 @@ def run_training(cfg: Config, quick: bool = False) -> str:
         print(stamp, flush=True)
 
     note(f"split sizes train={len(train):,} val={len(val):,} test={len(test):,} quick={quick}")
-    if not (train["platform_order_time"].max() < val["platform_order_time"].min() <= val["platform_order_time"].max() < test["platform_order_time"].min()):
+    if not (
+        train["platform_order_time"].max()
+        < val["platform_order_time"].min()
+        <= val["platform_order_time"].max()
+        < test["platform_order_time"].min()
+    ):
         raise AssertionError("temporal split is not strictly ordered")
 
     # ---------------- Stage 1: fit on train, score on validation ----------------
     models: dict[str, dict] = {}
 
     def register(name: str, pipe, features: list[str], deployable: bool, extra: dict | None = None):
-        models[name] = {"pipe": pipe, "features": features, "deployable": deployable, "val": regression_metrics(y_va, pipe.predict(val)), **(extra or {})}
+        models[name] = {
+            "pipe": pipe,
+            "features": features,
+            "deployable": deployable,
+            "val": regression_metrics(y_va, pipe.predict(val)),
+            **(extra or {}),
+        }
         note(f"{name}: val MAE={models[name]['val']['mae']:.4f}")
 
     register("baseline_global_median", C.fit_global_median(train, y_tr), ["-"], True)
@@ -95,15 +139,37 @@ def run_training(cfg: Config, quick: bool = False) -> str:
     rf_params = dict(cfg.training["random_forest"])
     if quick:
         rf_params["n_estimators"] = 20
-    register("random_forest", C.fit_random_forest(train, y_tr, deploy, seed, rf_params), deploy, True, {"params": rf_params})
+    register(
+        "random_forest",
+        C.fit_random_forest(train, y_tr, deploy, seed, rf_params),
+        deploy,
+        True,
+        {"params": rf_params},
+    )
 
     xgb_tuning = tune("xgboost", train, y_tr, val, y_va, deploy, seed, n_xgb, timeout)
-    note(f"xgboost tuning: {xgb_tuning['n_trials_completed']} trials, best val MAE={xgb_tuning['best_val_mae']:.4f}")
-    register("xgboost", C.fit_xgboost(train, y_tr, val, y_va, deploy, seed, xgb_tuning["best_params"]), deploy, True, {"params": xgb_tuning["best_params"]})
+    note(
+        f"xgboost tuning: {xgb_tuning['n_trials_completed']} trials, best val MAE={xgb_tuning['best_val_mae']:.4f}"
+    )
+    register(
+        "xgboost",
+        C.fit_xgboost(train, y_tr, val, y_va, deploy, seed, xgb_tuning["best_params"]),
+        deploy,
+        True,
+        {"params": xgb_tuning["best_params"]},
+    )
 
     cat_tuning = tune("catboost", train, y_tr, val, y_va, deploy, seed, n_cat, timeout)
-    note(f"catboost tuning: {cat_tuning['n_trials_completed']} trials, best val MAE={cat_tuning['best_val_mae']:.4f}")
-    register("catboost", C.fit_catboost(train, y_tr, val, y_va, deploy, seed, cat_tuning["best_params"]), deploy, True, {"params": cat_tuning["best_params"]})
+    note(
+        f"catboost tuning: {cat_tuning['n_trials_completed']} trials, best val MAE={cat_tuning['best_val_mae']:.4f}"
+    )
+    register(
+        "catboost",
+        C.fit_catboost(train, y_tr, val, y_va, deploy, seed, cat_tuning["best_params"]),
+        deploy,
+        True,
+        {"params": cat_tuning["best_params"]},
+    )
 
     register(
         "catboost_ablation_realtime",
@@ -116,10 +182,15 @@ def run_training(cfg: Config, quick: bool = False) -> str:
     # Meituan platform estimate (benchmark, not ours)
     def benchmark_metrics(df: pd.DataFrame) -> dict:
         avail = df[BENCHMARK].notna()
-        return {"available_share": float(avail.mean()), **regression_metrics(df.loc[avail, TARGET], df.loc[avail, BENCHMARK])}
+        return {
+            "available_share": float(avail.mean()),
+            **regression_metrics(df.loc[avail, TARGET], df.loc[avail, BENCHMARK]),
+        }
 
     bench_val = benchmark_metrics(val)
-    note(f"meituan platform estimate (benchmark): val MAE={bench_val['mae']:.4f} on {bench_val['available_share']:.2%} rows")
+    note(
+        f"meituan platform estimate (benchmark): val MAE={bench_val['mae']:.4f} on {bench_val['available_share']:.2%} rows"
+    )
 
     # ---------------- Stage 2: selection + calibration (validation only) ----------------
     deployable = {k: v for k, v in models.items() if v["deployable"]}
@@ -127,7 +198,9 @@ def run_training(cfg: Config, quick: bool = False) -> str:
     sel_pipe = models[selected]["pipe"]
     conformal = calibrate(y_va, sel_pipe.predict(val), cfg.conformal_alpha)
     selection_time = datetime.now(UTC).isoformat(timespec="seconds")
-    note(f"SELECTED (by val MAE): {selected}; conformal q_low={conformal.q_low:.3f} q_high={conformal.q_high:.3f}")
+    note(
+        f"SELECTED (by val MAE): {selected}; conformal q_low={conformal.q_low:.3f} q_high={conformal.q_high:.3f}"
+    )
 
     # ---------------- Stage 3: single test evaluation ----------------
     test_time = datetime.now(UTC).isoformat(timespec="seconds")
@@ -147,22 +220,42 @@ def run_training(cfg: Config, quick: bool = False) -> str:
     }
     inside = (test_scored[TARGET] >= low) & (test_scored[TARGET] <= high)
     cov_by_bucket = inside.groupby(poi_bucket(train_counts)).mean().to_dict()
-    note(f"TEST {selected}: MAE={test_metrics[selected]['mae']:.4f} R2={test_metrics[selected]['r2']:.4f} interval coverage={cov_test['coverage']:.3f}")
+    note(
+        f"TEST {selected}: MAE={test_metrics[selected]['mae']:.4f} R2={test_metrics[selected]['r2']:.4f} interval coverage={cov_test['coverage']:.3f}"
+    )
 
     # ---------------- Reports + artifact ----------------
     rep_dir = REPORTS_DIR / cfg.model_name / version
     rep_dir.mkdir(parents=True, exist_ok=True)
     comparison = [
-        {"model": n, "features": "deployable" if m["deployable"] else "ablation (not deployable)", "val_mae": m["val"]["mae"], "val_rmse": m["val"]["rmse"], "val_r2": m["val"]["r2"],
-         "test_mae": test_metrics[n]["mae"], "test_rmse": test_metrics[n]["rmse"], "test_r2": test_metrics[n]["r2"]}
+        {
+            "model": n,
+            "features": "deployable" if m["deployable"] else "ablation (not deployable)",
+            "val_mae": m["val"]["mae"],
+            "val_rmse": m["val"]["rmse"],
+            "val_r2": m["val"]["r2"],
+            "test_mae": test_metrics[n]["mae"],
+            "test_rmse": test_metrics[n]["rmse"],
+            "test_r2": test_metrics[n]["r2"],
+        }
         for n, m in models.items()
     ]
-    plots.model_comparison([r for r in comparison if r["features"] == "deployable"], rep_dir / "model_comparison.png")
+    plots.model_comparison(
+        [r for r in comparison if r["features"] == "deployable"], rep_dir / "model_comparison.png"
+    )
     y_t, p_t = test_scored[TARGET].to_numpy(), test_scored[pred_col].to_numpy()
     plots.actual_vs_predicted(y_t, p_t, rep_dir / "actual_vs_predicted.png", f"{selected} - test")
     plots.residuals_vs_predicted(y_t, p_t, rep_dir / "residuals.png", f"{selected} - residuals (test)")
-    plots.error_distribution(y_t, p_t, rep_dir / "error_distribution.png", f"{selected} - error distribution (test)")
-    plots.mae_by_hour(test_scored, TARGET, {selected: pred_col, "baseline_poi_median": "pred_baseline_poi_median"}, rep_dir / "mae_by_hour.png", "Test MAE by hour")
+    plots.error_distribution(
+        y_t, p_t, rep_dir / "error_distribution.png", f"{selected} - error distribution (test)"
+    )
+    plots.mae_by_hour(
+        test_scored,
+        TARGET,
+        {selected: pred_col, "baseline_poi_median": "pred_baseline_poi_median"},
+        rep_dir / "mae_by_hour.png",
+        "Test MAE by hour",
+    )
 
     metrics = {
         "model": cfg.model_name,
@@ -200,7 +293,9 @@ def run_training(cfg: Config, quick: bool = False) -> str:
         "params": models[selected].get("params"),
     }
     schema = feature_schema(cfg.model_name, version, deploy, cfg.conformal_alpha)
-    write_artifact(ARTIFACTS_DIR / cfg.model_name / version, sel_pipe, meta, metrics, schema, conformal.to_dict())
+    write_artifact(
+        ARTIFACTS_DIR / cfg.model_name / version, sel_pipe, meta, metrics, schema, conformal.to_dict()
+    )
     note(f"artifact written to {ARTIFACTS_DIR / cfg.model_name / version}")
     return f"done: selected={selected} report={rep_dir / 'RESULTS.md'}"
 
@@ -233,7 +328,9 @@ def _results_markdown(m: dict, comparison: list[dict], cfg: Config) -> str:
     ]
     for r in comparison:
         name = f"**{r['model']}**" if r["model"] == sel else r["model"]
-        lines.append(f"| {name} | {r['features']} | {_fmt(r['val_mae'])} | {_fmt(r['val_rmse'])} | {_fmt(r['val_r2'])} | {_fmt(r['test_mae'])} | {_fmt(r['test_rmse'])} | {_fmt(r['test_r2'])} |")
+        lines.append(
+            f"| {name} | {r['features']} | {_fmt(r['val_mae'])} | {_fmt(r['val_rmse'])} | {_fmt(r['val_r2'])} | {_fmt(r['test_mae'])} | {_fmt(r['test_rmse'])} | {_fmt(r['test_r2'])} |"
+        )
     lines.append(
         f"| Meituan platform estimate (benchmark, not ours) | platform model | {_fmt(bv['mae'])} | {_fmt(bv['rmse'])} | {_fmt(bv['r2'])} | {_fmt(bt['mae'])} | {_fmt(bt['rmse'])} | {_fmt(bt['r2'])} |"
     )
@@ -258,7 +355,9 @@ def _results_markdown(m: dict, comparison: list[dict], cfg: Config) -> str:
     ]
     for seg, groups in m["segments_test_selected"].items():
         for g, s in groups.items():
-            lines.append(f"| {seg} | {g} | {s['n']:,} | {_fmt(s['mae'])} | {_fmt(s['rmse'])} | {_fmt(s['bias'])} |")
+            lines.append(
+                f"| {seg} | {g} | {s['n']:,} | {_fmt(s['mae'])} | {_fmt(s['rmse'])} | {_fmt(s['bias'])} |"
+            )
     lines += [
         "",
         "## Figures (test day, selected model)",

@@ -32,7 +32,9 @@ class FeatureFrame(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         bad = set(self.columns) & FORBIDDEN
         if bad:
-            raise ValueError(f"forbidden (post-t0 / target / platform-estimate) columns requested: {sorted(bad)}")
+            raise ValueError(
+                f"forbidden (post-t0 / target / platform-estimate) columns requested: {sorted(bad)}"
+            )
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -58,7 +60,9 @@ class CountEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X: pd.DataFrame) -> np.ndarray:
-        return np.column_stack([np.log1p(X[c].map(self.counts_[c]).fillna(0).to_numpy(float)) for c in X.columns])
+        return np.column_stack(
+            [np.log1p(X[c].map(self.counts_[c]).fillna(0).to_numpy(float)) for c in X.columns]
+        )
 
     def get_feature_names_out(self, input_features=None):
         return np.array([f"{c}_log_count" for c in self.counts_])

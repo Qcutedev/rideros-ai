@@ -58,7 +58,9 @@ def add_time_features(df: pd.DataFrame, utc_offset_hours: int) -> pd.DataFrame:
 
 
 def haversine_km(lat1, lng1, lat2, lng2) -> np.ndarray:
-    lat1, lng1, lat2, lng2 = (np.radians(np.asarray(x, dtype=float) / schema.COORD_SCALE) for x in (lat1, lng1, lat2, lng2))
+    lat1, lng1, lat2, lng2 = (
+        np.radians(np.asarray(x, dtype=float) / schema.COORD_SCALE) for x in (lat1, lng1, lat2, lng2)
+    )
     a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lng2 - lng1) / 2) ** 2
     return 6371.0088 * 2 * np.arcsin(np.sqrt(a))
 
@@ -103,7 +105,9 @@ def add_ablation_features(df: pd.DataFrame) -> pd.DataFrame:
         poi_orders_last_30m=_count_in_window(poi, t0, 1800),
         da_orders_last_30m=_count_in_window(da, t0, 1800),
         poi_open_orders=_open_orders(poi, t0, fetch),
-        distance_km=haversine_km(df["sender_lat"], df["sender_lng"], df["recipient_lat"], df["recipient_lng"]),
+        distance_km=haversine_km(
+            df["sender_lat"], df["sender_lng"], df["recipient_lat"], df["recipient_lng"]
+        ),
     )
 
 
@@ -131,9 +135,23 @@ def build_orders(raw: pd.DataFrame, cfg: Config) -> tuple[pd.DataFrame, dict]:
     orders["poi_id"] = orders["poi_id"].astype(str)
     orders["da_id"] = orders["da_id"].astype(str)
     keep_cols = [
-        "order_id", "poi_id", "da_id", "platform_order_time", "fetch_time", "local_date", "hour", "minute_of_day",
-        "minute_sin", "minute_cos", "is_weekend", "poi_orders_last_30m", "da_orders_last_30m", "poi_open_orders",
-        "distance_km", BENCHMARK, TARGET,
+        "order_id",
+        "poi_id",
+        "da_id",
+        "platform_order_time",
+        "fetch_time",
+        "local_date",
+        "hour",
+        "minute_of_day",
+        "minute_sin",
+        "minute_cos",
+        "is_weekend",
+        "poi_orders_last_30m",
+        "da_orders_last_30m",
+        "poi_open_orders",
+        "distance_km",
+        BENCHMARK,
+        TARGET,
     ]
     return orders[keep_cols], rule_info
 

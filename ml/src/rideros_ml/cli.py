@@ -53,8 +53,13 @@ def cmd_validate(cfg, _args) -> int:
         tails = target_tail_profile(orders[orders["local_date"] <= cfg.split.train_last_date], TARGET)
 
     out = REPORTS_DIR / "data_validation"
-    write_json(out / "validation.json", {**report.to_dict(), "license": [c.__dict__ for c in license_checks], "tails": tails})
-    (out / "VALIDATION_REPORT.md").write_text(validation_markdown(report, license_checks, manifest, tails), encoding="utf-8")
+    write_json(
+        out / "validation.json",
+        {**report.to_dict(), "license": [c.__dict__ for c in license_checks], "tails": tails},
+    )
+    (out / "VALIDATION_REPORT.md").write_text(
+        validation_markdown(report, license_checks, manifest, tails), encoding="utf-8"
+    )
 
     gate_ok = report.ok and all(c.present for c in license_checks)
     for c in report.checks:
@@ -123,7 +128,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("build", help="build order-level table")
     sub.add_parser("eda", help="EDA report on the train period")
     p = sub.add_parser("train", help="baselines, models, tuning, evaluation, export")
-    p.add_argument("--quick", action="store_true", help="tiny tuning budget (smoke test only, not for reporting)")
+    p.add_argument(
+        "--quick", action="store_true", help="tiny tuning budget (smoke test only, not for reporting)"
+    )
     sub.add_parser("stats", help="export restaurant analytics aggregates")
     args = parser.parse_args(argv)
 

@@ -10,14 +10,14 @@ INDEX_COLUMN = "Unnamed: 0"
 
 ID_COLUMNS = ["order_id", "waybill_id", "courier_id", "poi_id", "da_id"]
 TIME_COLUMNS = [
-    "platform_order_time",          # order created (t0)
-    "order_push_time",              # order enters dispatch system
-    "estimate_meal_prepare_time",   # platform ESTIMATE of meal-ready time (Supplementary 2.5)
-    "estimate_arrived_time",        # promised delivery time
-    "dispatch_time",                # waybill assigned to a courier
-    "grab_time",                    # courier accepted (0 if rejected, Supplementary 2.4)
-    "fetch_time",                   # courier picked up food
-    "arrive_time",                  # delivered
+    "platform_order_time",  # order created (t0)
+    "order_push_time",  # order enters dispatch system
+    "estimate_meal_prepare_time",  # platform ESTIMATE of meal-ready time (Supplementary 2.5)
+    "estimate_arrived_time",  # promised delivery time
+    "dispatch_time",  # waybill assigned to a courier
+    "grab_time",  # courier accepted (0 if rejected, Supplementary 2.4)
+    "fetch_time",  # courier picked up food
+    "arrive_time",  # delivered
 ]
 COORD_COLUMNS = ["sender_lat", "sender_lng", "recipient_lat", "recipient_lng", "grab_lat", "grab_lng"]
 FLAG_COLUMNS = ["is_courier_grabbed", "is_prebook", "is_weekend"]

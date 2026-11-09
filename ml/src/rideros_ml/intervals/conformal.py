@@ -16,7 +16,7 @@ import numpy as np
 @dataclass(frozen=True)
 class ConformalInterval:
     alpha: float
-    q_low: float   # added to the prediction (negative)
+    q_low: float  # added to the prediction (negative)
     q_high: float  # added to the prediction (positive)
     n_calibration: int
 

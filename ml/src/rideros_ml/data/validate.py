@@ -93,22 +93,51 @@ def validate_waybills(df: pd.DataFrame, cfg: Config) -> ValidationReport:
 
     # 2. Row count vs official documentation
     checks.append(
-        _check("row_count", len(df) == ds.expected_rows, "warn", f"rows={len(df)} expected={ds.expected_rows}")
+        _check(
+            "row_count", len(df) == ds.expected_rows, "warn", f"rows={len(df)} expected={ds.expected_rows}"
+        )
     )
 
     # 3. Missing values (the dataset encodes "no time" as 0, never NaN)
     na = df.isna().sum()
-    checks.append(_check("no_nan", int(na.sum()) == 0, "error", f"NaN cells={int(na.sum())}", per_column=na[na > 0].to_dict()))
+    checks.append(
+        _check(
+            "no_nan",
+            int(na.sum()) == 0,
+            "error",
+            f"NaN cells={int(na.sum())}",
+            per_column=na[na > 0].to_dict(),
+        )
+    )
 
     # 4. Keys
     checks.append(
-        _check("waybill_id_unique", df["waybill_id"].is_unique, "error", f"duplicates={int(df['waybill_id'].duplicated().sum())}")
+        _check(
+            "waybill_id_unique",
+            df["waybill_id"].is_unique,
+            "error",
+            f"duplicates={int(df['waybill_id'].duplicated().sum())}",
+        )
     )
-    checks.append(_check("no_duplicate_rows", not df.duplicated().any(), "error", f"duplicate rows={int(df.duplicated().sum())}"))
+    checks.append(
+        _check(
+            "no_duplicate_rows",
+            not df.duplicated().any(),
+            "error",
+            f"duplicate rows={int(df.duplicated().sum())}",
+        )
+    )
 
     # 5. dt range
     dts = sorted(df["dt"].unique().tolist())
-    checks.append(_check("dt_range", dts[0] == 20221017 and dts[-1] == 20221024 and len(dts) == 8, "error", f"dt values={dts}"))
+    checks.append(
+        _check(
+            "dt_range",
+            dts[0] == 20221017 and dts[-1] == 20221024 and len(dts) == 8,
+            "error",
+            f"dt values={dts}",
+        )
+    )
 
     # 6. Plausible timestamps (non-zero values)
     lo, hi = pd.Timestamp("2022-10-01").timestamp(), pd.Timestamp("2022-11-01").timestamp()
@@ -118,14 +147,24 @@ def validate_waybills(df: pd.DataFrame, cfg: Config) -> ValidationReport:
         nz = s[s > 0]
         out_of_range[c] = int(((nz < lo) | (nz > hi)).sum())
     checks.append(
-        _check("timestamps_plausible", sum(out_of_range.values()) == 0, "warn", "non-zero timestamps outside Oct 2022", counts=out_of_range)
+        _check(
+            "timestamps_plausible",
+            sum(out_of_range.values()) == 0,
+            "warn",
+            "non-zero timestamps outside Oct 2022",
+            counts=out_of_range,
+        )
     )
     zero_counts = {c: int((df[c] == 0).sum()) for c in schema.TIME_COLUMNS}
-    checks.append(_check("timestamp_zero_counts", True, "info", "0 = event did not happen", counts=zero_counts))
+    checks.append(
+        _check("timestamp_zero_counts", True, "info", "0 = event did not happen", counts=zero_counts)
+    )
 
     # 7. Rejected-waybill consistency (Supplementary 2.4)
     rejected = df["is_courier_grabbed"] == 0
-    inconsistent = int((rejected & ((df["grab_time"] > 0) | (df["fetch_time"] > 0) | (df["arrive_time"] > 0))).sum())
+    inconsistent = int(
+        (rejected & ((df["grab_time"] > 0) | (df["fetch_time"] > 0) | (df["arrive_time"] > 0))).sum()
+    )
     grabbed_missing_fetch = int((~rejected & (df["fetch_time"] == 0)).sum())
     checks.append(
         _check(
@@ -156,10 +195,19 @@ def validate_waybills(df: pd.DataFrame, cfg: Config) -> ValidationReport:
     by_order = df.groupby("order_id")
     core = ["poi_id", "is_prebook", "sender_lat", "sender_lng"]
     varying = {c: int((by_order[c].nunique() > 1).sum()) for c in core}
-    checks.append(_check("order_core_attributes_constant", sum(varying.values()) == 0, "error", "orders whose core attribute differs across waybills", counts=varying))
+    checks.append(
+        _check(
+            "order_core_attributes_constant",
+            sum(varying.values()) == 0,
+            "error",
+            "orders whose core attribute differs across waybills",
+            counts=varying,
+        )
+    )
     # t0 and delivery address must be unambiguous. A tiny share of conflicting orders is tolerated and EXCLUDED in build.
     ambiguous = {
-        c: int((by_order[c].nunique() > 1).sum()) for c in ["platform_order_time", "recipient_lat", "recipient_lng"]
+        c: int((by_order[c].nunique() > 1).sum())
+        for c in ["platform_order_time", "recipient_lat", "recipient_lng"]
     }
     n_ambiguous = len(ambiguous_orders(df))
     share = n_ambiguous / n_orders
@@ -194,17 +242,40 @@ def validate_waybills(df: pd.DataFrame, cfg: Config) -> ValidationReport:
     ]
     viol = {f"{a}<={b}": int((g[b] < g[a]).sum()) for a, b in pairs}
     critical = viol["platform_order_time<=fetch_time"] + viol["grab_time<=fetch_time"]
-    checks.append(_check("chronology", critical == 0, "error", "violations (later event earlier than earlier event)", counts=viol))
+    checks.append(
+        _check(
+            "chronology",
+            critical == 0,
+            "error",
+            "violations (later event earlier than earlier event)",
+            counts=viol,
+        )
+    )
 
     # 11. Coordinates present for pickup and delivery
-    zero_coords = {c: int((df[c] == 0).sum()) for c in ["sender_lat", "sender_lng", "recipient_lat", "recipient_lng"]}
-    checks.append(_check("coordinates_present", sum(zero_coords.values()) == 0, "warn", "zero coordinates", counts=zero_coords))
+    zero_coords = {
+        c: int((df[c] == 0).sum()) for c in ["sender_lat", "sender_lng", "recipient_lat", "recipient_lng"]
+    }
+    checks.append(
+        _check(
+            "coordinates_present",
+            sum(zero_coords.values()) == 0,
+            "warn",
+            "zero coordinates",
+            counts=zero_coords,
+        )
+    )
 
     # 12. Timezone: is_weekend must agree with the local weekday of t0 under the configured UTC offset
     local = local_datetime(df["platform_order_time"], ds.local_utc_offset_hours)
     computed_weekend = (local.dt.day_of_week >= 5).astype(int)
     agree = float((computed_weekend == df["is_weekend"]).mean())
-    utc_agree = float(((pd.to_datetime(df["platform_order_time"], unit="s").dt.day_of_week >= 5).astype(int) == df["is_weekend"]).mean())
+    utc_agree = float(
+        (
+            (pd.to_datetime(df["platform_order_time"], unit="s").dt.day_of_week >= 5).astype(int)
+            == df["is_weekend"]
+        ).mean()
+    )
     checks.append(
         _check(
             "timezone_is_weekend_agreement",
@@ -214,7 +285,14 @@ def validate_waybills(df: pd.DataFrame, cfg: Config) -> ValidationReport:
         )
     )
     dt_agree = float((local.dt.strftime("%Y%m%d").astype(int) == df["dt"]).mean())
-    checks.append(_check("dt_vs_local_order_date", True, "info", f"share of rows where dt == local date of t0: {dt_agree:.5f}"))
+    checks.append(
+        _check(
+            "dt_vs_local_order_date",
+            True,
+            "info",
+            f"share of rows where dt == local date of t0: {dt_agree:.5f}",
+        )
+    )
 
     # 13. Prebook share and platform estimate availability
     checks.append(_check("prebook_share", True, "info", f"is_prebook share={df['is_prebook'].mean():.4f}"))
