@@ -4,17 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/theme/tokens.dart';
-import '../../../../core/errors/app_failure.dart';
-import '../../../../core/utils/date_json.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/utils/validators.dart';
-import '../../../../core/widgets/app_buttons.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/form_layout.dart';
-import '../../../../core/widgets/status_views.dart';
-import '../../../../l10n/app_localizations.dart';
-import '../../domain/profit_records.dart';
+import '../../app/theme/tokens.dart';
+import '../../l10n/app_localizations.dart';
+import '../errors/app_failure.dart';
+import '../utils/date_json.dart';
+import '../utils/formatters.dart';
+import '../utils/validators.dart';
+import 'app_buttons.dart';
+import 'app_text_field.dart';
+import 'form_layout.dart';
+import 'status_views.dart';
+
+/// Earliest date the backend accepts for records (`occurred_on` 2000-01-01).
+final firstRecordDate = DateTime.utc(2000);
 
 /// Read-only field that opens the date picker. Values are date-only (UTC midnight).
 class DateField extends StatelessWidget {
@@ -23,6 +25,7 @@ class DateField extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.lastDate,
+    this.firstDate,
     this.enabled = true,
     super.key,
   });
@@ -30,6 +33,9 @@ class DateField extends StatelessWidget {
   final String label;
   final DateTime value;
   final ValueChanged<DateTime> onChanged;
+
+  /// Defaults to [firstRecordDate].
+  final DateTime? firstDate;
 
   /// Usually today; never earlier than [value] so an existing record still opens.
   final DateTime lastDate;
@@ -40,7 +46,7 @@ class DateField extends StatelessWidget {
     final picked = await showDatePicker(
       context: context,
       initialDate: _local(value),
-      firstDate: _local(ProfitLimits.firstDate),
+      firstDate: _local(firstDate ?? firstRecordDate),
       lastDate: _local(last),
     );
     if (picked != null) onChanged(dateOnly(picked));
@@ -201,8 +207,13 @@ class RecordFormScaffold extends StatelessWidget {
   }
 }
 
-/// Asks before deleting. `true` = confirmed.
-Future<bool> confirmDelete(BuildContext context) async {
+/// Asks before deleting. `true` = confirmed. Defaults to the record texts.
+Future<bool> confirmDelete(
+  BuildContext context, {
+  String? title,
+  String? message,
+  String? confirmLabel,
+}) async {
   final l10n = AppLocalizations.of(context);
   final confirmed = await showDialog<bool>(
     context: context,
@@ -211,8 +222,8 @@ Future<bool> confirmDelete(BuildContext context) async {
         Icons.delete_outline_rounded,
         color: Theme.of(context).colorScheme.error,
       ),
-      title: Text(l10n.recordDeleteTitle),
-      content: Text(l10n.recordDeleteMessage),
+      title: Text(title ?? l10n.recordDeleteTitle),
+      content: Text(message ?? l10n.recordDeleteMessage),
       actions: [
         TextButton(
           key: const Key('confirm.cancel'),
@@ -227,7 +238,7 @@ Future<bool> confirmDelete(BuildContext context) async {
             foregroundColor: Theme.of(context).colorScheme.onError,
           ),
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.recordDelete),
+          child: Text(confirmLabel ?? l10n.recordDelete),
         ),
       ],
     ),

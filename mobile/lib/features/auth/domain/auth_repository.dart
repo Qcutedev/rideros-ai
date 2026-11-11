@@ -28,6 +28,13 @@ abstract interface class AuthRepository {
     required String newPassword,
   });
 
+  /// `PATCH /me`: the only editable account field. Returns the updated user.
+  Future<User> updateDisplayName(String displayName);
+
+  /// `DELETE /me` with the password: deletes the account and all of its data on the
+  /// server, then forgets the local tokens. Wrong password: 403 `invalid_password`.
+  Future<void> deleteAccount(String password);
+
   /// Fires when the refresh token is rejected during normal use.
   Stream<void> get sessionExpired;
 }

@@ -13,6 +13,10 @@ import 'package:rideros_ai/features/auth/presentation/register_screen.dart';
 import 'package:rideros_ai/features/auth/presentation/splash_screen.dart';
 import 'package:rideros_ai/features/dashboard/presentation/home_screen.dart';
 import 'package:rideros_ai/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:rideros_ai/features/profile/presentation/delete_account_screen.dart';
+import 'package:rideros_ai/features/profile/presentation/display_name_screen.dart';
+import 'package:rideros_ai/features/profile/presentation/profile_screen.dart';
+import 'package:rideros_ai/features/profile/presentation/rider_profile_form_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/expense_form_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/income_form_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/records_screen.dart';
@@ -56,7 +60,7 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
-  testWidgets('first login → onboarding → home → logout → login', (
+  testWidgets('first login → onboarding → home → profile → logout → login', (
     tester,
   ) async {
     await pumpApp(tester, fakeRepositories(auth, profiles));
@@ -66,7 +70,9 @@ void main() {
     await tapKey(tester, 'onboarding.skip');
     expect(find.byType(HomeScreen), findsOneWidget);
 
-    await tapKey(tester, 'home.logout');
+    await tapKey(tester, 'nav.profile');
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    await scrollAndTap(tester, 'profile.logout');
     expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.text(t.loginSessionExpired), findsNothing);
   });
@@ -116,7 +122,11 @@ void main() {
     await enter(tester, 'forgot.email', 'rider@example.com');
     await tapKey(tester, 'forgot.submit');
     await tapKey(tester, 'forgot.sent.haveToken');
-    await enter(tester, 'reset.token', 'AbCdEf0123456789_-xyz');
+    await enter(
+      tester,
+      'reset.token',
+      'AbCdEf0123456789_-xyz', // gitleaks:allow (fake test token)
+    );
     await enter(tester, 'reset.password', 'new pass 123');
     await enter(tester, 'reset.confirm', 'new pass 123');
     await tapKey(tester, 'reset.submit');
@@ -218,7 +228,8 @@ void main() {
       expect(find.text('฿1,049.50'), findsNWidgets(2));
       expect(adapter.count('/profit/summary'), 2);
 
-      await tapKey(tester, 'home.logout');
+      await tapKey(tester, 'nav.profile');
+      await scrollAndTap(tester, 'profile.logout');
       expect(find.byType(LoginScreen), findsOneWidget);
       expect(store.value, isNull);
       expect(adapter.paths.last, '/auth/logout');
@@ -305,6 +316,55 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(LoginScreen), findsOneWidget);
       expect(find.byType(IncomeFormScreen), findsNothing);
+    });
+
+    testWidgets('profile tab → rider profile form → saved → profile', (
+      tester,
+    ) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'nav.profile');
+      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.text(t.profileVehicleNotConfigured), findsOneWidget);
+
+      await tapKey(tester, 'profile.vehicle');
+      expect(find.byType(RiderProfileFormScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      await enter(tester, 'riderProfile.fuelKmPerLiter', '40');
+      await tapKey(tester, 'riderProfile.submit');
+
+      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.text('40 กม./ลิตร'), findsOneWidget);
+    });
+
+    testWidgets('delete account → login with a notice', (tester) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'nav.profile');
+      await scrollAndTap(tester, 'profile.deleteAccount');
+      expect(find.byType(DeleteAccountScreen), findsOneWidget);
+
+      await enter(tester, 'deleteAccount.password', 'secret pw');
+      await tapKey(tester, 'deleteAccount.submit');
+      await tapKey(tester, 'confirm.delete');
+
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.text(t.loginAccountDeleted), findsOneWidget);
+      expect(auth.calls, contains('deleteAccount'));
+    });
+
+    // Regression: the new name updates the session; that must not refresh the router
+    // and undo the pop back to the profile tab.
+    testWidgets('rename → back on the profile tab with the new name', (
+      tester,
+    ) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'nav.profile');
+      await tapKey(tester, 'profile.displayName');
+      expect(find.byType(DisplayNameScreen), findsOneWidget);
+      await enter(tester, 'displayName.field', 'Somsak');
+      await tapKey(tester, 'displayName.submit');
+      expect(find.byType(DisplayNameScreen), findsNothing);
+      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.text('Somsak'), findsWidgets);
     });
   });
 }

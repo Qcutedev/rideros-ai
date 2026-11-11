@@ -7,7 +7,7 @@ import 'package:rideros_ai/features/auth/presentation/reset_password_screen.dart
 import '../helpers/fakes.dart';
 import '../helpers/pump.dart';
 
-const _token = 'AbCdEf0123456789_-xyzXYZ0123456789abcdefghi';
+const _token = 'AbCdEf0123456789_-xyzXYZ0123456789abcdefghi'; // gitleaks:allow (fake test token)
 
 void main() {
   late FakeAuthRepository auth;

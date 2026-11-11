@@ -102,6 +102,22 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   });
 
+  @override
+  Future<User> updateDisplayName(String displayName) => guardApi(() async {
+    final response = await _dio.patch<Map<String, dynamic>>(
+      '/me',
+      data: {'display_name': displayName.trim()},
+    );
+    return User.fromJson(response.data!);
+  });
+
+  @override
+  Future<void> deleteAccount(String password) => guardApi(() async {
+    await _dio.delete<void>('/me', data: {'password': password});
+    // The server deleted the refresh tokens with the account.
+    await _tokens.clear();
+  });
+
   Future<User> _me() async {
     final response = await _dio.get<Map<String, dynamic>>('/me');
     return User.fromJson(response.data!);

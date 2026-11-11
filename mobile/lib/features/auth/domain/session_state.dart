@@ -18,7 +18,7 @@ final class SessionRestoreFailed extends SessionState {
   final Object failure;
 }
 
-enum SignOutReason { none, userLoggedOut, sessionExpired }
+enum SignOutReason { none, userLoggedOut, sessionExpired, accountDeleted }
 
 final class SignedOut extends SessionState {
   const SignedOut([this.reason = SignOutReason.none]);

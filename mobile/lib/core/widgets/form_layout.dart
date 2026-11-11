@@ -19,8 +19,10 @@ class FormLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Top-aligned: a short form (one field) starts under the app bar, not mid-screen.
     return SafeArea(
-      child: Center(
+      child: Align(
+        alignment: Alignment.topCenter,
         child: SingleChildScrollView(
           padding: AppSpacing.screen,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,

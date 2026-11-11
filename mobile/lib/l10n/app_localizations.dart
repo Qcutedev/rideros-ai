@@ -1078,6 +1078,234 @@ abstract class AppLocalizations {
   /// **'เวลาเริ่มและเวลาเลิกต้องไม่ตรงกัน'**
   String get sessionTimesEqual;
 
+  /// No description provided for @navProfile.
+  ///
+  /// In th, this message translates to:
+  /// **'โปรไฟล์'**
+  String get navProfile;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'โปรไฟล์'**
+  String get profileTitle;
+
+  /// No description provided for @profileMemberSince.
+  ///
+  /// In th, this message translates to:
+  /// **'สมัครเมื่อ {date}'**
+  String profileMemberSince(String date);
+
+  /// No description provided for @profileAccountSection.
+  ///
+  /// In th, this message translates to:
+  /// **'บัญชี'**
+  String get profileAccountSection;
+
+  /// No description provided for @profileEditName.
+  ///
+  /// In th, this message translates to:
+  /// **'แก้ไขชื่อที่แสดง'**
+  String get profileEditName;
+
+  /// No description provided for @profileEmailHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้เข้าสู่ระบบ · ยังเปลี่ยนอีเมลไม่ได้'**
+  String get profileEmailHelper;
+
+  /// No description provided for @profileVehicleSection.
+  ///
+  /// In th, this message translates to:
+  /// **'ยานพาหนะและต้นทุน'**
+  String get profileVehicleSection;
+
+  /// No description provided for @profileVehicleTile.
+  ///
+  /// In th, this message translates to:
+  /// **'ประเภทรถ ค่าน้ำมัน และค่าเสื่อม'**
+  String get profileVehicleTile;
+
+  /// No description provided for @profileVehicleNotConfigured.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่ได้กรอกข้อมูล แตะเพื่อตั้งค่า'**
+  String get profileVehicleNotConfigured;
+
+  /// No description provided for @profileFuelEconomyValue.
+  ///
+  /// In th, this message translates to:
+  /// **'{km} กม./ลิตร'**
+  String profileFuelEconomyValue(String km);
+
+  /// No description provided for @profileFuelPriceValue.
+  ///
+  /// In th, this message translates to:
+  /// **'น้ำมัน {price}/ลิตร'**
+  String profileFuelPriceValue(String price);
+
+  /// No description provided for @profileDepreciationValue.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าเสื่อม {price}/กม.'**
+  String profileDepreciationValue(String price);
+
+  /// No description provided for @profileRegionSection.
+  ///
+  /// In th, this message translates to:
+  /// **'เขตเวลาและสกุลเงิน'**
+  String get profileRegionSection;
+
+  /// No description provided for @profileTimezone.
+  ///
+  /// In th, this message translates to:
+  /// **'เขตเวลา'**
+  String get profileTimezone;
+
+  /// No description provided for @profileCurrency.
+  ///
+  /// In th, this message translates to:
+  /// **'สกุลเงิน'**
+  String get profileCurrency;
+
+  /// No description provided for @profileInfoSection.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลและสัญญาอนุญาต'**
+  String get profileInfoSection;
+
+  /// No description provided for @profileAbout.
+  ///
+  /// In th, this message translates to:
+  /// **'เกี่ยวกับแอปและสัญญาอนุญาต'**
+  String get profileAbout;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบบัญชี'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @riderProfileTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ยานพาหนะและต้นทุน'**
+  String get riderProfileTitle;
+
+  /// No description provided for @riderProfileTimezoneHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ชื่อเขตเวลาแบบ IANA เช่น Asia/Bangkok · ใช้แบ่งวันและสัปดาห์ในสรุปกำไร'**
+  String get riderProfileTimezoneHelper;
+
+  /// No description provided for @riderProfileCurrency.
+  ///
+  /// In th, this message translates to:
+  /// **'สกุลเงิน {currency} (ตอนนี้รองรับสกุลเดียว)'**
+  String riderProfileCurrency(String currency);
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบบัญชี'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In th, this message translates to:
+  /// **'บัญชีและข้อมูลทั้งหมดของคุณจะถูกลบถาวรทันที ได้แก่ รายได้ ค่าใช้จ่าย ช่วงทำงาน โปรไฟล์ไรเดอร์ ร้านของฉัน บันทึกเวลารับ ประวัติการทำนาย และ Scenario กะงาน'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @deleteAccountIrreversible.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบแล้วกู้คืนไม่ได้ ถ้าต้องการใช้งานอีกต้องสมัครใหม่และเริ่มบันทึกใหม่ทั้งหมด'**
+  String get deleteAccountIrreversible;
+
+  /// No description provided for @deleteAccountPasswordHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'กรอกรหัสผ่านปัจจุบันเพื่อยืนยันว่าเป็นเจ้าของบัญชี'**
+  String get deleteAccountPasswordHelper;
+
+  /// No description provided for @deleteAccountSubmit.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบบัญชีถาวร'**
+  String get deleteAccountSubmit;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบบัญชีถาวร?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลทั้งหมดจะถูกลบทันทีและกู้คืนไม่ได้'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @loginAccountDeleted.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบบัญชีและข้อมูลทั้งหมดแล้ว'**
+  String get loginAccountDeleted;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เกี่ยวกับแอป'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In th, this message translates to:
+  /// **'ผู้ช่วยไรเดอร์ส่งอาหาร: บันทึกกำไรจริง ประมาณเวลา Order-to-Pickup และวางแผนกะงาน ตัวเลขกำไรมาจากรายการที่คุณบันทึกเอง แอปไม่ได้เชื่อมต่อแพลตฟอร์มส่งอาหารใด'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutDataTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลที่ใช้ฝึกโมเดล Pickup'**
+  String get aboutDataTitle;
+
+  /// No description provided for @aboutDataBody.
+  ///
+  /// In th, this message translates to:
+  /// **'Meituan INFORMS TSL Research Challenge (ข้อมูลการส่งอาหารในประเทศจีน) · สัญญาอนุญาต CC BY-NC 4.0 (ใช้เพื่อการวิจัย/ไม่ใช่เชิงพาณิชย์) · แอปไม่ได้แจกจ่ายชุดข้อมูลนี้'**
+  String get aboutDataBody;
+
+  /// No description provided for @aboutFontTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ฟอนต์'**
+  String get aboutFontTitle;
+
+  /// No description provided for @aboutFontBody.
+  ///
+  /// In th, this message translates to:
+  /// **'IBM Plex Sans Thai · SIL Open Font License 1.1'**
+  String get aboutFontBody;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In th, this message translates to:
+  /// **'สัญญาอนุญาตโอเพนซอร์สทั้งหมด'**
+  String get aboutLicenses;
+
+  /// No description provided for @meituanAcknowledgement.
+  ///
+  /// In th, this message translates to:
+  /// **'This research was supported by data provided by Meituan.'**
+  String get meituanAcknowledgement;
+
+  /// No description provided for @failureInvalidPassword.
+  ///
+  /// In th, this message translates to:
+  /// **'รหัสผ่านไม่ถูกต้อง'**
+  String get failureInvalidPassword;
+
   /// No description provided for @failureNotFound.
   ///
   /// In th, this message translates to:

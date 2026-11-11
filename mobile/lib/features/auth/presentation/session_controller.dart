@@ -69,6 +69,21 @@ class SessionController extends Notifier<SessionState> {
     if (ref.mounted) state = const SignedOut(SignOutReason.userLoggedOut);
   }
 
+  /// Throws an `AppFailure`; on success the signed-in user shows the new name.
+  Future<void> updateDisplayName(String displayName) async {
+    final user = await _auth.updateDisplayName(displayName);
+    final current = state;
+    if (ref.mounted && current is SignedIn) {
+      state = current.copyWith(user: user);
+    }
+  }
+
+  /// Throws an `AppFailure` (e.g. `invalid_password`); the session stays as it was.
+  Future<void> deleteAccount(String password) async {
+    await _auth.deleteAccount(password);
+    if (ref.mounted) state = const SignedOut(SignOutReason.accountDeleted);
+  }
+
   /// Onboarding saved the rider profile.
   void markProfileConfigured() {
     final current = state;

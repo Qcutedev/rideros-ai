@@ -39,24 +39,11 @@ final homeSummaryProvider = FutureProvider.autoDispose<HomeSummary>((
 
 /// Signed-in landing tab: greeting, today's and this week's actual profit, and
 /// shortcuts to record income, expenses and work sessions.
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _loggingOut = false;
-
-  Future<void> _logout() async {
-    setState(() => _loggingOut = true);
-    // Never fails: the local session ends even when the server is unreachable.
-    await ref.read(sessionControllerProvider.notifier).logout();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final session = ref.watch(sessionControllerProvider);
@@ -64,18 +51,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final summary = ref.watch(homeSummaryProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        actions: [
-          // Moves to the profile screen in P3c.
-          IconButton(
-            key: const Key('home.logout'),
-            tooltip: l10n.logout,
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: _loggingOut ? null : _logout,
-          ),
-        ],
-      ),
+      // Logout lives on the profile tab.
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(homeSummaryProvider.future),
         child: ListView(

@@ -567,6 +567,139 @@ class AppLocalizationsTh extends AppLocalizations {
   String get sessionTimesEqual => 'เวลาเริ่มและเวลาเลิกต้องไม่ตรงกัน';
 
   @override
+  String get navProfile => 'โปรไฟล์';
+
+  @override
+  String get profileTitle => 'โปรไฟล์';
+
+  @override
+  String profileMemberSince(String date) {
+    return 'สมัครเมื่อ $date';
+  }
+
+  @override
+  String get profileAccountSection => 'บัญชี';
+
+  @override
+  String get profileEditName => 'แก้ไขชื่อที่แสดง';
+
+  @override
+  String get profileEmailHelper => 'ใช้เข้าสู่ระบบ · ยังเปลี่ยนอีเมลไม่ได้';
+
+  @override
+  String get profileVehicleSection => 'ยานพาหนะและต้นทุน';
+
+  @override
+  String get profileVehicleTile => 'ประเภทรถ ค่าน้ำมัน และค่าเสื่อม';
+
+  @override
+  String get profileVehicleNotConfigured =>
+      'ยังไม่ได้กรอกข้อมูล แตะเพื่อตั้งค่า';
+
+  @override
+  String profileFuelEconomyValue(String km) {
+    return '$km กม./ลิตร';
+  }
+
+  @override
+  String profileFuelPriceValue(String price) {
+    return 'น้ำมัน $price/ลิตร';
+  }
+
+  @override
+  String profileDepreciationValue(String price) {
+    return 'ค่าเสื่อม $price/กม.';
+  }
+
+  @override
+  String get profileRegionSection => 'เขตเวลาและสกุลเงิน';
+
+  @override
+  String get profileTimezone => 'เขตเวลา';
+
+  @override
+  String get profileCurrency => 'สกุลเงิน';
+
+  @override
+  String get profileInfoSection => 'ข้อมูลและสัญญาอนุญาต';
+
+  @override
+  String get profileAbout => 'เกี่ยวกับแอปและสัญญาอนุญาต';
+
+  @override
+  String get profileDeleteAccount => 'ลบบัญชี';
+
+  @override
+  String get riderProfileTitle => 'ยานพาหนะและต้นทุน';
+
+  @override
+  String get riderProfileTimezoneHelper =>
+      'ชื่อเขตเวลาแบบ IANA เช่น Asia/Bangkok · ใช้แบ่งวันและสัปดาห์ในสรุปกำไร';
+
+  @override
+  String riderProfileCurrency(String currency) {
+    return 'สกุลเงิน $currency (ตอนนี้รองรับสกุลเดียว)';
+  }
+
+  @override
+  String get deleteAccountTitle => 'ลบบัญชี';
+
+  @override
+  String get deleteAccountWarning =>
+      'บัญชีและข้อมูลทั้งหมดของคุณจะถูกลบถาวรทันที ได้แก่ รายได้ ค่าใช้จ่าย ช่วงทำงาน โปรไฟล์ไรเดอร์ ร้านของฉัน บันทึกเวลารับ ประวัติการทำนาย และ Scenario กะงาน';
+
+  @override
+  String get deleteAccountIrreversible =>
+      'ลบแล้วกู้คืนไม่ได้ ถ้าต้องการใช้งานอีกต้องสมัครใหม่และเริ่มบันทึกใหม่ทั้งหมด';
+
+  @override
+  String get deleteAccountPasswordHelper =>
+      'กรอกรหัสผ่านปัจจุบันเพื่อยืนยันว่าเป็นเจ้าของบัญชี';
+
+  @override
+  String get deleteAccountSubmit => 'ลบบัญชีถาวร';
+
+  @override
+  String get deleteAccountConfirmTitle => 'ลบบัญชีถาวร?';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'ข้อมูลทั้งหมดจะถูกลบทันทีและกู้คืนไม่ได้';
+
+  @override
+  String get loginAccountDeleted => 'ลบบัญชีและข้อมูลทั้งหมดแล้ว';
+
+  @override
+  String get aboutTitle => 'เกี่ยวกับแอป';
+
+  @override
+  String get aboutDescription =>
+      'ผู้ช่วยไรเดอร์ส่งอาหาร: บันทึกกำไรจริง ประมาณเวลา Order-to-Pickup และวางแผนกะงาน ตัวเลขกำไรมาจากรายการที่คุณบันทึกเอง แอปไม่ได้เชื่อมต่อแพลตฟอร์มส่งอาหารใด';
+
+  @override
+  String get aboutDataTitle => 'ข้อมูลที่ใช้ฝึกโมเดล Pickup';
+
+  @override
+  String get aboutDataBody =>
+      'Meituan INFORMS TSL Research Challenge (ข้อมูลการส่งอาหารในประเทศจีน) · สัญญาอนุญาต CC BY-NC 4.0 (ใช้เพื่อการวิจัย/ไม่ใช่เชิงพาณิชย์) · แอปไม่ได้แจกจ่ายชุดข้อมูลนี้';
+
+  @override
+  String get aboutFontTitle => 'ฟอนต์';
+
+  @override
+  String get aboutFontBody => 'IBM Plex Sans Thai · SIL Open Font License 1.1';
+
+  @override
+  String get aboutLicenses => 'สัญญาอนุญาตโอเพนซอร์สทั้งหมด';
+
+  @override
+  String get meituanAcknowledgement =>
+      'This research was supported by data provided by Meituan.';
+
+  @override
+  String get failureInvalidPassword => 'รหัสผ่านไม่ถูกต้อง';
+
+  @override
   String get failureNotFound => 'ไม่พบรายการนี้ (อาจถูกลบไปแล้ว)';
 
   @override

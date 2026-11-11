@@ -51,6 +51,11 @@ const allRoutePatterns = [
   Routes.expenseEditPattern,
   Routes.workSessionNew,
   Routes.workSessionEditPattern,
+  Routes.profile,
+  Routes.profileDisplayName,
+  Routes.riderProfile,
+  Routes.deleteAccount,
+  Routes.about,
 ];
 
 /// Pumps one screen at [path] inside a router. Every other route renders
@@ -142,6 +147,24 @@ Future<void> tapKey(
   } else {
     await tester.pump();
   }
+}
+
+/// Scrolls the first scrollable until [finder] is built and fully on screen. Needed
+/// for rows of lazily built lists that start below the 800x600 test screen.
+Future<void> scrollIntoView(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.ensureVisible(finder);
+  await tester.pump();
+}
+
+/// [scrollIntoView] then [tapKey].
+Future<void> scrollAndTap(WidgetTester tester, String key) async {
+  await scrollIntoView(tester, find.byKey(Key(key)));
+  await tapKey(tester, key);
 }
 
 /// Thai strings for assertions.

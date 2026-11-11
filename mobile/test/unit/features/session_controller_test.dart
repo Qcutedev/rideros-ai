@@ -264,4 +264,60 @@ void main() {
       );
     });
   });
+
+  group('account', () {
+    setUp(() => auth.restoreUser = testUser);
+
+    test('updateDisplayName replaces the signed-in user', () async {
+      final container = await started();
+      await container
+          .read(sessionControllerProvider.notifier)
+          .updateDisplayName('Somsak');
+      final state = container.read(sessionControllerProvider) as SignedIn;
+      expect(state.user.displayName, 'Somsak');
+      expect(state.profileConfigured, isFalse, reason: 'kept as it was');
+    });
+
+    test('a failed rename keeps the old name and rethrows', () async {
+      auth.updateNameError = const NetworkFailure();
+      final container = await started();
+      await expectLater(
+        container
+            .read(sessionControllerProvider.notifier)
+            .updateDisplayName('Somsak'),
+        throwsA(isA<NetworkFailure>()),
+      );
+      final state = container.read(sessionControllerProvider) as SignedIn;
+      expect(state.user.displayName, testUser.displayName);
+    });
+
+    test('deleteAccount signs out with its own reason', () async {
+      final container = await started();
+      await container
+          .read(sessionControllerProvider.notifier)
+          .deleteAccount('secret pw');
+      expect(auth.lastArgs['password'], 'secret pw');
+      expect(
+        container.read(sessionControllerProvider),
+        isA<SignedOut>().having(
+          (s) => s.reason,
+          'reason',
+          SignOutReason.accountDeleted,
+        ),
+      );
+    });
+
+    test('a wrong password keeps the user signed in', () async {
+      auth.deleteError = const ApiFailure(
+        statusCode: 403,
+        code: ApiErrorCode.invalidPassword,
+      );
+      final container = await started();
+      await expectLater(
+        container.read(sessionControllerProvider.notifier).deleteAccount('x'),
+        throwsA(isA<ApiFailure>()),
+      );
+      expect(container.read(sessionControllerProvider), isA<SignedIn>());
+    });
+  });
 }

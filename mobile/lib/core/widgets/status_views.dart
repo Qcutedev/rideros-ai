@@ -113,6 +113,61 @@ class SummarySkeleton extends StatelessWidget {
   }
 }
 
+/// Skeleton shaped like a card of list rows (icon + two lines each).
+class ListSkeleton extends StatelessWidget {
+  const ListSkeleton({this.rows = 3, super.key});
+
+  final int rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      label: l10n.commonLoading,
+      liveRegion: true,
+      child: ExcludeSemantics(
+        child: Card(
+          key: const Key('skeleton.list'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < rows; i++)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    child: Row(
+                      children: [
+                        SkeletonBox(
+                          width: 40,
+                          height: 40,
+                          radius: AppRadius.pill,
+                        ),
+                        SizedBox(width: AppSpacing.lg),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SkeletonBox(width: 160),
+                              SizedBox(height: AppSpacing.sm),
+                              SkeletonBox(width: 100, height: 12),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Centered icon + title + message + optional action. Used for empty and error states.
 class StatusView extends StatelessWidget {
   const StatusView({

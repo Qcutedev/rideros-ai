@@ -12,8 +12,16 @@ abstract final class Routes {
   static const home = '/home';
   static const profit = '/profit';
 
+  static const profile = '/profile';
+
   /// TrueProfit records: `?tab=` one of [RecordsTab] names.
   static const records = '/profit/records';
+
+  // Profile screens, shown over the tabs.
+  static const profileDisplayName = '/profile/display-name';
+  static const riderProfile = '/profile/rider';
+  static const deleteAccount = '/profile/delete-account';
+  static const about = '/profile/about';
 
   // Record forms, shown over the tabs.
   static const incomeNew = '/income/new';

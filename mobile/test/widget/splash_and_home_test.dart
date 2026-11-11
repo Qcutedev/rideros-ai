@@ -52,7 +52,7 @@ void main() {
     auth.restoreGate!.complete();
   });
 
-  testWidgets('home greets the user and logs out', (tester) async {
+  testWidgets('home greets the user', (tester) async {
     auth.restoreUser = testUser;
     await pumpScreen(
       tester,
@@ -65,7 +65,5 @@ void main() {
     );
     expect(find.text(t.homeGreeting(testUser.displayName)), findsOneWidget);
     expect(find.text(t.homeSignedInAs(testUser.email)), findsOneWidget);
-    await tapKey(tester, 'home.logout');
-    expect(auth.calls, contains('logout'));
   });
 }

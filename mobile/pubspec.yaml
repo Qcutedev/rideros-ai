@@ -86,6 +86,10 @@ flutter:
         - asset: assets/fonts/IBMPlexSansThai-Bold.ttf
           weight: 700
 
+  # Shown on the licence page (registered in `main.dart`).
+  assets:
+    - assets/fonts/OFL.txt
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

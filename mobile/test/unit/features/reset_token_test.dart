@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/features/auth/domain/reset_token.dart';
 
 void main() {
-  const token = 'AbCdEf0123456789_-xyzXYZ0123456789abcdefghi';
+  const token = 'AbCdEf0123456789_-xyzXYZ0123456789abcdefghi'; // gitleaks:allow (fake test token)
 
   test('accepts the bare token', () {
     expect(extractResetToken(token), token);

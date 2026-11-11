@@ -5,11 +5,11 @@ import '../../../core/utils/clock.dart';
 import '../../../core/utils/date_json.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/form_widgets.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_records.dart';
 import 'profit_labels.dart';
 import 'profit_providers.dart';
-import 'widgets/record_form_widgets.dart';
 
 /// `/expenses/new` and `/expenses/:id`.
 class ExpenseFormScreen extends ConsumerWidget {

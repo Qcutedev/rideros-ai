@@ -59,6 +59,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         message: l10n.loginSessionExpired,
         tone: BannerTone.warning,
       ),
+      (SignedOut(reason: SignOutReason.accountDeleted), _) => AppBanner(
+        message: l10n.loginAccountDeleted,
+        tone: BannerTone.success,
+      ),
       (_, LoginNotice.registered) => AppBanner(
         message: l10n.loginRegisteredPleaseLogin,
         tone: BannerTone.success,

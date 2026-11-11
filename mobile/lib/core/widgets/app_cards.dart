@@ -134,3 +134,31 @@ class MetricTileRow extends StatelessWidget {
     ),
   );
 }
+
+/// Card holding list rows (e.g. settings or entry points), divided by thin lines.
+class TileGroup extends StatelessWidget {
+  const TileGroup({required this.children, super.key});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                indent: AppSpacing.lg,
+                endIndent: AppSpacing.lg,
+                color: context.semanticColors.border,
+              ),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}

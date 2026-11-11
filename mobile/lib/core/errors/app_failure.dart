@@ -78,6 +78,7 @@ abstract final class ApiErrorCode {
   static const rateLimited = 'rate_limited';
   static const internalError = 'internal_error';
   static const invalidTimezone = 'invalid_timezone';
+  static const invalidPassword = 'invalid_password';
 
   // TrueProfit records.
   static const workSessionOverlap = 'work_session_overlap';

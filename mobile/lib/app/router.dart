@@ -11,6 +11,11 @@ import '../features/auth/presentation/session_controller.dart';
 import '../features/auth/presentation/splash_screen.dart';
 import '../features/dashboard/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/profile/presentation/about_screen.dart';
+import '../features/profile/presentation/delete_account_screen.dart';
+import '../features/profile/presentation/display_name_screen.dart';
+import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/rider_profile_form_screen.dart';
 import '../features/profit/presentation/expense_form_screen.dart';
 import '../features/profit/presentation/income_form_screen.dart';
 import '../features/profit/presentation/records_screen.dart';
@@ -44,19 +49,41 @@ String? authRedirect(SessionState session, Uri location) {
   }
 }
 
+/// What [authRedirect] depends on. Other changes (e.g. a new display name) must not
+/// refresh the router: a refresh re-applies the current location and would undo a
+/// `pop` that happens right after the change.
+Object _guardKey(SessionState session) => switch (session) {
+  SessionRestoring() => 'restoring',
+  SessionRestoreFailed() => 'restore_failed',
+  SignedOut() => 'signed_out',
+  SignedIn(:final profileConfigured) => ('signed_in', profileConfigured),
+};
+
+/// Router refresh signal: holds the latest session, notifies only when the guard's
+/// answer can change.
+class _GuardRefresh extends ChangeNotifier {
+  _GuardRefresh(this.state);
+
+  SessionState state;
+
+  void update(SessionState next) {
+    final changed = _guardKey(state) != _guardKey(next);
+    state = next;
+    if (changed) notifyListeners();
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   // Root navigator: record forms open over the bottom navigation.
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-  final session = ValueNotifier<SessionState>(
-    ref.read(sessionControllerProvider),
-  );
-  ref.listen(sessionControllerProvider, (_, next) => session.value = next);
+  final session = _GuardRefresh(ref.read(sessionControllerProvider));
+  ref.listen(sessionControllerProvider, (_, next) => session.update(next));
 
   final router = GoRouter(
     navigatorKey: rootKey,
     initialLocation: Routes.splash,
     refreshListenable: session,
-    redirect: (context, state) => authRedirect(session.value, state.uri),
+    redirect: (context, state) => authRedirect(session.state, state.uri),
     routes: [
       GoRoute(
         path: Routes.splash,
@@ -115,9 +142,18 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
       ...formRoutes(rootKey),
+      ...profileRoutes(rootKey),
     ],
   );
   ref.onDispose(() {
@@ -162,5 +198,29 @@ List<GoRoute> formRoutes(GlobalKey<NavigatorState> root) => [
     path: Routes.workSessionEditPattern,
     builder: (context, state) =>
         WorkSessionFormScreen(id: state.pathParameters['id']),
+  ),
+];
+
+/// Profile forms and pages on the [root] navigator (they cover the tabs).
+List<GoRoute> profileRoutes(GlobalKey<NavigatorState> root) => [
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.profileDisplayName,
+    builder: (context, state) => const DisplayNameScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.riderProfile,
+    builder: (context, state) => const RiderProfileFormScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.deleteAccount,
+    builder: (context, state) => const DeleteAccountScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.about,
+    builder: (context, state) => const AboutScreen(),
   ),
 ];

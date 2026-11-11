@@ -24,6 +24,7 @@ String _apiMessage(AppLocalizations l10n, ApiFailure failure) =>
       ApiErrorCode.passwordResetUnavailable =>
         l10n.failurePasswordResetUnavailable,
       ApiErrorCode.invalidTimezone => l10n.failureInvalidTimezone,
+      ApiErrorCode.invalidPassword => l10n.failureInvalidPassword,
       ApiErrorCode.validationError => l10n.failureValidation,
       ApiErrorCode.workSessionOverlap => l10n.failureWorkSessionOverlap,
       ApiErrorCode.invalidTimeRange => l10n.failureInvalidTimeRange,

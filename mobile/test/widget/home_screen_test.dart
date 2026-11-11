@@ -129,9 +129,10 @@ void main() {
     });
   }
 
-  testWidgets('logout ends the session', (tester) async {
+  testWidgets('no logout button on home (it is on the profile tab)', (
+    tester,
+  ) async {
     await pumpHome(tester);
-    await tapKey(tester, 'home.logout');
-    expect(auth.calls, contains('logout'));
+    expect(find.byKey(const Key('home.logout')), findsNothing);
   });
 }

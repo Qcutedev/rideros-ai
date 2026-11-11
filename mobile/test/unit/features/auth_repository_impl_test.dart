@@ -198,4 +198,48 @@ void main() {
       ),
     );
   });
+
+  group('account', () {
+    /// Signs in so the next calls carry an access token.
+    Future<void> signIn(FakeHandler next) async {
+      adapter.handler = (o) => switch ((o.method, o.path)) {
+        ('POST', '/auth/login') => json(200, tokenJson()),
+        ('GET', '/me') => json(200, userJson()),
+        _ => next(o),
+      };
+      await repo.login(email: 'rider@example.com', password: 'secret pw');
+      adapter.requests.clear();
+    }
+
+    test('updateDisplayName patches /me with the trimmed name', () async {
+      await signIn((o) => json(200, userJson(name: 'Somsak')));
+      final user = await repo.updateDisplayName('  Somsak ');
+      final request = adapter.requests.single;
+      expect((request.method, request.path), ('PATCH', '/me'));
+      expect(request.data, {'display_name': 'Somsak'});
+      expect(request.headers['Authorization'], 'Bearer access-1');
+      expect(user.displayName, 'Somsak');
+    });
+
+    test('deleteAccount sends the password and forgets the tokens', () async {
+      await signIn((o) => json(204));
+      expect(store.value, isNotNull);
+      await repo.deleteAccount('secret pw');
+      final request = adapter.requests.single;
+      expect((request.method, request.path), ('DELETE', '/me'));
+      expect(request.data, {'password': 'secret pw'});
+      expect(store.value, isNull);
+    });
+
+    test('deleteAccount with a wrong password keeps the session', () async {
+      await signIn((o) => apiError(403, 'invalid_password'));
+      await expectLater(
+        repo.deleteAccount('wrong'),
+        throwsA(
+          isA<ApiFailure>().having((f) => f.code, 'code', 'invalid_password'),
+        ),
+      );
+      expect(store.value, 'refresh-token-0000000001');
+    });
+  });
 }

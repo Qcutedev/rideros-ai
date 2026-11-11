@@ -23,7 +23,10 @@ class FakeAuthRepository implements AuthRepository {
   Object? registerError;
   Object? forgotError;
   Object? resetError;
+  Object? updateNameError;
+  Object? deleteError;
   Completer<void>? loginGate;
+  Completer<void>? deleteGate;
   Completer<void>? restoreGate;
 
   final calls = <String>[];
@@ -72,6 +75,22 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> logout() async => calls.add('logout');
 
   @override
+  Future<User> updateDisplayName(String displayName) async {
+    calls.add('updateName');
+    lastArgs['displayName'] = displayName;
+    if (updateNameError != null) throw updateNameError!;
+    return testUser.copyWith(displayName: displayName.trim());
+  }
+
+  @override
+  Future<void> deleteAccount(String password) async {
+    calls.add('deleteAccount');
+    lastArgs['password'] = password;
+    await deleteGate?.future;
+    if (deleteError != null) throw deleteError!;
+  }
+
+  @override
   Future<void> requestPasswordReset(String email) async {
     calls.add('forgot');
     lastArgs['email'] = email;
@@ -90,18 +109,27 @@ class FakeAuthRepository implements AuthRepository {
 }
 
 class FakeRiderProfileRepository implements RiderProfileRepository {
-  FakeRiderProfileRepository({this.configured = false});
+  FakeRiderProfileRepository({this.configured = false, this._profile});
 
   bool configured;
+  RiderProfile? _profile;
   Object? fetchError;
   Object? saveError;
+  Completer<void>? fetchGate;
   RiderProfileInput? lastSaved;
   int saves = 0;
+  int fetches = 0;
+
+  /// What `fetch` returns: the last saved profile, or defaults.
+  RiderProfile get profile =>
+      (_profile ?? const RiderProfile()).copyWith(isConfigured: configured);
 
   @override
   Future<RiderProfile> fetch() async {
+    fetches++;
+    await fetchGate?.future;
     if (fetchError != null) throw fetchError!;
-    return RiderProfile(isConfigured: configured);
+    return profile;
   }
 
   @override
@@ -110,13 +138,16 @@ class FakeRiderProfileRepository implements RiderProfileRepository {
     lastSaved = input;
     if (saveError != null) throw saveError!;
     configured = true;
-    return RiderProfile(
+    _profile = RiderProfile(
       vehicleType: input.vehicleType,
       fuelKmPerLiter: input.fuelKmPerLiter,
       fuelPricePerLiter: input.fuelPricePerLiter,
       depreciationPerKm: input.depreciationPerKm,
+      timezone: input.timezone,
+      currency: input.currency,
       isConfigured: true,
     );
+    return profile;
   }
 }
 
