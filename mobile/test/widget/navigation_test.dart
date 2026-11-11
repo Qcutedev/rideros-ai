@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/app/app.dart';
+import 'package:rideros_ai/app/intro/brand_intro.dart';
+import 'package:rideros_ai/app/intro/brand_logo.dart';
 import 'package:rideros_ai/app/router.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/network/api_client.dart';
@@ -35,18 +37,30 @@ import 'package:rideros_ai/features/shifts/presentation/shifts_screen.dart';
 
 import '../helpers/fake_http_adapter.dart';
 import '../helpers/fakes.dart';
+import '../helpers/file_bundle.dart';
 import '../helpers/pickup_fakes.dart';
 import '../helpers/profit_fakes.dart';
 import '../helpers/pump.dart';
 import '../helpers/shift_fakes.dart';
 
-/// The real app (router, guard, theme) with fake repositories.
-Future<void> pumpApp(WidgetTester tester, List<Override> overrides) async {
+/// The real app (router, guard, theme) with fake repositories. The brand intro
+/// is off unless [intro] (it has its own tests in `brand_intro_test.dart`).
+Future<void> pumpApp(
+  WidgetTester tester,
+  List<Override> overrides, {
+  bool intro = false,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
-      overrides: overrides,
+      overrides: [
+        brandIntroEnabledProvider.overrideWithValue(intro),
+        ...overrides,
+      ],
       retry: (retryCount, error) => null,
-      child: const RiderOsApp(),
+      child: DefaultAssetBundle(
+        bundle: FileAssetBundle(),
+        child: const RiderOsApp(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -65,6 +79,22 @@ void main() {
   setUp(() {
     auth = FakeAuthRepository();
     profiles = FakeRiderProfileRepository();
+  });
+
+  testWidgets('the brand intro plays at start, then hands over to login', (
+    tester,
+  ) async {
+    await pumpApp(tester, fakeRepositories(auth, profiles), intro: true);
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.byType(BrandIntro), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is CustomPaint && w.painter is BrandLogoPainter,
+      ),
+      findsNothing,
+    );
+    await login(tester);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
   });
 
   testWidgets('no stored session: start → login', (tester) async {

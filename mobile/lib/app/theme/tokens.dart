@@ -41,6 +41,10 @@ abstract final class AppColors {
 
   /// Dark-mode counterpart of [borderStrong] (≥3:1 against [darkSurface]).
   static const darkBorderStrong = Color(0xFF5E7A6C);
+
+  // Brand logo (`assets/brand/rideros_logo.svg`): ivory mark, muted mint "OS".
+  static const logoIvory = Color(0xFFF3EEE5);
+  static const logoMint = Color(0xFF8FD1A6);
 }
 
 /// Spacing scale: 4, 8, 12, 16, 20, 24, 32 dp (plus 2 and 48 for fine/large gaps).
@@ -96,6 +100,10 @@ abstract final class AppSizes {
 abstract final class AppDurations {
   static const fast = Duration(milliseconds: 150);
   static const medium = Duration(milliseconds: 250);
+
+  /// Brand intro at app start: logo reveal and hold, then the hand-over fade (≈3 s).
+  static const introReveal = Duration(milliseconds: 2600);
+  static const introExit = Duration(milliseconds: 400);
 }
 
 /// Type scale (§2.4): IBM Plex Sans Thai, bundled under `assets/fonts/` (OFL).
