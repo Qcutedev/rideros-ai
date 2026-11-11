@@ -1,7 +1,7 @@
 # HANDOFF — RiderOS AI
 
-> อัปเดตล่าสุด: 2026-11-12 · สถานะ: **Phase 3 อนุมัติแล้ว 2026-11-11 · Phase 4 อนุมัติแล้ว 2026-11-12 (`cc2a8b9`, §4.9) · MVP Freeze (Tag `mvp-freeze`) · ถัดไป Phase 5 RoadContext — เริ่มใน Session ใหม่ที่ §4.2** · Intro ขี่รถ + ไอคอนแอป (`cdb78ba` → `4a364e1`, §4.8, ก่อนเริ่ม Phase 4) · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
-> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) → `cdb78ba` (Brand intro) → `4a364e1` (Ride intro) → `cc2a8b9` (Phase 4) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
+> อัปเดตล่าสุด: 2026-11-12 · สถานะ: **Phase 5 RoadContext กำลังทำ: แผน + 12 การตัดสินใจอนุมัติ (§4.11) · P5a Backend `04bd24c` · ถัดไป P5b Mobile ใน Session ใหม่ที่ §4.2** · Phase 3 อนุมัติแล้ว 2026-11-11 · Phase 4 อนุมัติแล้ว 2026-11-12 (`cc2a8b9`, §4.9) · MVP Freeze (Tag `mvp-freeze`) · Intro ขี่รถ + ไอคอนแอป (`cdb78ba` → `4a364e1`, §4.8, ก่อนเริ่ม Phase 4) · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
+> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) → `cdb78ba` (Brand intro) → `4a364e1` (Ride intro) → `cc2a8b9` (Phase 4) → `7da3bde` (Logo) → `04bd24c` (P5a) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
 
 **Session ใหม่ (Phase 3) ให้อ่านตามลำดับ:** ไฟล์นี้ (โดยเฉพาะ §4) → `docs/DEVELOPMENT_ROADMAP.md` (W6–W8 + Phase 3 Exit Criteria) → `docs/SYSTEM_ARCHITECTURE.md` (§2.1 Flutter, §3 Data Flows, §4 API, §5 Security, §6 Folder Structure `mobile/`) → `backend/README.md` (API Contract จริงที่ App ต้องเรียก) → `docs/PROJECT_PLAN.md` (Scope ของหน้าจอ)
 
@@ -261,7 +261,38 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - Tests: `test/widget/app_logo_mark_test.dart` (+2) + `brand_logo_test.dart` (emblemBounds) · `flutter analyze` No issues · `flutter test` **427 passed** · ดูบน Emulator (Profile build) หน้า Login + สมัครสมาชิก ถูกต้อง
 - หัวหน้า สมัครสมาชิก / ลืมรหัสผ่าน / ตั้งรหัสใหม่ (`AuthHeader.page` ใน `core/widgets/auth_layout.dart`): โลโก้ (56) + หัวข้อ + คำอธิบาย **จัดกึ่งกลาง** เหมือนหน้า Login · ปุ่มย้อนกลับยังอยู่ซ้ายบน · Test: `design_system_test.dart` ตรวจตำแหน่งกึ่งกลาง (Fail ถ้าไม่มีการแก้) · `flutter test` **427 passed** · ดูบน Emulator หน้าสมัคร + ลืมรหัสผ่าน ถูกต้อง
 
+### 4.11 Phase 5 RoadContext AI (W10–W11) — **แผน + การตัดสินใจ 12 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-12**
+- งานย่อย: **P5a** Backend RoadContext (ยังไม่มี CV): Migration `0004` (`road_incidents`, `incident_reports`), Module `road` 6 Endpoint ตาม SYSTEM_ARCHITECTURE §4, กฎรวมซ้ำ `ST_DWithin` + หมวด + ช่วงเวลา (ค่าใน Config), Status machine §4, อัปโหลดรูป (Magic bytes, ≤ 5 MB, Re-encode ลบ EXIF, ชื่อ UUID), Tests → **P5b** Mobile (แผนที่ `flutter_map` + OSM, รายการใกล้ตัว, ฟอร์มรายงาน, รายละเอียด + ยังอยู่/คลี่คลายแล้ว) → **P5c** CV (ตรวจ License 3 ส่วน → Transfer learning torchvision → `cv_service/` `POST /classify` → Background classify → แสดง "AI แนะนำ") + Phase 5 Report แล้วรออนุมัติ · License ไม่ผ่าน → ตัด CV ตามลำดับตัด Scope แล้วรายงานตรงๆ
+- การตัดสินใจ (ยืนยันแล้ว):
+  1. ทางเข้า: คง 5 แท็บ + การ์ด "เหตุบนถนนใกล้คุณ" ที่หน้าหลัก → Route `/road`
+  2. `expired` คิดตอนอ่าน (`expires_at < now()` = expired ไม่แสดงบนแผนที่) · เขียนสถานะลงแถวเมื่อมีการเขียนครั้งถัดไป · ไม่มี Scheduler
+  3. รูปเห็นได้เฉพาะเจ้าของ Report (Endpoint ต้อง Auth) · คนอื่นเห็นข้อมูลรวมเท่านั้น
+  4. เก็บรูปใน Docker volume `road_images` (S3 ตอน Phase 7) · `DELETE /me` ลบรูปด้วย
+  5. Admin = `users.role = 'admin'` (มีอยู่แล้ว) ตั้งผ่านสคริปต์ CLI เท่านั้น · ไม่มี UI admin
+  6. `geolocator` สิทธิ์ "ขณะใช้งาน" เท่านั้น · ปฏิเสธสิทธิ์ยังปักหมุดเองได้ · ไม่ติดตามเบื้องหลัง
+  7. OSM standard tiles ตอน Dev + `userAgentPackageName` + Attribution "© OpenStreetMap" · เปลี่ยน Provider ใน Phase 7 (R9)
+  8. CV 3 คลาส `flooding` / `road_damage` / `other` จาก Dataset ที่ License ผ่าน (RDD2022 + AlleyFloodNet/Flood10k) เลือกบางส่วน · ห้าม Commit Dataset
+  9. MobileNetV3-Large (ImageNet weights ของ torchvision) · Split Train/Val/Test ไม่ปน · Metrics บน Test + Latency บน CPU ของ `cv_service` · ระบุว่าไม่มีภาพจากไทย
+  10. แสดง "AI แนะนำ: <หมวด> (xx%)" + ป้าย `ค่าประมาณ` · < 0.6 → "AI ไม่แน่ใจ" · ไม่เปลี่ยนหมวด/สถานะเอง · ห้ามคำว่า "ยืนยันแล้ว" · `corroborated` แสดงเป็น "มีผู้รายงานหลายคน"
+  11. `cv_service/` ตาม Architecture §6 · Training ใน `cv_service/training/` · uv project แยก (torch ไม่ปน `ml/`)
+  12. รัศมี/ช่วงเวลา/TTL ตาม DATABASE_DESIGN §4 (ค่าเริ่มต้นที่ยังไม่ Validate — ระบุในเอกสาร)
+- **P5a เสร็จ 2026-11-12 (Commit `04bd24c` ตามที่ผู้ใช้สั่ง · gitleaks `dir` + `git` → no leaks found)** — Backend RoadContext ไม่มี CV
+  · Migration `0004_road_context.py` · Module `backend/app/modules/road/` (`rules.py` ค่าตาม §4 + `ROAD_RULES` JSON override รายหมวด, `models.py`, `schemas.py`, `images.py`, `service.py`, `router.py`) · `scripts/set_role.py` (ตั้ง admin) · Settings ใหม่: `ROAD_RULES`, `ROAD_CORROBORATE_MIN_REPORTERS`=2, `ROAD_RESOLVE_MIN_CLEARED`=2, `ROAD_IMAGE_DIR`, `ROAD_IMAGE_MAX_BYTES`=5 MB, `RATE_LIMIT_ROAD_REPORT`=10/min ต่อผู้ใช้ · deps `pillow`, `python-multipart` · compose volume `road-images` → `/data/road_images` (Dockerfile สร้างโฟลเดอร์ให้ user `app`) · API ทั้งหมดใน `backend/README.md` หัวข้อ RoadContext
+  · Endpoint เพิ่มจาก Architecture §4: `GET /road/reports` (Report ของฉัน) + `GET /road/reports/{id}/image` (รูปของฉันเท่านั้น, ข้อ 3)
+  · กฎ: รวมเข้ากับเหตุที่ใกล้ที่สุดหมวดเดียวกันภายในรัศมี + report ล่าสุดภายในช่วงเวลา · ตำแหน่งเหตุ = ของ Report แรก · `pg_advisory_xact_lock` ต่อหมวดกันเปิดเหตุซ้ำพร้อมกัน · ผู้ใช้เดิมรายงานเหตุเดิมซ้ำ → 409 `already_reported` · ยืนยันใหม่แทนที่ของเดิม · ตัดสินใจเพิ่มระหว่างทำ (บันทึกใน DATABASE_DESIGN): `unverified` → `resolved` ได้ด้วย 2 cleared, Admin ตั้งได้เฉพาะ resolved/rejected
+  · รูป: Magic bytes JPEG/PNG/WebP, ≤ 5 MB (เช็ค Content-Length ก่อน + อ่านไม่เกิน), ≤ 40 MP, หมุนตาม EXIF แล้ว Re-encode เป็น JPEG ≤ 1600 px ไม่มี EXIF/GPS, ชื่อ `<uuid hex>.jpg` · เขียนไม่สำเร็จ → ลบไฟล์คืน · `DELETE /me` ลบรูป + คำนวณ `report_count`/`distinct_reporters` ใหม่ + ลบเหตุที่ไม่เหลือ Report
+  · Tests: `tests/api/test_road.py` (58: กฎรวมซ้ำทุกหมวด 5 แบบ = ในรัศมี/ขอบช่วงเวลา, นอกรัศมี, เลยช่วงเวลา, ต่างหมวด, หมดอายุแล้วไม่รวม · ใกล้สุด · Corroborate/Resolve/แทนที่การยืนยัน/Expired/Admin · bbox/nearby · ความเป็นส่วนตัว · รูป EXIF/หมุน/PNG โปร่งใส/415/413/503/ลบไฟล์เมื่อพัง · ลบบัญชี) + rate limit + config · Backend **380 passed**, ruff สะอาด, Coverage `app/modules` 98% (road service 98%)
+  · Dev stack: Rebuild แล้ว Migration 0004 ผ่าน · Smoke ผ่าน API จริง (รายงาน + รูป → 201, รูป 200 JPEG, nearby/bbox เจอ, `DELETE /me` → ไม่เหลือแถว/ไฟล์)
+  · ถัดไป: **P5b Mobile** — ผู้ใช้สั่งให้เริ่มใน Session ใหม่ (§4.2)
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
+**2026-11-12: Phase 5 แผนอนุมัติ (§4.11) · P5a Backend เสร็จ + Commit `04bd24c` → Session ถัดไป: P5b Mobile RoadContext แล้ว P5c CV + Phase 5 Report** · ห้าม Commit จนกว่าผู้ใช้สั่ง
+- ตรวจสถานะ: `git status` (สะอาด ยกเว้น CRLF noise ใน `mobile/lib/l10n/*.dart`) · `docker compose up -d --build` (Image ต้องมี Migration 0004 + volume `road-images`) · `/ready` ok · `flutter devices` เห็น `emulator-5554` · `flutter test` **427 passed** · Backend **380 passed**
+- P5b ตามข้อ 1, 3, 6, 7, 10 ใน §4.11: Route `/road` (การ์ด "เหตุบนถนนใกล้คุณ" ที่หน้าหลัก ไม่เพิ่มแท็บ) · `features/road/` (data/domain/presentation แบบ Pickup) · แผนที่ `flutter_map` + OSM (`userAgentPackageName`, Attribution) · รายการใกล้ตัว (`/road/incidents/nearby`) · ฟอร์มรายงาน (หมวด 5 อย่าง, `geolocator` ขณะใช้งาน + ลากหมุดเองได้, `image_picker` บีบอัด, คำอธิบาย ≤ 500) · หน้ารายละเอียด + ปุ่ม ยังอยู่/คลี่คลายแล้ว + "รายงานโดยผู้ใช้ · อัปเดตล่าสุด X นาทีที่แล้ว" (ห้าม "Real-time"/"ยืนยันแล้ว"; `corroborated` = "มีผู้รายงานหลายคน") · รายงานของฉัน + รูปของฉัน · Error codes: `already_reported` (details.incident_id → เปิดเหตุนั้น), `incident_closed`, `unsupported_image`, `image_too_large`, `image_storage_unavailable`, `invalid_bbox` · API ดู `backend/README.md` หัวข้อ RoadContext
+- Android: สิทธิ์ `ACCESS_FINE_LOCATION`/`ACCESS_COARSE_LOCATION` + กล้อง/รูป · Emulator ตั้งตำแหน่ง: `adb emu geo fix 100.5018 13.7563`
+- จบ P5b → รายงานแล้วหยุด รอสั่ง P5c
+
+
 **2026-11-12: Phase 4 อนุมัติแล้ว + Commit `cc2a8b9` + Tag `mvp-freeze` (ผู้ใช้สั่ง) → Session ถัดไป: Phase 5 RoadContext AI (W10–W11)**
 - MVP Freeze (ข้อ 9): Module 1–3 (Auth, TrueProfit, Pickup, Shift) แก้ได้เฉพาะ Bug ห้ามเพิ่ม Feature
 - เริ่ม Phase 5 ด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยันก่อน (แบบ Phase 4) · Exit criteria ใน Roadmap §Phase 5 · ลำดับตัด Scope: Object Detection → CV Classifier → (K-Means) → RoadContext ทั้ง Module · CV ต้องตรวจ License ของ Dataset ก่อน (Roadmap W11)
@@ -311,7 +342,7 @@ python -m uv run rideros-ml stats
 cd "C:\dev\RiderOS AI"
 docker compose up --build              # DB + API + โมเดล (ต้องมี ml/artifacts ก่อน); ครั้งแรก Import ร้านเอง
 cd backend
-python -m uv run pytest --cov=app/modules   # 317 tests (~45 s) ต้องมี `docker compose up -d db`
+python -m uv run pytest --cov=app/modules   # 380 tests (~80 s) ต้องมี `docker compose up -d db`
 python -m uv run ruff check . ; python -m uv run ruff format --check .
 ```
 
