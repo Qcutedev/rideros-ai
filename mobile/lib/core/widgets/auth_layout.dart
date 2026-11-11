@@ -101,8 +101,8 @@ class AuthHeader extends StatelessWidget {
   }) : subtitle = tagline,
        isBrand = true;
 
-  /// Back button (when there is a screen to go back to), small logo, title
-  /// and an optional description.
+  /// Back button (when there is a screen to go back to) at the top left, then
+  /// logo, title and an optional description centred like the login header.
   const AuthHeader.page({required this.title, this.subtitle, super.key})
     : isBrand = false;
 
@@ -126,7 +126,7 @@ class AuthHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final semantic = context.semanticColors;
     final canPop = Navigator.of(context).canPop();
-    // Full width up to the max, so short titles stay left-aligned.
+    // Full width up to the max: the back button keeps to the left edge.
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -138,7 +138,7 @@ class AuthHeader extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xs,
               AppSpacing.xs,
-              AppSpacing.xl,
+              AppSpacing.xs,
               AppSpacing.xl,
             ),
             child: Column(
@@ -151,16 +151,19 @@ class AuthHeader extends StatelessWidget {
                       : const SizedBox.shrink(),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const AppLogoMark(size: 48, onDark: true),
+                      const Center(child: AppLogoMark(size: 56, onDark: true)),
                       const SizedBox(height: AppSpacing.lg),
                       Semantics(
                         header: true,
                         child: Text(
                           title,
+                          textAlign: TextAlign.center,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: Colors.white,
                           ),
@@ -170,6 +173,7 @@ class AuthHeader extends StatelessWidget {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           subtitle!,
+                          textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: semantic.onHeroMuted,
                           ),

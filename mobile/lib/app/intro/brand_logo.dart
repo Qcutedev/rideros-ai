@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart' hide Gradient;
 import 'package:flutter/services.dart';
 import 'package:path_parsing/path_parsing.dart';
 
@@ -18,6 +19,9 @@ enum BrandLayer {
 
   /// The rider (emblem) without its built-in speed trails.
   static const rider = [body, shoulder, helmet];
+
+  /// The emblem as drawn in the artwork: speed trails and rider, no wordmark.
+  static const emblem = [speedLines, body, shoulder, helmet];
   static const wordmark = [wordmarkRider, wordmarkOs];
 }
 
@@ -27,7 +31,8 @@ class BrandLogo {
   BrandLogo._(this.paths)
     : riderBounds = _union(paths, BrandLayer.rider),
       speedLinesBounds = paths[BrandLayer.speedLines]!.getBounds(),
-      wordmarkBounds = _union(paths, BrandLayer.wordmark);
+      wordmarkBounds = _union(paths, BrandLayer.wordmark),
+      emblemBounds = _union(paths, BrandLayer.emblem);
 
   static const asset = 'assets/brand/rideros_logo.svg';
 
@@ -38,6 +43,28 @@ class BrandLogo {
   final Rect riderBounds;
   final Rect speedLinesBounds;
   final Rect wordmarkBounds;
+  final Rect emblemBounds;
+
+  /// Fill of one [layer] in [color]. As in the artwork, the speed trails and the
+  /// back of the body fade in from the left (gradient in logo units).
+  static Paint layerPaint(BrandLayer layer, Color color) {
+    final paint = Paint()..color = color;
+    final (double from, double to, double start)? fade = switch (layer) {
+      BrandLayer.speedLines => (20, 160, 0),
+      BrandLayer.body => (58, 200, 0.15),
+      _ => null,
+    };
+    if (fade != null) {
+      paint
+        ..color =
+            const Color(0xFF000000) // opaque: the gradient carries alpha
+        ..shader = Gradient.linear(Offset(fade.$1, 0), Offset(fade.$2, 0), [
+          color.withValues(alpha: color.a * fade.$3),
+          color,
+        ]);
+    }
+    return paint;
+  }
 
   static Future<BrandLogo> load(AssetBundle bundle) async =>
       parse(await bundle.loadString(asset));
@@ -70,6 +97,38 @@ class BrandLogo {
     writeSvgPathDataToPath(d, _PathWriter(path));
     return path;
   }
+}
+
+/// The emblem ([BrandLayer.emblem]) in [color], scaled to fit and centred.
+class BrandEmblemPainter extends CustomPainter {
+  BrandEmblemPainter(this.logo, this.color);
+
+  final BrandLogo logo;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final b = logo.emblemBounds;
+    final scale = (size.width / b.width) < (size.height / b.height)
+        ? size.width / b.width
+        : size.height / b.height;
+    canvas
+      ..save()
+      ..translate(
+        (size.width - b.width * scale) / 2,
+        (size.height - b.height * scale) / 2,
+      )
+      ..scale(scale)
+      ..translate(-b.left, -b.top);
+    for (final layer in BrandLayer.emblem) {
+      canvas.drawPath(logo.paths[layer]!, BrandLogo.layerPaint(layer, color));
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(BrandEmblemPainter old) =>
+      old.logo != logo || old.color != color;
 }
 
 class _PathWriter extends PathProxy {

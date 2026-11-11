@@ -16,6 +16,11 @@ void main() {
     // The rider and its trails sit above the wordmark; the trails trail it.
     expect(logo.riderBounds.bottom, lessThan(logo.wordmarkBounds.top));
     expect(logo.speedLinesBounds.left, lessThan(logo.riderBounds.left));
+    // The emblem (login, splash) is the trails plus the rider, no wordmark.
+    expect(
+      logo.emblemBounds,
+      logo.speedLinesBounds.expandToInclude(logo.riderBounds),
+    );
   });
 
   test('a missing layer is a format error', () {

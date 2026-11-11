@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/intro/brand_logo.dart';
 import '../../app/theme/tokens.dart';
 
 /// Scrollable, width-limited (480 dp) column for form screens. Scrolls above
@@ -59,48 +60,70 @@ class FormLayout extends StatelessWidget {
 /// Vertical gap between form fields.
 const formGap = SizedBox(height: AppSpacing.lg);
 
-/// RiderOS AI logo mark: rider icon in a rounded green tile.
-class AppLogoMark extends StatelessWidget {
+/// RiderOS AI logo mark: the brand emblem (speed trails and rider) from
+/// `assets/brand/rideros_logo.svg`, the same artwork as the ride intro and the
+/// launcher icon. On the Forest Green headers it is drawn in ivory on the
+/// green itself; elsewhere in ivory on a rounded green tile (like the icon).
+/// [size] is the height; the emblem is wider than tall.
+class AppLogoMark extends StatefulWidget {
   const AppLogoMark({this.size = 64, this.onDark = false, super.key});
 
   final double size;
 
-  /// On the Forest Green splash: mint tile with a green icon.
+  /// On the Forest Green header: no tile.
   final bool onDark;
 
   @override
+  State<AppLogoMark> createState() => _AppLogoMarkState();
+}
+
+class _AppLogoMarkState extends State<AppLogoMark> {
+  /// Parsed once per asset bundle (the app has one; tests may swap it).
+  static final _logos = Expando<Future<BrandLogo>>();
+
+  Future<BrandLogo>? _logo;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bundle = DefaultAssetBundle.of(context);
+    _logo = _logos[bundle] ??= BrandLogo.load(bundle);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final background = onDark ? AppColors.mint : AppColors.brand;
-    final foreground = onDark ? AppColors.forest : Colors.white;
-    return ExcludeSemantics(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(size * 0.3),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(
-              Icons.two_wheeler_rounded,
-              size: size * 0.6,
-              color: foreground,
-            ),
-            Positioned(
-              right: size * 0.14,
-              top: size * 0.14,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                size: size * 0.22,
-                color: onDark ? AppColors.brand : AppColors.mint,
+    final size = widget.size;
+    // Emblem box: wider than tall; inside a tile it gets a margin.
+    final emblem = widget.onDark
+        ? Size(size * 1.5, size)
+        : Size(size * 0.72, size * 0.72);
+    Widget mark = FutureBuilder<BrandLogo>(
+      future: _logo,
+      builder: (context, snapshot) => SizedBox.fromSize(
+        size: emblem,
+        child: snapshot.data == null
+            ? null
+            : CustomPaint(
+                painter: BrandEmblemPainter(
+                  snapshot.data!,
+                  AppColors.logoIvory,
+                ),
               ),
-            ),
-          ],
-        ),
       ),
     );
+    if (!widget.onDark) {
+      mark = Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.forest,
+          borderRadius: BorderRadius.circular(size * 0.28),
+        ),
+        child: mark,
+      );
+    }
+    return ExcludeSemantics(child: mark);
   }
 }
 

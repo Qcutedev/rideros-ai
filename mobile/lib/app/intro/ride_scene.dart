@@ -282,22 +282,7 @@ class RideScenePainter extends CustomPainter {
   /// as the `fade-*` gradients of the SVG do.
   void _fill(Canvas canvas, BrandLayer layer, double opacity) {
     final ivory = AppColors.logoIvory.withValues(alpha: opacity);
-    final paint = Paint()..color = ivory;
-    final (double from, double to, double start)? fade = switch (layer) {
-      BrandLayer.speedLines => (20, 160, 0),
-      BrandLayer.body => (58, 200, 0.15),
-      _ => null,
-    };
-    if (fade != null) {
-      paint
-        ..color =
-            const Color(0xFF000000) // opaque: the gradient carries alpha
-        ..shader = ui.Gradient.linear(Offset(fade.$1, 0), Offset(fade.$2, 0), [
-          ivory.withValues(alpha: opacity * fade.$3),
-          ivory,
-        ]);
-    }
-    canvas.drawPath(logo.paths[layer]!, paint);
+    canvas.drawPath(logo.paths[layer]!, BrandLogo.layerPaint(layer, ivory));
   }
 
   @override

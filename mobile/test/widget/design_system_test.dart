@@ -10,6 +10,7 @@ import 'package:rideros_ai/core/widgets/app_buttons.dart';
 import 'package:rideros_ai/core/widgets/app_cards.dart';
 import 'package:rideros_ai/core/widgets/app_text_field.dart';
 import 'package:rideros_ai/core/widgets/auth_layout.dart';
+import 'package:rideros_ai/core/widgets/form_layout.dart';
 import 'package:rideros_ai/core/widgets/status_views.dart';
 import 'package:rideros_ai/l10n/app_localizations.dart';
 
@@ -237,6 +238,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('second'), findsOneWidget);
       expect(find.text('sub'), findsOneWidget);
+      // Logo, title and description centred like the login header; the back
+      // button stays at the left edge.
+      final header = tester.getRect(find.byType(AuthHeader).last);
+      for (final part in [
+        find.byType(AppLogoMark).last,
+        find.text('second'),
+        find.text('sub'),
+      ]) {
+        expect(tester.getCenter(part).dx, closeTo(header.center.dx, 0.5));
+      }
+      expect(
+        tester.getCenter(find.byType(BackButton)).dx,
+        lessThan(header.center.dx - 150),
+      );
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.text('body:first'), findsOneWidget);
