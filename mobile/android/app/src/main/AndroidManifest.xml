@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- API calls to the RiderOS backend. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- RoadContext: position while the app is in use only (no background location). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="RiderOS AI"
         android:allowBackup="false"

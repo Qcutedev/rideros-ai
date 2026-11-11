@@ -83,6 +83,8 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             const _QuickActions(),
+            const SizedBox(height: AppSpacing.lg),
+            const _RoadCard(),
           ],
         ),
       ),
@@ -235,6 +237,59 @@ class _QuickActions extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Entry to RoadContext (no tab of its own). Asks for nothing until opened.
+class _RoadCard extends StatelessWidget {
+  const _RoadCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: const Key('home.road'),
+        onTap: () => context.push(Routes.road),
+        child: Padding(
+          padding: AppSpacing.cardPadding,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.semanticColors.warningContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.warning_amber_rounded,
+                  color: context.semanticColors.warning,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.homeRoadTitle, style: theme.textTheme.titleSmall),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.homeRoadMessage,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

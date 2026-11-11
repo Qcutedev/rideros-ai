@@ -40,6 +40,7 @@ final class ApiFailure extends AppFailure {
     required this.code,
     this.message = '',
     this.fieldErrors = const {},
+    this.details = const [],
   });
 
   final int statusCode;
@@ -52,6 +53,19 @@ final class ApiFailure extends AppFailure {
 
   /// 422 details keyed by the last element of `loc` (e.g. `email`).
   final Map<String, String> fieldErrors;
+
+  /// The envelope's `details` objects as sent, e.g. `[{"incident_id": "…"}]`
+  /// of `already_reported`.
+  final List<Map<String, Object?>> details;
+
+  /// First string value of [key] among [details].
+  String? detail(String key) {
+    for (final item in details) {
+      final value = item[key];
+      if (value is String) return value;
+    }
+    return null;
+  }
 
   @override
   String toString() => 'ApiFailure($statusCode, $code)';
@@ -97,6 +111,14 @@ abstract final class ApiErrorCode {
   static const missingAssumption = 'missing_assumption';
   static const insufficientHistory = 'insufficient_history';
   static const estimationMethodUnavailable = 'estimation_method_unavailable';
+
+  // RoadContext.
+  static const alreadyReported = 'already_reported';
+  static const incidentClosed = 'incident_closed';
+  static const unsupportedImage = 'unsupported_image';
+  static const imageTooLarge = 'image_too_large';
+  static const imageStorageUnavailable = 'image_storage_unavailable';
+  static const invalidBbox = 'invalid_bbox';
 
   // Access-token problems: the client refreshes once and retries.
   static const tokenExpired = 'token_expired';

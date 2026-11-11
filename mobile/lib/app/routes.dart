@@ -60,6 +60,15 @@ abstract final class Routes {
     queryParameters: {'ids': ids.join(',')},
   ).toString();
 
+  // RoadContext, shown over the tabs (opened from the home card, no tab).
+  static const road = '/road';
+  static const roadReportNew = '/road/report';
+  static const roadPickLocation = '/road/pick-location';
+  static const roadMyReports = '/road/my-reports';
+  static const incidentPattern = '/road/incidents/:id';
+
+  static String incident(String id) => '/road/incidents/$id';
+
   // Profile screens, shown over the tabs.
   static const profileDisplayName = '/profile/display-name';
   static const riderProfile = '/profile/rider';

@@ -99,6 +99,22 @@ void main() {
     expect(store.value, 'refresh-1');
   });
 
+  test('expired access token: a multipart body is sent again', () async {
+    server.validAccess = 'rotated-on-server';
+    final r = await dio.post<Map<String, dynamic>>(
+      '/data',
+      data: FormData.fromMap({
+        'category': 'flooding',
+        'image': MultipartFile.fromBytes([1, 2, 3], filename: 'a.jpg'),
+      }),
+    );
+    expect(r.data, {'ok': '/data'});
+    expect(adapter.paths, ['/data', '/auth/refresh', '/data']);
+    final retried = adapter.requests.last.data as FormData;
+    expect(retried.fields.single.value, 'flooding');
+    expect(retried.files.single.value.filename, 'a.jpg');
+  });
+
   test('concurrent 401s trigger a single refresh', () async {
     server.validAccess = 'rotated-on-server';
     server.refreshGate = Completer<void>();

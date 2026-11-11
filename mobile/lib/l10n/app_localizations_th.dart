@@ -1484,6 +1484,362 @@ class AppLocalizationsTh extends AppLocalizations {
   String get failureEstimationMethodUnavailable => 'วิธีประมาณนี้ยังไม่เปิดใช้';
 
   @override
+  String get homeRoadTitle => 'เหตุบนถนนใกล้คุณ';
+
+  @override
+  String get homeRoadMessage =>
+      'ดูแผนที่เหตุที่ไรเดอร์รายงาน และแจ้งเหตุที่คุณพบ';
+
+  @override
+  String get roadTitle => 'เหตุบนถนน';
+
+  @override
+  String get roadTabMap => 'แผนที่';
+
+  @override
+  String get roadTabNearby => 'ใกล้ฉัน';
+
+  @override
+  String get roadReportAction => 'รายงานเหตุ';
+
+  @override
+  String get roadMyReports => 'รายงานของฉัน';
+
+  @override
+  String get roadCategoryFlooding => 'น้ำท่วม';
+
+  @override
+  String get roadCategoryRoadDamage => 'ถนนชำรุด';
+
+  @override
+  String get roadCategoryRoadClosure => 'ปิดถนน';
+
+  @override
+  String get roadCategoryRoadObstacle => 'สิ่งกีดขวาง';
+
+  @override
+  String get roadCategoryTrafficIncident => 'อุบัติเหตุ';
+
+  @override
+  String get roadStatusUnverified => 'รอผู้รายงานเพิ่ม';
+
+  @override
+  String get roadStatusCorroborated => 'มีผู้รายงานหลายคน';
+
+  @override
+  String get roadStatusResolved => 'คลี่คลายแล้ว';
+
+  @override
+  String get roadStatusExpired => 'หมดอายุ';
+
+  @override
+  String get roadStatusRejected => 'ผู้ดูแลนำออก';
+
+  @override
+  String roadReportedByUsers(String ago) {
+    return 'รายงานโดยผู้ใช้ · อัปเดตล่าสุด $ago';
+  }
+
+  @override
+  String get roadAgoJustNow => 'เมื่อสักครู่';
+
+  @override
+  String roadAgoMinutes(int n) {
+    return '$n นาทีที่แล้ว';
+  }
+
+  @override
+  String roadAgoHours(int n) {
+    return '$n ชั่วโมงที่แล้ว';
+  }
+
+  @override
+  String roadAgoDays(int n) {
+    return '$n วันที่แล้ว';
+  }
+
+  @override
+  String roadDistanceM(int m) {
+    return '$m ม.';
+  }
+
+  @override
+  String roadDistanceKm(String km) {
+    return '$km กม.';
+  }
+
+  @override
+  String get roadNotice =>
+      'ข้อมูลรายงานโดยไรเดอร์ ไม่ได้ตรวจสอบโดย RiderOS ตำแหน่งและเวลามาจากผู้รายงานและอาจไม่เป็นปัจจุบัน';
+
+  @override
+  String get roadMapZoomIn => 'ซูมเข้าเพื่อดูเหตุในบริเวณนี้';
+
+  @override
+  String get roadMapTruncated =>
+      'มีเหตุมากเกินกว่าจะแสดงทั้งหมด ซูมเข้าเพื่อดูให้ครบ';
+
+  @override
+  String get roadMapLoadFailed => 'โหลดเหตุบนแผนที่ไม่สำเร็จ';
+
+  @override
+  String get roadMapMyLocation => 'ไปที่ตำแหน่งของฉัน';
+
+  @override
+  String roadMapIncidentCount(int n) {
+    return '$n เหตุในบริเวณนี้';
+  }
+
+  @override
+  String get roadNearbyEmptyTitle => 'ไม่มีเหตุใกล้คุณ';
+
+  @override
+  String roadNearbyEmptyMessage(int km) {
+    return 'ไม่มีเหตุที่ยังเปิดอยู่ในระยะ $km กม. จากตำแหน่งของคุณ';
+  }
+
+  @override
+  String roadNearbyHeader(int km) {
+    return 'ในระยะ $km กม. · เรียงจากใกล้สุด';
+  }
+
+  @override
+  String get roadLocationFinding => 'กำลังหาตำแหน่ง…';
+
+  @override
+  String get roadLocationDeniedTitle => 'ยังไม่ได้รับสิทธิ์ตำแหน่ง';
+
+  @override
+  String get roadLocationDeniedMessage =>
+      'อนุญาตให้ใช้ตำแหน่งขณะใช้แอป เพื่อดูเหตุใกล้คุณ แอปไม่ติดตามตำแหน่งเบื้องหลัง';
+
+  @override
+  String get roadLocationAllow => 'อนุญาตตำแหน่ง';
+
+  @override
+  String get roadLocationDeniedForeverMessage =>
+      'สิทธิ์ตำแหน่งของแอปถูกปิดไว้ เปิดได้ที่การตั้งค่าแอป';
+
+  @override
+  String get roadLocationOpenSettings => 'เปิดการตั้งค่า';
+
+  @override
+  String get roadLocationServiceOffTitle => 'ตำแหน่งของเครื่องปิดอยู่';
+
+  @override
+  String get roadLocationServiceOffMessage =>
+      'เปิดตำแหน่ง (GPS) ของเครื่อง แล้วลองใหม่';
+
+  @override
+  String get roadLocationUnavailableTitle => 'หาตำแหน่งไม่ได้';
+
+  @override
+  String get roadLocationUnavailableMessage =>
+      'ลองใหม่อีกครั้ง หรือดูเหตุจากแผนที่';
+
+  @override
+  String get roadReportTitle => 'รายงานเหตุบนถนน';
+
+  @override
+  String get roadReportCategory => 'ประเภทเหตุ';
+
+  @override
+  String get roadReportCategoryRequired => 'เลือกประเภทเหตุ';
+
+  @override
+  String get roadReportLocation => 'ตำแหน่งของเหตุ';
+
+  @override
+  String get roadReportLocationGps => 'ตำแหน่งปัจจุบันของคุณ';
+
+  @override
+  String get roadReportLocationManual => 'ตำแหน่งที่คุณปักหมุด';
+
+  @override
+  String get roadReportLocationRequired => 'เลือกตำแหน่งของเหตุบนแผนที่';
+
+  @override
+  String get roadReportLocationNoGps =>
+      'ไม่ได้ใช้ตำแหน่งของเครื่อง ปักหมุดเองบนแผนที่ได้';
+
+  @override
+  String get roadReportChooseLocation => 'เลือกบนแผนที่';
+
+  @override
+  String get roadReportChangeLocation => 'เปลี่ยนตำแหน่ง';
+
+  @override
+  String get roadReportLocationHelp =>
+      'ไรเดอร์คนอื่นเห็นตำแหน่งของเหตุ แต่ไม่เห็นว่าใครรายงาน';
+
+  @override
+  String get roadReportPhoto => 'รูปภาพ';
+
+  @override
+  String get roadReportPhotoHelp =>
+      'แอปย่อรูปก่อนส่ง เซิร์ฟเวอร์ลบข้อมูลตำแหน่งในไฟล์ (EXIF) และรูปนี้เห็นได้เฉพาะคุณ';
+
+  @override
+  String get roadReportTakePhoto => 'ถ่ายรูป';
+
+  @override
+  String get roadReportPickPhoto => 'เลือกจากคลังภาพ';
+
+  @override
+  String get roadReportRemovePhoto => 'ลบรูป';
+
+  @override
+  String get roadReportPhotoFailed =>
+      'เปิดกล้องหรือคลังภาพไม่ได้ ตรวจสอบสิทธิ์ของแอปแล้วลองใหม่';
+
+  @override
+  String get roadReportPhotoTooLarge => 'รูปใหญ่เกิน 5 MB กรุณาเลือกรูปอื่น';
+
+  @override
+  String get roadReportDescription => 'รายละเอียด';
+
+  @override
+  String get roadReportSubmit => 'ส่งรายงาน';
+
+  @override
+  String get roadReportSent => 'ส่งรายงานแล้ว';
+
+  @override
+  String get roadReportMerged =>
+      'ส่งแล้ว · รวมกับเหตุเดียวกันที่มีผู้รายงานไว้ใกล้ๆ';
+
+  @override
+  String get roadReportView => 'ดู';
+
+  @override
+  String get roadAlreadyReported =>
+      'คุณรายงานเหตุนี้ไว้แล้ว แจ้งว่ายังอยู่ได้ที่หน้ารายละเอียด';
+
+  @override
+  String get roadOpenIncident => 'เปิดเหตุนี้';
+
+  @override
+  String get roadPickLocationTitle => 'เลือกตำแหน่ง';
+
+  @override
+  String get roadPickLocationHelp => 'เลื่อนแผนที่ให้หมุดอยู่ตรงจุดเกิดเหตุ';
+
+  @override
+  String get roadPickLocationUse => 'ใช้ตำแหน่งนี้';
+
+  @override
+  String get roadDetailTitle => 'รายละเอียดเหตุ';
+
+  @override
+  String get roadDetailReporters => 'ผู้รายงาน';
+
+  @override
+  String get roadDetailReports => 'รายงานทั้งหมด';
+
+  @override
+  String get roadDetailCleared => 'แจ้งว่าคลี่คลาย';
+
+  @override
+  String get roadDetailFirstReported => 'รายงานครั้งแรก';
+
+  @override
+  String get roadDetailExpires => 'หมดอายุ';
+
+  @override
+  String roadPeople(int n) {
+    return '$n คน';
+  }
+
+  @override
+  String roadTimes(int n) {
+    return '$n ครั้ง';
+  }
+
+  @override
+  String roadDateTime(String date, String time) {
+    return '$date $time';
+  }
+
+  @override
+  String get roadConfirmQuestion => 'เหตุนี้ยังอยู่ไหม?';
+
+  @override
+  String get roadConfirmStill => 'ยังอยู่';
+
+  @override
+  String get roadConfirmCleared => 'คลี่คลายแล้ว';
+
+  @override
+  String roadConfirmMineStill(String ago) {
+    return 'คุณแจ้งว่ายังอยู่ · $ago';
+  }
+
+  @override
+  String roadConfirmMineCleared(String ago) {
+    return 'คุณแจ้งว่าคลี่คลายแล้ว · $ago';
+  }
+
+  @override
+  String get roadConfirmHelp =>
+      'คำตอบใหม่แทนคำตอบเดิมของคุณ เหตุจะปิดเมื่อมีไรเดอร์หลายคนแจ้งว่าคลี่คลาย';
+
+  @override
+  String get roadConfirmSaved => 'บันทึกคำตอบแล้ว';
+
+  @override
+  String roadClosedMessage(String status) {
+    return 'เหตุนี้ปิดแล้ว ($status) จึงแจ้งเพิ่มไม่ได้';
+  }
+
+  @override
+  String get roadMyReport => 'รายงานของคุณ';
+
+  @override
+  String get roadPhotoLoadFailed => 'โหลดรูปไม่สำเร็จ';
+
+  @override
+  String roadAiSuggestion(String label, int percent) {
+    return 'AI แนะนำ: $label ($percent%)';
+  }
+
+  @override
+  String get roadAiUnsure => 'AI ไม่แน่ใจประเภทจากรูปนี้';
+
+  @override
+  String get roadAiPending => 'AI กำลังดูรูปนี้';
+
+  @override
+  String get roadAiOther => 'อื่นๆ';
+
+  @override
+  String get roadMyReportsEmptyTitle => 'ยังไม่มีรายงาน';
+
+  @override
+  String get roadMyReportsEmptyMessage => 'เหตุที่คุณรายงานจะแสดงที่นี่';
+
+  @override
+  String get roadHasPhoto => 'มีรูป';
+
+  @override
+  String get failureAlreadyReported => 'คุณรายงานเหตุนี้ไว้แล้ว';
+
+  @override
+  String get failureIncidentClosed => 'เหตุนี้ปิดแล้ว แจ้งเพิ่มไม่ได้';
+
+  @override
+  String get failureUnsupportedImage => 'รองรับเฉพาะรูป JPEG, PNG หรือ WebP';
+
+  @override
+  String get failureImageTooLarge => 'รูปใหญ่เกิน 5 MB';
+
+  @override
+  String get failureImageStorageUnavailable =>
+      'ตอนนี้เซิร์ฟเวอร์รับรูปไม่ได้ ส่งรายงานโดยไม่แนบรูปได้';
+
+  @override
+  String get failureInvalidBbox => 'บริเวณแผนที่กว้างเกินไป ซูมเข้าแล้วลองใหม่';
+
+  @override
   String get failureNetwork =>
       'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
 

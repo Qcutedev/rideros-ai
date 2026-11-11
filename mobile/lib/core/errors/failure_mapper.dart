@@ -43,15 +43,17 @@ AppFailure _fromResponse(Response<dynamic> response) {
     code: code,
     message: envelope?.message ?? '',
     fieldErrors: envelope?.fieldErrors ?? const {},
+    details: envelope?.details ?? const [],
   );
 }
 
 class _Envelope {
-  const _Envelope(this.code, this.message, this.fieldErrors);
+  const _Envelope(this.code, this.message, this.fieldErrors, this.details);
 
   final String code;
   final String message;
   final Map<String, String> fieldErrors;
+  final List<Map<String, Object?>> details;
 }
 
 _Envelope? _envelope(Object? data) {
@@ -62,10 +64,12 @@ _Envelope? _envelope(Object? data) {
   if (code is! String || code.isEmpty) return null;
   final message = error['message'];
   final fields = <String, String>{};
+  final objects = <Map<String, Object?>>[];
   final details = error['details'];
   if (details is List) {
     for (final item in details) {
       if (item is! Map) continue;
+      objects.add({for (final e in item.entries) e.key.toString(): e.value});
       final loc = item['loc'];
       final msg = item['msg'];
       if (loc is List && loc.isNotEmpty && msg is String) {
@@ -73,7 +77,7 @@ _Envelope? _envelope(Object? data) {
       }
     }
   }
-  return _Envelope(code, message is String ? message : '', fields);
+  return _Envelope(code, message is String ? message : '', fields, objects);
 }
 
 Duration? _retryAfter(Headers headers) {

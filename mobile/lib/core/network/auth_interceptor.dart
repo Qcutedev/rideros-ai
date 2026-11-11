@@ -60,6 +60,8 @@ class AuthInterceptor extends Interceptor {
         await _tokens.refresh();
       }
       request.extra[AuthOptions._retried] = true;
+      // A multipart body is finalized once sent; send a fresh copy.
+      if (request.data case final FormData form) request.data = form.clone();
       handler.resolve(await retry(request));
     } on DioException catch (retryError) {
       handler.next(retryError);
