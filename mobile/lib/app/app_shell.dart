@@ -5,7 +5,6 @@ import '../l10n/app_localizations.dart';
 import 'theme/tokens.dart';
 
 /// Bottom navigation of the signed-in app. Each tab keeps its own navigation stack.
-/// Only finished features get a tab (Shift arrives later in P3c).
 class AppShell extends StatelessWidget {
   const AppShell({required this.shell, super.key});
 
@@ -46,6 +45,12 @@ class AppShell extends StatelessWidget {
               icon: const Icon(Icons.account_balance_wallet_outlined),
               selectedIcon: const Icon(Icons.account_balance_wallet_rounded),
               label: l10n.navProfit,
+            ),
+            NavigationDestination(
+              key: const Key('nav.shifts'),
+              icon: const Icon(Icons.event_note_outlined),
+              selectedIcon: const Icon(Icons.event_note_rounded),
+              label: l10n.navShifts,
             ),
             NavigationDestination(
               key: const Key('nav.profile'),

@@ -25,7 +25,12 @@ abstract interface class ProfitRepository {
   /// The period that contains [date] (default: today in the rider's zone).
   Future<ProfitSummary> summary(ProfitPeriod period, {DateTime? date});
 
-  /// The backend's default window (30 days / 12 weeks / 12 months) ending with the
-  /// bucket that contains [to] (default: today).
-  Future<ProfitTrends> trends(ProfitPeriod granularity, {DateTime? to});
+  /// Buckets from [from] to [to] (inclusive local dates). Without [from]: the
+  /// backend's default window (30 days / 12 weeks / 12 months) ending with the
+  /// bucket that contains [to] (default: today in the rider's zone).
+  Future<ProfitTrends> trends(
+    ProfitPeriod granularity, {
+    DateTime? from,
+    DateTime? to,
+  });
 }

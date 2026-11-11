@@ -92,6 +92,12 @@ abstract final class ApiErrorCode {
   static const invalidPickupTimes = 'invalid_pickup_times';
   static const pickupWaitTooLong = 'pickup_wait_too_long';
 
+  // Shift simulator.
+  static const invalidShiftLength = 'invalid_shift_length';
+  static const missingAssumption = 'missing_assumption';
+  static const insufficientHistory = 'insufficient_history';
+  static const estimationMethodUnavailable = 'estimation_method_unavailable';
+
   // Access-token problems: the client refreshes once and retries.
   static const tokenExpired = 'token_expired';
   static const invalidToken = 'invalid_token';

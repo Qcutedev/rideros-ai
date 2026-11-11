@@ -12,12 +12,14 @@ import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
 import 'package:rideros_ai/features/pickup/data/pickup_repository_impl.dart';
 import 'package:rideros_ai/features/profile/data/rider_profile_repository_impl.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
+import 'package:rideros_ai/features/shifts/data/shift_repository_impl.dart';
 import 'package:rideros_ai/l10n/app_localizations.dart';
 import 'package:rideros_ai/l10n/app_localizations_th.dart';
 
 import 'fakes.dart';
 import 'pickup_fakes.dart';
 import 'profit_fakes.dart';
+import 'shift_fakes.dart';
 
 /// Overrides that replace the network layer with fakes and fix "now" to [testNow].
 List<Override> fakeRepositories(
@@ -25,12 +27,14 @@ List<Override> fakeRepositories(
   FakeRiderProfileRepository? profiles,
   ProfitFakes? profit,
   FakePickupRepository? pickup,
+  FakeShiftRepository? shifts,
 ]) {
   final p = profit ?? ProfitFakes();
   return [
     pickupRepositoryProvider.overrideWithValue(
       pickup ?? FakePickupRepository(),
     ),
+    shiftRepositoryProvider.overrideWithValue(shifts ?? FakeShiftRepository()),
     authRepositoryProvider.overrideWithValue(auth),
     riderProfileRepositoryProvider.overrideWithValue(
       profiles ?? FakeRiderProfileRepository(),
@@ -66,6 +70,12 @@ const allRoutePatterns = [
   Routes.expenseEditPattern,
   Routes.workSessionNew,
   Routes.workSessionEditPattern,
+  Routes.shifts,
+  Routes.shiftDetailPattern,
+  Routes.shiftCompare,
+  Routes.shiftNew,
+  Routes.shiftEditPattern,
+  Routes.shiftSessionPicker,
   Routes.profile,
   Routes.profileDisplayName,
   Routes.riderProfile,

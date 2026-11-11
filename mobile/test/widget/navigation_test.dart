@@ -28,12 +28,17 @@ import 'package:rideros_ai/features/profit/presentation/income_form_screen.dart'
 import 'package:rideros_ai/features/profit/presentation/records_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/true_profit_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/work_session_form_screen.dart';
+import 'package:rideros_ai/features/shifts/presentation/shift_compare_screen.dart';
+import 'package:rideros_ai/features/shifts/presentation/shift_detail_screen.dart';
+import 'package:rideros_ai/features/shifts/presentation/shift_form_screen.dart';
+import 'package:rideros_ai/features/shifts/presentation/shifts_screen.dart';
 
 import '../helpers/fake_http_adapter.dart';
 import '../helpers/fakes.dart';
 import '../helpers/pickup_fakes.dart';
 import '../helpers/profit_fakes.dart';
 import '../helpers/pump.dart';
+import '../helpers/shift_fakes.dart';
 
 /// The real app (router, guard, theme) with fake repositories.
 Future<void> pumpApp(WidgetTester tester, List<Override> overrides) async {
@@ -302,13 +307,16 @@ void main() {
       expect(profit.expenses.calls, isEmpty);
     });
 
-    testWidgets('tabs in order: home, pickup, profit, profile', (tester) async {
+    testWidgets('tabs in order: home, pickup, profit, shifts, profile', (
+      tester,
+    ) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
       final xs = [
         for (final key in [
           'nav.home',
           'nav.pickup',
           'nav.profit',
+          'nav.shifts',
           'nav.profile',
         ])
           tester.getCenter(find.byKey(Key(key))).dx,
@@ -371,6 +379,53 @@ void main() {
         find.byKey(Key('log.${pickup.logItems.single.id}')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('shifts: new over the tabs → details in the tab → compare', (
+      tester,
+    ) async {
+      final shifts = FakeShiftRepository(items: [scenario(id: 'old')]);
+      await pumpApp(
+        tester,
+        fakeRepositories(auth, profiles, profit, null, shifts),
+      );
+      await tapKey(tester, 'nav.shifts');
+      expect(find.byType(ShiftsScreen), findsOneWidget);
+
+      await tapKey(tester, 'shifts.add');
+      expect(find.byType(ShiftFormScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      await enter(tester, 'shiftForm.name', 'Night');
+      await enter(tester, 'shiftForm.ordersPerHour', '2');
+      await enter(tester, 'shiftForm.incomePerOrder', '50');
+      await tapKey(tester, 'shiftForm.submit');
+
+      // The new scenario's details, inside the tab; back = the list.
+      expect(find.byType(ShiftDetailScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('shift.net'))).data,
+        '฿500.00',
+      );
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(ShiftsScreen), findsOneWidget);
+
+      await tapKey(tester, 'shift.new-1.select');
+      await tapKey(tester, 'shift.old.select');
+      await tapKey(tester, 'shifts.compare');
+      expect(find.byType(ShiftCompareScreen), findsOneWidget);
+      expect(shifts.calls, contains('compare:new-1,old'));
+
+      // Deleting from the details drops it from the selection.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'shift.old');
+      await tapKey(tester, 'shift.delete');
+      await tapKey(tester, 'confirm.delete');
+      expect(find.byType(ShiftsScreen), findsOneWidget);
+      expect(find.text(t.shiftsSelectedCount(1)), findsOneWidget);
+      expect(find.byKey(const Key('shifts.compare')), findsNothing);
     });
 
     testWidgets('profile → Pickup model card over the tabs → back', (

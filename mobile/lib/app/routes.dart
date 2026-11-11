@@ -41,6 +41,25 @@ abstract final class Routes {
         : {'restaurant_id': restaurantId, 'restaurant_name': ?name},
   ).toString();
 
+  // Shift Simulator. Details and the comparison are inside the tab; the form and
+  // the work-session picker cover the tabs. `new`, `edit` and `select-session`
+  // are not under `scenarios/` so they are never read as an id.
+  static const shifts = '/shifts';
+  static const shiftDetailPattern = '/shifts/scenarios/:id';
+  static const shiftCompare = '/shifts/compare';
+  static const shiftNew = '/shifts/new';
+  static const shiftEditPattern = '/shifts/edit/:id';
+  static const shiftSessionPicker = '/shifts/select-session';
+
+  static String shiftDetail(String id) => '/shifts/scenarios/$id';
+  static String shiftEdit(String id) => '/shifts/edit/$id';
+
+  /// The comparison of [ids] (2-5), in that order.
+  static String shiftCompareFor(List<String> ids) => Uri(
+    path: shiftCompare,
+    queryParameters: {'ids': ids.join(',')},
+  ).toString();
+
   // Profile screens, shown over the tabs.
   static const profileDisplayName = '/profile/display-name';
   static const riderProfile = '/profile/rider';

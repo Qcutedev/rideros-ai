@@ -116,15 +116,19 @@ class ProfitRepositoryImpl implements ProfitRepository {
       });
 
   @override
-  Future<ProfitTrends> trends(ProfitPeriod granularity, {DateTime? to}) =>
-      guardApi(() async {
-        final response = await _dio.get<Map<String, dynamic>>(
-          '/profit/trends',
-          queryParameters: {
-            'granularity': granularity.name,
-            if (to != null) 'to': formatIsoDate(to),
-          },
-        );
-        return ProfitTrends.fromJson(response.data!);
-      });
+  Future<ProfitTrends> trends(
+    ProfitPeriod granularity, {
+    DateTime? from,
+    DateTime? to,
+  }) => guardApi(() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/profit/trends',
+      queryParameters: {
+        'granularity': granularity.name,
+        if (from != null) 'from': formatIsoDate(from),
+        if (to != null) 'to': formatIsoDate(to),
+      },
+    );
+    return ProfitTrends.fromJson(response.data!);
+  });
 }

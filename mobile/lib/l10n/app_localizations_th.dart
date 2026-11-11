@@ -1143,6 +1143,347 @@ class AppLocalizationsTh extends AppLocalizations {
   String get failurePickupWaitTooLong => 'เวลารอยาวได้ไม่เกิน 3 ชั่วโมง';
 
   @override
+  String get navShifts => 'กะงาน';
+
+  @override
+  String get shiftsTitle => 'จำลองกะงาน';
+
+  @override
+  String get shiftsIntro =>
+      'Scenario คือกะงานที่วางแผนไว้ ระบบประมาณรายได้ ค่าใช้จ่าย และกำไรให้ ทุกตัวเลขเป็นค่าประมาณและไม่นับรวมใน TrueProfit';
+
+  @override
+  String get shiftsSelectHint => 'เลือก 2–5 รายการเพื่อเปรียบเทียบ';
+
+  @override
+  String shiftsSelectedCount(int count) {
+    return 'เลือกแล้ว $count รายการ';
+  }
+
+  @override
+  String shiftsCompareCount(int count) {
+    return 'เปรียบเทียบ ($count)';
+  }
+
+  @override
+  String get shiftsClearSelection => 'ล้างที่เลือก';
+
+  @override
+  String shiftsSelect(String name) {
+    return 'เลือก $name เพื่อเปรียบเทียบ';
+  }
+
+  @override
+  String get shiftsMaxSelected => 'เลือกได้สูงสุด 5 รายการ';
+
+  @override
+  String get shiftsAdd => 'เพิ่ม Scenario';
+
+  @override
+  String get shiftsEmptyTitle => 'ยังไม่มี Scenario';
+
+  @override
+  String get shiftsEmptyMessage =>
+      'สร้าง Scenario ของกะที่อยากลอง เช่น 17:00–22:00 วันศุกร์ แล้วดูกำไรประมาณก่อนออกวิ่งจริง เทียบกันได้ครั้งละ 2–5 แบบ';
+
+  @override
+  String get shiftAnyDay => 'ทุกวัน';
+
+  @override
+  String get shiftNetEstimate => 'กำไรสุทธิประมาณ';
+
+  @override
+  String get shiftPerHourEstimate => 'กำไรต่อชั่วโมงประมาณ';
+
+  @override
+  String shiftPerHourValue(String value) {
+    return '$value/ชม.';
+  }
+
+  @override
+  String get shiftMethodAssumption => 'จากสมมติฐาน';
+
+  @override
+  String get shiftMethodHistorical => 'จากประวัติของฉัน';
+
+  @override
+  String get shiftMethodUnavailable => 'วิธีที่ยังไม่เปิดใช้';
+
+  @override
+  String get shiftNewTitle => 'เพิ่ม Scenario';
+
+  @override
+  String get shiftEditTitle => 'แก้ไข Scenario';
+
+  @override
+  String get shiftFieldName => 'ชื่อ Scenario';
+
+  @override
+  String get shiftFieldNameHint => 'เช่น เย็นวันศุกร์';
+
+  @override
+  String get shiftFieldStart => 'เวลาเริ่ม';
+
+  @override
+  String get shiftFieldEnd => 'เวลาเลิก';
+
+  @override
+  String get shiftLengthInvalid => 'กะต้องยาว 30 นาที ถึง 16 ชั่วโมง';
+
+  @override
+  String get shiftFieldWeekday => 'วันในสัปดาห์';
+
+  @override
+  String get shiftWeekdayHelper =>
+      'ไม่บังคับ · วิธีจากประวัติจะใช้เฉพาะวันที่เลือก ถ้ามีข้อมูลวันนั้นอย่างน้อย 5 วัน';
+
+  @override
+  String get shiftFieldMethod => 'วิธีประมาณ';
+
+  @override
+  String get shiftMethodAssumptionHint =>
+      'คำนวณจากออเดอร์ต่อชั่วโมงและรายได้ต่อออเดอร์ที่คุณกรอก';
+
+  @override
+  String get shiftMethodHistoricalHint =>
+      'ใช้รายได้และค่าใช้จ่ายต่อชั่วโมงจากข้อมูลจริงของคุณ 84 วันล่าสุด';
+
+  @override
+  String shiftHistoryUnavailable(int days) {
+    return 'วิธีจากประวัติใช้ได้เมื่อมีวันที่มีชั่วโมงทำงานอย่างน้อย 5 วันใน 84 วันล่าสุด (ตอนนี้ $days วัน)';
+  }
+
+  @override
+  String get shiftAssumptionsTitle => 'สมมติฐาน';
+
+  @override
+  String get shiftFieldOrdersPerHour => 'ออเดอร์ต่อชั่วโมง';
+
+  @override
+  String get shiftFieldIncomePerOrder => 'รายได้ต่อออเดอร์ (บาท)';
+
+  @override
+  String get shiftFieldKmPerOrder => 'ระยะทางต่อออเดอร์ (กม.)';
+
+  @override
+  String get shiftKmPerOrderHelper =>
+      'ไม่บังคับ · เว้นว่าง = ไม่รวมค่าน้ำมันและค่าเสื่อม';
+
+  @override
+  String get shiftProfileFallbackHelper =>
+      'ไม่บังคับ · เว้นว่าง = ใช้ค่าจากโปรไฟล์';
+
+  @override
+  String get shiftFieldOtherCosts => 'ค่าใช้จ่ายคงที่ของกะ (บาท)';
+
+  @override
+  String get shiftOtherCostsHelper => 'ไม่บังคับ · เช่น ที่จอดรถ ค่าข้าว';
+
+  @override
+  String get shiftFormEstimateNote => 'บันทึกแล้วระบบจะคำนวณค่าประมาณให้ทันที';
+
+  @override
+  String get shiftDetailTitle => 'รายละเอียด Scenario';
+
+  @override
+  String get shiftEstimatedRevenue => 'รายได้ประมาณ';
+
+  @override
+  String get shiftEstimatedExpenses => 'ค่าใช้จ่ายประมาณ';
+
+  @override
+  String get shiftRangeTitle => 'ช่วงกำไรสุทธิประมาณ';
+
+  @override
+  String shiftRangeValue(String low, String high) {
+    return '$low ถึง $high';
+  }
+
+  @override
+  String get shiftRangeHint =>
+      'P20–P80 ของกำไรต่อชั่วโมงรายวันในประวัติ × ชั่วโมงของกะ';
+
+  @override
+  String get shiftBasisTitle => 'ที่มาของตัวเลข';
+
+  @override
+  String shiftBasisSameWeekday(String weekday, int days) {
+    return 'ใช้เฉพาะ$weekday $days วัน';
+  }
+
+  @override
+  String shiftBasisAllDays(int days) {
+    return 'ใช้ทุกวันที่ทำงาน $days วัน';
+  }
+
+  @override
+  String shiftBasisWindow(String from, String to) {
+    return 'ข้อมูลช่วง $from – $to';
+  }
+
+  @override
+  String get shiftHistoricalHours => 'ชั่วโมงทำงานในประวัติ';
+
+  @override
+  String get shiftRevenuePerHour => 'รายได้ต่อชั่วโมง';
+
+  @override
+  String get shiftExpensesPerHour => 'ค่าใช้จ่ายต่อชั่วโมง';
+
+  @override
+  String get shiftHistoricalNote =>
+      'ใช้ค่าเฉลี่ยทั้งวัน ไม่ได้แยกตามช่วงเวลาของกะ';
+
+  @override
+  String get shiftShiftHours => 'ชั่วโมงของกะ';
+
+  @override
+  String shiftHoursValue(String hours) {
+    return '$hours ชม.';
+  }
+
+  @override
+  String get shiftExpectedOrders => 'ออเดอร์ที่คาด';
+
+  @override
+  String get shiftExpectedKm => 'ระยะทางที่คาด (กม.)';
+
+  @override
+  String get shiftFuelCost => 'ค่าน้ำมัน';
+
+  @override
+  String get shiftDepreciationCost => 'ค่าเสื่อม';
+
+  @override
+  String get shiftOtherCosts => 'ค่าใช้จ่ายคงที่';
+
+  @override
+  String get shiftSourceScenario => 'จาก Scenario';
+
+  @override
+  String get shiftSourceProfile => 'จากโปรไฟล์';
+
+  @override
+  String get shiftInputFromProfile => 'เว้นว่าง · ใช้ค่าจากโปรไฟล์';
+
+  @override
+  String get shiftInputsTitle => 'สมมติฐานที่กรอก';
+
+  @override
+  String get shiftNotSet => '—';
+
+  @override
+  String get shiftWarningDistance =>
+      'ไม่รวมต้นทุนระยะทาง (ไม่ได้กรอกระยะทางต่อออเดอร์)';
+
+  @override
+  String get shiftWarningFuel =>
+      'ไม่รวมค่าน้ำมัน (ไม่มีอัตราสิ้นเปลืองหรือราคาน้ำมันทั้งใน Scenario และโปรไฟล์)';
+
+  @override
+  String get shiftWarningDepreciation =>
+      'ไม่รวมค่าเสื่อม (ไม่มีค่าเสื่อมต่อ กม. ทั้งใน Scenario และโปรไฟล์)';
+
+  @override
+  String get shiftWarningFewWeekdays =>
+      'วันเดียวกันในสัปดาห์มีข้อมูลไม่ถึง 5 วัน จึงใช้ทุกวันแทน';
+
+  @override
+  String shiftWarningOther(String code) {
+    return 'คำเตือนจากระบบ: $code';
+  }
+
+  @override
+  String get shiftReEstimate => 'คำนวณใหม่ด้วยข้อมูลล่าสุด';
+
+  @override
+  String get shiftReEstimated => 'คำนวณใหม่แล้ว';
+
+  @override
+  String get shiftEdit => 'แก้ไข';
+
+  @override
+  String get shiftDelete => 'ลบ Scenario';
+
+  @override
+  String get shiftDeleteTitle => 'ลบ Scenario นี้?';
+
+  @override
+  String get shiftDeleteMessage =>
+      'Scenario และค่าประมาณจะถูกลบ กู้คืนไม่ได้ (ไม่กระทบข้อมูลจริงใน TrueProfit)';
+
+  @override
+  String get shiftLinkTitle => 'ช่วงทำงานจริง';
+
+  @override
+  String get shiftLinkNone => 'ยังไม่ได้ผูกกับช่วงทำงานจริง';
+
+  @override
+  String get shiftLinkHint =>
+      'ไม่บังคับ · ผูกไว้เพื่อจำว่ากะจริงตรงกับ Scenario ไหน ไม่เปลี่ยนค่าประมาณ';
+
+  @override
+  String get shiftLinkAction => 'ผูกกับช่วงทำงานจริง';
+
+  @override
+  String get shiftLinkChange => 'เปลี่ยนช่วงทำงาน';
+
+  @override
+  String get shiftUnlink => 'ยกเลิกการผูก';
+
+  @override
+  String get shiftLinked => 'ผูกกับช่วงทำงานแล้ว';
+
+  @override
+  String get shiftUnlinked => 'ยกเลิกการผูกแล้ว';
+
+  @override
+  String get shiftNotInTrueProfit =>
+      'ค่าประมาณจาก Shift Simulator ไม่นับรวมใน TrueProfit';
+
+  @override
+  String shiftEstimatedAt(String date) {
+    return 'คำนวณล่าสุด $date';
+  }
+
+  @override
+  String get shiftPickSessionTitle => 'เลือกช่วงทำงาน';
+
+  @override
+  String get shiftPickSessionEmptyTitle => 'ยังไม่มีช่วงทำงาน';
+
+  @override
+  String get shiftPickSessionEmptyMessage =>
+      'บันทึกช่วงทำงานจริงก่อน แล้วกลับมาผูกกับ Scenario';
+
+  @override
+  String get shiftCompareTitle => 'เปรียบเทียบ Scenario';
+
+  @override
+  String get shiftBestNet => 'กำไรสุทธิสูงสุด';
+
+  @override
+  String get shiftBestPerHour => 'กำไรต่อชั่วโมงสูงสุด';
+
+  @override
+  String get shiftCompareNote =>
+      'ทุกตัวเลขเป็นค่าประมาณ ไม่นับรวมใน TrueProfit';
+
+  @override
+  String get failureInvalidShiftLength => 'กะต้องยาว 30 นาที ถึง 16 ชั่วโมง';
+
+  @override
+  String get failureMissingAssumption =>
+      'วิธีจากสมมติฐานต้องมีออเดอร์ต่อชั่วโมงและรายได้ต่อออเดอร์';
+
+  @override
+  String get failureInsufficientHistory =>
+      'ประวัติยังไม่พอ ต้องมีวันที่มีชั่วโมงทำงานอย่างน้อย 5 วันใน 84 วันล่าสุด';
+
+  @override
+  String get failureEstimationMethodUnavailable => 'วิธีประมาณนี้ยังไม่เปิดใช้';
+
+  @override
   String get failureNetwork =>
       'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
 

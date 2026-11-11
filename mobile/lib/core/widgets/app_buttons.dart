@@ -44,20 +44,34 @@ class AppPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Secondary action: transparent with a green outline.
+/// Secondary action: transparent with a green outline. While [isLoading] it shows
+/// a spinner and ignores taps.
 class AppSecondaryButton extends StatelessWidget {
   const AppSecondaryButton({
     required this.label,
     required this.onPressed,
+    this.isLoading = false,
     super.key,
   });
 
   final String label;
   final VoidCallback? onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(onPressed: onPressed, child: Text(label));
+    return OutlinedButton(
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? SizedBox.square(
+              dimension: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                semanticsLabel: label,
+              ),
+            )
+          : Text(label),
+    );
   }
 }
 

@@ -308,6 +308,16 @@ class AsyncValueView<T> extends StatelessWidget {
   }
 }
 
+/// While a provider reloads (e.g. after an action bumped a revision) it is
+/// loading but still holds the last data: keep showing that data instead of the
+/// skeleton, so the screen does not flash or lose its scroll position.
+extension KeepDataWhileReloading<T> on AsyncValue<T> {
+  AsyncValue<T> get keepingData => switch (this) {
+    AsyncLoading(hasValue: true, :final value) => AsyncData(value as T),
+    _ => this,
+  };
+}
+
 enum BannerTone { info, warning, error, success }
 
 /// Inline message inside a form or card (§5.4): icon + short text.

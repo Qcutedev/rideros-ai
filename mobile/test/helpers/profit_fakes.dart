@@ -61,6 +61,9 @@ class FakeProfitRepository implements ProfitRepository {
   DateTime today;
   final Map<(ProfitPeriod, DateTime), ProfitMetrics> summaryMetrics = {};
   final Map<ProfitPeriod, List<ProfitMetrics>> trendMetrics = {};
+
+  /// Daily points of a trends request with `from` (date-only keys).
+  final Map<DateTime, ProfitMetrics> dailyMetrics = {};
   Object? summaryError;
   Object? trendsError;
   Completer<void>? gate;
@@ -88,12 +91,40 @@ class FakeProfitRepository implements ProfitRepository {
   }
 
   @override
-  Future<ProfitTrends> trends(ProfitPeriod granularity, {DateTime? to}) async {
+  Future<ProfitTrends> trends(
+    ProfitPeriod granularity, {
+    DateTime? from,
+    DateTime? to,
+  }) async {
     calls.add(
-      'trends:${granularity.name}:${to == null ? '-' : formatIsoDate(to)}',
+      'trends:${granularity.name}:'
+      '${from == null ? '' : '${formatIsoDate(from)}..'}'
+      '${to == null ? '-' : formatIsoDate(to)}',
     );
     await gate?.future;
     if (trendsError != null) throw trendsError!;
+    if (from != null) {
+      // Explicit window: one daily point per date, from [dailyMetrics].
+      final points = <TrendPoint>[];
+      for (
+        var day = dateOnly(from);
+        !day.isAfter(to ?? today);
+        day = day.add(const Duration(days: 1))
+      ) {
+        points.add(
+          TrendPoint(
+            startDate: day,
+            endDate: day,
+            metrics: dailyMetrics[day] ?? metrics(),
+          ),
+        );
+      }
+      return ProfitTrends(
+        granularity: granularity,
+        currency: 'THB',
+        points: points,
+      );
+    }
     final values = trendMetrics[granularity] ?? [metrics(), metrics()];
     var start = periodStart(to ?? today, granularity);
     final points = <TrendPoint>[];

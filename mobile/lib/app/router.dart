@@ -29,6 +29,11 @@ import '../features/profit/presentation/income_form_screen.dart';
 import '../features/profit/presentation/records_screen.dart';
 import '../features/profit/presentation/true_profit_screen.dart';
 import '../features/profit/presentation/work_session_form_screen.dart';
+import '../features/shifts/presentation/shift_compare_screen.dart';
+import '../features/shifts/presentation/shift_detail_screen.dart';
+import '../features/shifts/presentation/shift_form_screen.dart';
+import '../features/shifts/presentation/shifts_screen.dart';
+import '../features/shifts/presentation/work_session_picker_screen.dart';
 import 'app_shell.dart';
 import 'routes.dart';
 
@@ -185,6 +190,27 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: Routes.shifts,
+                builder: (context, state) => const ShiftsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'compare',
+                    builder: (context, state) => ShiftCompareScreen(
+                      ids: state.uri.queryParameters['ids'] ?? '',
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'scenarios/:id',
+                    builder: (context, state) =>
+                        ShiftDetailScreen(id: state.pathParameters['id']!),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: Routes.profile,
                 builder: (context, state) => const ProfileScreen(),
               ),
@@ -194,6 +220,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       ...formRoutes(rootKey),
       ...pickupRoutes(rootKey),
+      ...shiftRoutes(rootKey),
       ...profileRoutes(rootKey),
     ],
   );
@@ -271,6 +298,26 @@ List<GoRoute> pickupRoutes(GlobalKey<NavigatorState> root) => [
     parentNavigatorKey: root,
     path: Routes.modelInfo,
     builder: (context, state) => const ModelInfoScreen(),
+  ),
+];
+
+/// Shift forms and the work-session picker on the [root] navigator.
+List<GoRoute> shiftRoutes(GlobalKey<NavigatorState> root) => [
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.shiftNew,
+    builder: (context, state) => const ShiftFormScreen(),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.shiftEditPattern,
+    builder: (context, state) =>
+        ShiftFormScreen(id: state.pathParameters['id']),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.shiftSessionPicker,
+    builder: (context, state) => const WorkSessionPickerScreen(),
   ),
 ];
 

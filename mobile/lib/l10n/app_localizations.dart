@@ -2062,6 +2062,600 @@ abstract class AppLocalizations {
   /// **'เวลารอยาวได้ไม่เกิน 3 ชั่วโมง'**
   String get failurePickupWaitTooLong;
 
+  /// No description provided for @navShifts.
+  ///
+  /// In th, this message translates to:
+  /// **'กะงาน'**
+  String get navShifts;
+
+  /// No description provided for @shiftsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'จำลองกะงาน'**
+  String get shiftsTitle;
+
+  /// No description provided for @shiftsIntro.
+  ///
+  /// In th, this message translates to:
+  /// **'Scenario คือกะงานที่วางแผนไว้ ระบบประมาณรายได้ ค่าใช้จ่าย และกำไรให้ ทุกตัวเลขเป็นค่าประมาณและไม่นับรวมใน TrueProfit'**
+  String get shiftsIntro;
+
+  /// No description provided for @shiftsSelectHint.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือก 2–5 รายการเพื่อเปรียบเทียบ'**
+  String get shiftsSelectHint;
+
+  /// No description provided for @shiftsSelectedCount.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือกแล้ว {count} รายการ'**
+  String shiftsSelectedCount(int count);
+
+  /// No description provided for @shiftsCompareCount.
+  ///
+  /// In th, this message translates to:
+  /// **'เปรียบเทียบ ({count})'**
+  String shiftsCompareCount(int count);
+
+  /// No description provided for @shiftsClearSelection.
+  ///
+  /// In th, this message translates to:
+  /// **'ล้างที่เลือก'**
+  String get shiftsClearSelection;
+
+  /// No description provided for @shiftsSelect.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือก {name} เพื่อเปรียบเทียบ'**
+  String shiftsSelect(String name);
+
+  /// No description provided for @shiftsMaxSelected.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือกได้สูงสุด 5 รายการ'**
+  String get shiftsMaxSelected;
+
+  /// No description provided for @shiftsAdd.
+  ///
+  /// In th, this message translates to:
+  /// **'เพิ่ม Scenario'**
+  String get shiftsAdd;
+
+  /// No description provided for @shiftsEmptyTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่มี Scenario'**
+  String get shiftsEmptyTitle;
+
+  /// No description provided for @shiftsEmptyMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'สร้าง Scenario ของกะที่อยากลอง เช่น 17:00–22:00 วันศุกร์ แล้วดูกำไรประมาณก่อนออกวิ่งจริง เทียบกันได้ครั้งละ 2–5 แบบ'**
+  String get shiftsEmptyMessage;
+
+  /// No description provided for @shiftAnyDay.
+  ///
+  /// In th, this message translates to:
+  /// **'ทุกวัน'**
+  String get shiftAnyDay;
+
+  /// No description provided for @shiftNetEstimate.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรสุทธิประมาณ'**
+  String get shiftNetEstimate;
+
+  /// No description provided for @shiftPerHourEstimate.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรต่อชั่วโมงประมาณ'**
+  String get shiftPerHourEstimate;
+
+  /// No description provided for @shiftPerHourValue.
+  ///
+  /// In th, this message translates to:
+  /// **'{value}/ชม.'**
+  String shiftPerHourValue(String value);
+
+  /// No description provided for @shiftMethodAssumption.
+  ///
+  /// In th, this message translates to:
+  /// **'จากสมมติฐาน'**
+  String get shiftMethodAssumption;
+
+  /// No description provided for @shiftMethodHistorical.
+  ///
+  /// In th, this message translates to:
+  /// **'จากประวัติของฉัน'**
+  String get shiftMethodHistorical;
+
+  /// No description provided for @shiftMethodUnavailable.
+  ///
+  /// In th, this message translates to:
+  /// **'วิธีที่ยังไม่เปิดใช้'**
+  String get shiftMethodUnavailable;
+
+  /// No description provided for @shiftNewTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เพิ่ม Scenario'**
+  String get shiftNewTitle;
+
+  /// No description provided for @shiftEditTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'แก้ไข Scenario'**
+  String get shiftEditTitle;
+
+  /// No description provided for @shiftFieldName.
+  ///
+  /// In th, this message translates to:
+  /// **'ชื่อ Scenario'**
+  String get shiftFieldName;
+
+  /// No description provided for @shiftFieldNameHint.
+  ///
+  /// In th, this message translates to:
+  /// **'เช่น เย็นวันศุกร์'**
+  String get shiftFieldNameHint;
+
+  /// No description provided for @shiftFieldStart.
+  ///
+  /// In th, this message translates to:
+  /// **'เวลาเริ่ม'**
+  String get shiftFieldStart;
+
+  /// No description provided for @shiftFieldEnd.
+  ///
+  /// In th, this message translates to:
+  /// **'เวลาเลิก'**
+  String get shiftFieldEnd;
+
+  /// No description provided for @shiftLengthInvalid.
+  ///
+  /// In th, this message translates to:
+  /// **'กะต้องยาว 30 นาที ถึง 16 ชั่วโมง'**
+  String get shiftLengthInvalid;
+
+  /// No description provided for @shiftFieldWeekday.
+  ///
+  /// In th, this message translates to:
+  /// **'วันในสัปดาห์'**
+  String get shiftFieldWeekday;
+
+  /// No description provided for @shiftWeekdayHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · วิธีจากประวัติจะใช้เฉพาะวันที่เลือก ถ้ามีข้อมูลวันนั้นอย่างน้อย 5 วัน'**
+  String get shiftWeekdayHelper;
+
+  /// No description provided for @shiftFieldMethod.
+  ///
+  /// In th, this message translates to:
+  /// **'วิธีประมาณ'**
+  String get shiftFieldMethod;
+
+  /// No description provided for @shiftMethodAssumptionHint.
+  ///
+  /// In th, this message translates to:
+  /// **'คำนวณจากออเดอร์ต่อชั่วโมงและรายได้ต่อออเดอร์ที่คุณกรอก'**
+  String get shiftMethodAssumptionHint;
+
+  /// No description provided for @shiftMethodHistoricalHint.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้รายได้และค่าใช้จ่ายต่อชั่วโมงจากข้อมูลจริงของคุณ 84 วันล่าสุด'**
+  String get shiftMethodHistoricalHint;
+
+  /// No description provided for @shiftHistoryUnavailable.
+  ///
+  /// In th, this message translates to:
+  /// **'วิธีจากประวัติใช้ได้เมื่อมีวันที่มีชั่วโมงทำงานอย่างน้อย 5 วันใน 84 วันล่าสุด (ตอนนี้ {days} วัน)'**
+  String shiftHistoryUnavailable(int days);
+
+  /// No description provided for @shiftAssumptionsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'สมมติฐาน'**
+  String get shiftAssumptionsTitle;
+
+  /// No description provided for @shiftFieldOrdersPerHour.
+  ///
+  /// In th, this message translates to:
+  /// **'ออเดอร์ต่อชั่วโมง'**
+  String get shiftFieldOrdersPerHour;
+
+  /// No description provided for @shiftFieldIncomePerOrder.
+  ///
+  /// In th, this message translates to:
+  /// **'รายได้ต่อออเดอร์ (บาท)'**
+  String get shiftFieldIncomePerOrder;
+
+  /// No description provided for @shiftFieldKmPerOrder.
+  ///
+  /// In th, this message translates to:
+  /// **'ระยะทางต่อออเดอร์ (กม.)'**
+  String get shiftFieldKmPerOrder;
+
+  /// No description provided for @shiftKmPerOrderHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · เว้นว่าง = ไม่รวมค่าน้ำมันและค่าเสื่อม'**
+  String get shiftKmPerOrderHelper;
+
+  /// No description provided for @shiftProfileFallbackHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · เว้นว่าง = ใช้ค่าจากโปรไฟล์'**
+  String get shiftProfileFallbackHelper;
+
+  /// No description provided for @shiftFieldOtherCosts.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าใช้จ่ายคงที่ของกะ (บาท)'**
+  String get shiftFieldOtherCosts;
+
+  /// No description provided for @shiftOtherCostsHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · เช่น ที่จอดรถ ค่าข้าว'**
+  String get shiftOtherCostsHelper;
+
+  /// No description provided for @shiftFormEstimateNote.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกแล้วระบบจะคำนวณค่าประมาณให้ทันที'**
+  String get shiftFormEstimateNote;
+
+  /// No description provided for @shiftDetailTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'รายละเอียด Scenario'**
+  String get shiftDetailTitle;
+
+  /// No description provided for @shiftEstimatedRevenue.
+  ///
+  /// In th, this message translates to:
+  /// **'รายได้ประมาณ'**
+  String get shiftEstimatedRevenue;
+
+  /// No description provided for @shiftEstimatedExpenses.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าใช้จ่ายประมาณ'**
+  String get shiftEstimatedExpenses;
+
+  /// No description provided for @shiftRangeTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วงกำไรสุทธิประมาณ'**
+  String get shiftRangeTitle;
+
+  /// No description provided for @shiftRangeValue.
+  ///
+  /// In th, this message translates to:
+  /// **'{low} ถึง {high}'**
+  String shiftRangeValue(String low, String high);
+
+  /// No description provided for @shiftRangeHint.
+  ///
+  /// In th, this message translates to:
+  /// **'P20–P80 ของกำไรต่อชั่วโมงรายวันในประวัติ × ชั่วโมงของกะ'**
+  String get shiftRangeHint;
+
+  /// No description provided for @shiftBasisTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ที่มาของตัวเลข'**
+  String get shiftBasisTitle;
+
+  /// No description provided for @shiftBasisSameWeekday.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้เฉพาะ{weekday} {days} วัน'**
+  String shiftBasisSameWeekday(String weekday, int days);
+
+  /// No description provided for @shiftBasisAllDays.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้ทุกวันที่ทำงาน {days} วัน'**
+  String shiftBasisAllDays(int days);
+
+  /// No description provided for @shiftBasisWindow.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลช่วง {from} – {to}'**
+  String shiftBasisWindow(String from, String to);
+
+  /// No description provided for @shiftHistoricalHours.
+  ///
+  /// In th, this message translates to:
+  /// **'ชั่วโมงทำงานในประวัติ'**
+  String get shiftHistoricalHours;
+
+  /// No description provided for @shiftRevenuePerHour.
+  ///
+  /// In th, this message translates to:
+  /// **'รายได้ต่อชั่วโมง'**
+  String get shiftRevenuePerHour;
+
+  /// No description provided for @shiftExpensesPerHour.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าใช้จ่ายต่อชั่วโมง'**
+  String get shiftExpensesPerHour;
+
+  /// No description provided for @shiftHistoricalNote.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้ค่าเฉลี่ยทั้งวัน ไม่ได้แยกตามช่วงเวลาของกะ'**
+  String get shiftHistoricalNote;
+
+  /// No description provided for @shiftShiftHours.
+  ///
+  /// In th, this message translates to:
+  /// **'ชั่วโมงของกะ'**
+  String get shiftShiftHours;
+
+  /// No description provided for @shiftHoursValue.
+  ///
+  /// In th, this message translates to:
+  /// **'{hours} ชม.'**
+  String shiftHoursValue(String hours);
+
+  /// No description provided for @shiftExpectedOrders.
+  ///
+  /// In th, this message translates to:
+  /// **'ออเดอร์ที่คาด'**
+  String get shiftExpectedOrders;
+
+  /// No description provided for @shiftExpectedKm.
+  ///
+  /// In th, this message translates to:
+  /// **'ระยะทางที่คาด (กม.)'**
+  String get shiftExpectedKm;
+
+  /// No description provided for @shiftFuelCost.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าน้ำมัน'**
+  String get shiftFuelCost;
+
+  /// No description provided for @shiftDepreciationCost.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าเสื่อม'**
+  String get shiftDepreciationCost;
+
+  /// No description provided for @shiftOtherCosts.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าใช้จ่ายคงที่'**
+  String get shiftOtherCosts;
+
+  /// No description provided for @shiftSourceScenario.
+  ///
+  /// In th, this message translates to:
+  /// **'จาก Scenario'**
+  String get shiftSourceScenario;
+
+  /// No description provided for @shiftSourceProfile.
+  ///
+  /// In th, this message translates to:
+  /// **'จากโปรไฟล์'**
+  String get shiftSourceProfile;
+
+  /// No description provided for @shiftInputFromProfile.
+  ///
+  /// In th, this message translates to:
+  /// **'เว้นว่าง · ใช้ค่าจากโปรไฟล์'**
+  String get shiftInputFromProfile;
+
+  /// No description provided for @shiftInputsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'สมมติฐานที่กรอก'**
+  String get shiftInputsTitle;
+
+  /// No description provided for @shiftNotSet.
+  ///
+  /// In th, this message translates to:
+  /// **'—'**
+  String get shiftNotSet;
+
+  /// No description provided for @shiftWarningDistance.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่รวมต้นทุนระยะทาง (ไม่ได้กรอกระยะทางต่อออเดอร์)'**
+  String get shiftWarningDistance;
+
+  /// No description provided for @shiftWarningFuel.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่รวมค่าน้ำมัน (ไม่มีอัตราสิ้นเปลืองหรือราคาน้ำมันทั้งใน Scenario และโปรไฟล์)'**
+  String get shiftWarningFuel;
+
+  /// No description provided for @shiftWarningDepreciation.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่รวมค่าเสื่อม (ไม่มีค่าเสื่อมต่อ กม. ทั้งใน Scenario และโปรไฟล์)'**
+  String get shiftWarningDepreciation;
+
+  /// No description provided for @shiftWarningFewWeekdays.
+  ///
+  /// In th, this message translates to:
+  /// **'วันเดียวกันในสัปดาห์มีข้อมูลไม่ถึง 5 วัน จึงใช้ทุกวันแทน'**
+  String get shiftWarningFewWeekdays;
+
+  /// No description provided for @shiftWarningOther.
+  ///
+  /// In th, this message translates to:
+  /// **'คำเตือนจากระบบ: {code}'**
+  String shiftWarningOther(String code);
+
+  /// No description provided for @shiftReEstimate.
+  ///
+  /// In th, this message translates to:
+  /// **'คำนวณใหม่ด้วยข้อมูลล่าสุด'**
+  String get shiftReEstimate;
+
+  /// No description provided for @shiftReEstimated.
+  ///
+  /// In th, this message translates to:
+  /// **'คำนวณใหม่แล้ว'**
+  String get shiftReEstimated;
+
+  /// No description provided for @shiftEdit.
+  ///
+  /// In th, this message translates to:
+  /// **'แก้ไข'**
+  String get shiftEdit;
+
+  /// No description provided for @shiftDelete.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบ Scenario'**
+  String get shiftDelete;
+
+  /// No description provided for @shiftDeleteTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบ Scenario นี้?'**
+  String get shiftDeleteTitle;
+
+  /// No description provided for @shiftDeleteMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'Scenario และค่าประมาณจะถูกลบ กู้คืนไม่ได้ (ไม่กระทบข้อมูลจริงใน TrueProfit)'**
+  String get shiftDeleteMessage;
+
+  /// No description provided for @shiftLinkTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วงทำงานจริง'**
+  String get shiftLinkTitle;
+
+  /// No description provided for @shiftLinkNone.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่ได้ผูกกับช่วงทำงานจริง'**
+  String get shiftLinkNone;
+
+  /// No description provided for @shiftLinkHint.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · ผูกไว้เพื่อจำว่ากะจริงตรงกับ Scenario ไหน ไม่เปลี่ยนค่าประมาณ'**
+  String get shiftLinkHint;
+
+  /// No description provided for @shiftLinkAction.
+  ///
+  /// In th, this message translates to:
+  /// **'ผูกกับช่วงทำงานจริง'**
+  String get shiftLinkAction;
+
+  /// No description provided for @shiftLinkChange.
+  ///
+  /// In th, this message translates to:
+  /// **'เปลี่ยนช่วงทำงาน'**
+  String get shiftLinkChange;
+
+  /// No description provided for @shiftUnlink.
+  ///
+  /// In th, this message translates to:
+  /// **'ยกเลิกการผูก'**
+  String get shiftUnlink;
+
+  /// No description provided for @shiftLinked.
+  ///
+  /// In th, this message translates to:
+  /// **'ผูกกับช่วงทำงานแล้ว'**
+  String get shiftLinked;
+
+  /// No description provided for @shiftUnlinked.
+  ///
+  /// In th, this message translates to:
+  /// **'ยกเลิกการผูกแล้ว'**
+  String get shiftUnlinked;
+
+  /// No description provided for @shiftNotInTrueProfit.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าประมาณจาก Shift Simulator ไม่นับรวมใน TrueProfit'**
+  String get shiftNotInTrueProfit;
+
+  /// No description provided for @shiftEstimatedAt.
+  ///
+  /// In th, this message translates to:
+  /// **'คำนวณล่าสุด {date}'**
+  String shiftEstimatedAt(String date);
+
+  /// No description provided for @shiftPickSessionTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือกช่วงทำงาน'**
+  String get shiftPickSessionTitle;
+
+  /// No description provided for @shiftPickSessionEmptyTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่มีช่วงทำงาน'**
+  String get shiftPickSessionEmptyTitle;
+
+  /// No description provided for @shiftPickSessionEmptyMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกช่วงทำงานจริงก่อน แล้วกลับมาผูกกับ Scenario'**
+  String get shiftPickSessionEmptyMessage;
+
+  /// No description provided for @shiftCompareTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เปรียบเทียบ Scenario'**
+  String get shiftCompareTitle;
+
+  /// No description provided for @shiftBestNet.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรสุทธิสูงสุด'**
+  String get shiftBestNet;
+
+  /// No description provided for @shiftBestPerHour.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรต่อชั่วโมงสูงสุด'**
+  String get shiftBestPerHour;
+
+  /// No description provided for @shiftCompareNote.
+  ///
+  /// In th, this message translates to:
+  /// **'ทุกตัวเลขเป็นค่าประมาณ ไม่นับรวมใน TrueProfit'**
+  String get shiftCompareNote;
+
+  /// No description provided for @failureInvalidShiftLength.
+  ///
+  /// In th, this message translates to:
+  /// **'กะต้องยาว 30 นาที ถึง 16 ชั่วโมง'**
+  String get failureInvalidShiftLength;
+
+  /// No description provided for @failureMissingAssumption.
+  ///
+  /// In th, this message translates to:
+  /// **'วิธีจากสมมติฐานต้องมีออเดอร์ต่อชั่วโมงและรายได้ต่อออเดอร์'**
+  String get failureMissingAssumption;
+
+  /// No description provided for @failureInsufficientHistory.
+  ///
+  /// In th, this message translates to:
+  /// **'ประวัติยังไม่พอ ต้องมีวันที่มีชั่วโมงทำงานอย่างน้อย 5 วันใน 84 วันล่าสุด'**
+  String get failureInsufficientHistory;
+
+  /// No description provided for @failureEstimationMethodUnavailable.
+  ///
+  /// In th, this message translates to:
+  /// **'วิธีประมาณนี้ยังไม่เปิดใช้'**
+  String get failureEstimationMethodUnavailable;
+
   /// No description provided for @failureNetwork.
   ///
   /// In th, this message translates to:
