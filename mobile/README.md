@@ -1,11 +1,12 @@
-# rideros_ai — Flutter app (Phase 3)
+# rideros_ai — Flutter app (Phase 3–4)
 
 Android app for RiderOS AI. Flutter 3.47 / Dart 3.13. Architecture: `docs/SYSTEM_ARCHITECTURE.md` §2.1.
 API contract: `backend/README.md`.
 
 Status: **P3a** (design system, router + auth guard, API client with token refresh, splash, login,
 register, forgot/reset password, onboarding) and **P3b** (bottom navigation, home dashboard, TrueProfit
-dashboard with trend chart, income / expense / work-session lists and forms). P3c screens follow.
+dashboard with trend chart, income / expense / work-session lists and forms), **P3c** (Pickup Intelligence,
+Shift Simulator, Profile) and **Phase 4** (end-to-end journey against the real API, reset deep link).
 
 ## Run
 
@@ -25,8 +26,10 @@ flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 - Plain HTTP is allowed only in **debug** builds and only to `10.0.2.2`, `127.0.0.1` and `localhost`
   (`android/app/src/debug/res/xml/network_security_config.xml`).
 - Forgot password (D5): in development the backend has no e-mail provider and writes the reset link to its log
-  (`docker compose logs backend`, line `DEV ONLY password reset link`). Paste the whole link (or the token) on
-  the "ตั้งรหัสผ่านใหม่" screen.
+  (`docker compose logs backend`, line `DEV ONLY password reset link`). Open it on the emulator with
+  `adb shell am start -a android.intent.action.VIEW -d "'rideros://reset-password?token=...'"`, or paste the
+  whole link (or the token) on the "ตั้งรหัสผ่านใหม่" screen. The link opens the reset screen signed in or out;
+  after a reset the server signs out every device, so the app signs out too and shows the login screen.
 
 ## Checks
 
@@ -36,6 +39,26 @@ flutter test                    # unit + widget + navigation tests
 flutter test --coverage         # coverage/lcov.info
 dart format --set-exit-if-changed lib test
 ```
+
+### End-to-end journey (Phase 4)
+
+Needs the compose stack (`docker compose up -d` at the root, `/api/v1/ready` ok with the model) and the
+emulator `emulator-5554`. One command builds, installs and drives the real app through the UI, then checks
+the numbers against PostgreSQL:
+
+```powershell
+flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_journey_test.dart -d emulator-5554
+```
+
+- Journey (`integration_test/app_journey_test.dart`): Register (signs in) → Onboarding → Logout → Login →
+  Dashboard → Pickup prediction for `POI-203` → add income → add expense → TrueProfit → two scenarios →
+  Compare. It clears the stored refresh token first; the ride intro plays as in the real app.
+- Host driver (`test_driver/integration_test.dart`): compares what the screens showed with SQL through
+  `docker compose exec db psql` (profile, prediction range/midpoint, today's revenue/expenses/net/hours/
+  net per hour, each compared scenario, best net), prints every check, then deletes the throwaway
+  `e2e+<timestamp>@example.com` account with `DELETE /me` and checks that no rows are left.
+- `$env:E2E_KEEP = "1"` keeps the account. When a check fails the account is kept for a look.
+- About 40 s on the emulator after the first build.
 
 After changing a freezed/json model or `lib/l10n/app_th.arb`:
 

@@ -310,6 +310,19 @@ void main() {
       await tapKey(tester, 'income.submit');
       expect(find.byType(RecordsScreen), findsOneWidget);
       expect(find.text('450.00'), findsOneWidget);
+      // The "saved" message belongs to the list's own Scaffold, which keeps
+      // its add button clear of it (not the shell's, which knows no FAB).
+      final snack = find.byType(SnackBar);
+      expect(
+        find.descendant(of: find.byType(RecordsScreen), matching: snack),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .getRect(snack)
+            .overlaps(tester.getRect(find.byKey(const Key('records.add')))),
+        isFalse,
+      );
 
       // Home keeps its own stack and reloaded its numbers after the save.
       await tapKey(tester, 'nav.home');

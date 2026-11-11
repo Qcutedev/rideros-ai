@@ -45,6 +45,7 @@ export 'routes.dart';
 /// * signed out → public screens only (default: login)
 /// * signed in without a rider profile → onboarding
 /// * signed in → anything but public screens, splash and onboarding (default: home)
+/// * a password reset link opens the reset screen in every state but restoring
 String? authRedirect(SessionState session, Uri location) {
   final path = location.path;
   final isPublic = Routes.public.contains(path);
@@ -53,12 +54,48 @@ String? authRedirect(SessionState session, Uri location) {
       return path == Routes.splash ? null : Routes.splash;
     case SignedOut():
       return isPublic ? null : Routes.login;
+    case SignedIn() when path == Routes.resetPassword:
+      // The e-mail link must not be lost because the rider is signed in.
+      return null;
     case SignedIn(profileConfigured: false):
       return path == Routes.onboarding ? null : Routes.onboarding;
     case SignedIn():
       final leave =
           isPublic || path == Routes.splash || path == Routes.onboarding;
       return leave ? Routes.home : null;
+  }
+}
+
+/// The password reset e-mail link (`rideros://reset-password?token=…`, backend
+/// `PASSWORD_RESET_URL_BASE`) as an app location, or null for any other URI.
+/// Android hands the whole link to the router, whose path is empty.
+Uri? resetLinkLocation(Uri uri) {
+  if (uri.scheme != 'rideros' || uri.host != 'reset-password') return null;
+  final token = uri.queryParameters['token'];
+  return Uri(
+    path: Routes.resetPassword,
+    queryParameters: token == null ? null : {'token': token},
+  );
+}
+
+/// Top-level redirect: maps the reset link, keeps it while the session is
+/// being restored (the guard shows splash meanwhile), then applies the guard.
+class AppRedirect {
+  Uri? _pendingLink;
+
+  String? call(SessionState session, Uri uri) {
+    final link = resetLinkLocation(uri);
+    final restoring =
+        session is SessionRestoring || session is SessionRestoreFailed;
+    if (restoring) {
+      if (link != null) _pendingLink = link;
+      return authRedirect(session, uri);
+    }
+    final target = link ?? _pendingLink ?? uri;
+    _pendingLink = null;
+    final guarded = authRedirect(session, target);
+    if (guarded != null) return guarded;
+    return identical(target, uri) ? null : target.toString();
   }
 }
 
@@ -91,12 +128,13 @@ final routerProvider = Provider<GoRouter>((ref) {
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
   final session = _GuardRefresh(ref.read(sessionControllerProvider));
   ref.listen(sessionControllerProvider, (_, next) => session.update(next));
+  final redirect = AppRedirect();
 
   final router = GoRouter(
     navigatorKey: rootKey,
     initialLocation: Routes.splash,
     refreshListenable: session,
-    redirect: (context, state) => authRedirect(session.state, state.uri),
+    redirect: (context, state) => redirect(session.state, state.uri),
     routes: [
       GoRoute(
         path: Routes.splash,

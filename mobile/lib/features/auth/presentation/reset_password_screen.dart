@@ -12,7 +12,9 @@ import '../../../core/widgets/form_layout.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/reset_token.dart';
+import '../domain/session_state.dart';
 import 'auth_form_controllers.dart';
+import 'session_controller.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({this.initialToken, super.key});
@@ -48,7 +50,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           token: extractResetToken(_token.text)!,
           newPassword: _password.text,
         );
-    if (ok && mounted) {
+    if (!ok || !mounted) return;
+    // The server signs out every device after a reset, this one included.
+    final session = ref.read(sessionControllerProvider.notifier);
+    if (ref.read(sessionControllerProvider) is SignedIn) await session.logout();
+    if (mounted) {
       context.go('${Routes.login}?notice=${LoginNotice.passwordReset}');
     }
   }

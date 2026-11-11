@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/app/router.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/features/auth/presentation/forgot_password_screen.dart';
 import 'package:rideros_ai/features/auth/presentation/reset_password_screen.dart';
+import 'package:rideros_ai/features/auth/presentation/session_controller.dart';
 
 import '../helpers/fakes.dart';
 import '../helpers/pump.dart';
@@ -108,6 +111,25 @@ void main() {
       await tapKey(tester, 'reset.submit');
       expect(auth.lastArgs['token'], _token);
       expect(auth.lastArgs['newPassword'], 'new pass 123');
+      expect(auth.calls, isNot(contains('logout')));
+      expect(
+        find.text('route:${Routes.login}?notice=${LoginNotice.passwordReset}'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('signed in (opened from the e-mail link): success signs out '
+        'this device too → login', (tester) async {
+      auth.restoreUser = testUser;
+      await pump(tester, token: _token);
+      // Restore the stored session before the reset (signed in).
+      ProviderScope.containerOf(tester.element(find.byType(Scaffold)))
+          .listen(sessionControllerProvider, (_, _) {});
+      await tester.pumpAndSettle();
+      await enter(tester, 'reset.password', 'new pass 123');
+      await enter(tester, 'reset.confirm', 'new pass 123');
+      await tapKey(tester, 'reset.submit');
+      expect(auth.calls, containsAllInOrder(['reset', 'logout']));
       expect(
         find.text('route:${Routes.login}?notice=${LoginNotice.passwordReset}'),
         findsOneWidget,

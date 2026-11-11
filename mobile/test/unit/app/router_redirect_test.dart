@@ -46,11 +46,13 @@ void main() {
     }
   });
 
-  test('signed in without a profile: only onboarding', () {
+  test('signed in without a profile: only onboarding (and a reset link)', () {
     for (final path in allPaths) {
       expect(
         redirect(needsOnboarding, path),
-        path == Routes.onboarding ? isNull : Routes.onboarding,
+        path == Routes.onboarding || path == Routes.resetPassword
+            ? isNull
+            : Routes.onboarding,
         reason: path,
       );
     }
@@ -58,7 +60,9 @@ void main() {
 
   test('signed in: auth screens, splash and onboarding → home', () {
     for (final path in allPaths) {
-      final expected = path == Routes.home ? isNull : Routes.home;
+      final expected = path == Routes.home || path == Routes.resetPassword
+          ? isNull
+          : Routes.home;
       expect(redirect(signedIn, path), expected, reason: path);
     }
   });
@@ -66,5 +70,58 @@ void main() {
   test('query parameters do not change the decision', () {
     expect(redirect(const SignedOut(), '/reset-password?token=abc'), isNull);
     expect(redirect(signedIn, '/login?notice=registered'), Routes.home);
+  });
+
+  group('reset link', () {
+    final link = Uri.parse('rideros://reset-password?token=abc123');
+
+    test('maps only rideros://reset-password', () {
+      expect(
+        resetLinkLocation(link).toString(),
+        '/reset-password?token=abc123',
+      );
+      expect(
+        resetLinkLocation(Uri.parse('rideros://reset-password')).toString(),
+        Routes.resetPassword,
+      );
+      expect(resetLinkLocation(Uri.parse('rideros://other?token=a')), isNull);
+      expect(resetLinkLocation(Uri.parse('https://reset-password/x')), isNull);
+      expect(resetLinkLocation(Uri.parse('/reset-password?token=a')), isNull);
+    });
+
+    test('opens the reset screen signed out and signed in', () {
+      for (final state in [const SignedOut(), signedIn, needsOnboarding]) {
+        expect(
+          AppRedirect()(state, link),
+          '/reset-password?token=abc123',
+          reason: '$state',
+        );
+      }
+    });
+
+    test('is kept while restoring and opened afterwards', () {
+      final redirect = AppRedirect();
+      expect(redirect(const SessionRestoring(), link), Routes.splash);
+      expect(
+        redirect(
+          const SessionRestoreFailed(NetworkFailure()),
+          Uri.parse(Routes.splash),
+        ),
+        isNull,
+      );
+      expect(
+        redirect(signedIn, Uri.parse(Routes.splash)),
+        '/reset-password?token=abc123',
+      );
+      // Used once: the next refresh follows the plain guard again.
+      expect(redirect(signedIn, Uri.parse(Routes.splash)), Routes.home);
+    });
+
+    test('other locations are left to the guard', () {
+      final redirect = AppRedirect();
+      expect(redirect(signedIn, Uri.parse(Routes.home)), isNull);
+      expect(redirect(signedIn, Uri.parse(Routes.login)), Routes.home);
+      expect(redirect(const SignedOut(), Uri.parse(Routes.home)), Routes.login);
+    });
   });
 }

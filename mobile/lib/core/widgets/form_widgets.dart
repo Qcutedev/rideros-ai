@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/app_shell.dart';
 import '../../app/theme/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../errors/app_failure.dart';
@@ -246,12 +247,20 @@ Future<bool> confirmDelete(
   return confirmed ?? false;
 }
 
-/// After a successful save/delete: tell the rider and leave the form.
+/// After a successful save/delete: tell the rider and leave the form. The
+/// message goes to the tab page underneath (see `shellMessengerKeyProvider`), so
+/// it sits above that page's FAB or bottom bar.
 void closeForm(BuildContext context, String message) {
-  ScaffoldMessenger.of(context)
+  final messenger =
+      ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(shellMessengerKeyProvider).currentState ??
+      ScaffoldMessenger.of(context);
+  context.pop();
+  messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(message)));
-  context.pop();
 }
 
 /// Loads the record for an edit screen with loading / error states.
