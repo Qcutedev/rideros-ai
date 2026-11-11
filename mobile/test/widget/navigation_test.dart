@@ -530,6 +530,30 @@ void main() {
       expect(find.byType(NavigationBar), findsOneWidget);
     });
 
+    testWidgets('report snackbar stays on the map when a marker is opened', (
+      tester,
+    ) async {
+      final road = RoadFakes();
+      road.repo.incidents.add(testIncident(id: 'i-new'));
+      await pumpApp(
+        tester,
+        fakeRepositories(auth, profiles, profit, null, null, road),
+      );
+      await scrollAndTap(tester, 'home.road');
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('road.report')));
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'reportForm.category.flooding');
+      await tapKey(tester, 'reportForm.submit');
+      expect(find.text(t.roadReportSent), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('marker.i-1')));
+      await tester.pumpAndSettle();
+      expect(find.byType(IncidentDetailScreen), findsOneWidget);
+      expect(find.text(t.roadReportSent), findsNothing);
+    });
+
     testWidgets('home shortcut → work session saved → home', (tester) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
       await tapKey(tester, 'home.addSession');

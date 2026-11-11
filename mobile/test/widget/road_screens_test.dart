@@ -235,6 +235,36 @@ void main() {
       expect(find.byKey(const Key('incident.i-1')), findsOneWidget);
     });
 
+    Future<void> pauseAndResume(WidgetTester tester) async {
+      tester.binding
+        ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+        ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('denied: resuming does not ask a second time', (tester) async {
+      // The permission dialog itself pauses and resumes the app.
+      road.location.result = const LocationMissing(LocationProblem.denied);
+      await open(tester);
+      expect(road.location.calls, 1);
+      await pauseAndResume(tester);
+      expect(road.location.calls, 1);
+      expect(find.byKey(const Key('road.location.denied')), findsOneWidget);
+    });
+
+    testWidgets('denied forever: back from settings checks again', (
+      tester,
+    ) async {
+      road.location.result = const LocationMissing(
+        LocationProblem.deniedForever,
+      );
+      await open(tester);
+      road.location.result = const LocationFound(testPoint);
+      await pauseAndResume(tester);
+      expect(road.location.calls, 2);
+      expect(find.byKey(const Key('incident.i-1')), findsOneWidget);
+    });
+
     testWidgets('denied forever opens the app settings', (tester) async {
       road.location.result = const LocationMissing(
         LocationProblem.deniedForever,

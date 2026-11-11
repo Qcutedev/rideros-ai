@@ -33,10 +33,16 @@ class _RoadScreenState extends ConsumerState<RoadScreen> {
   @override
   void initState() {
     super.initState();
-    // Back from the settings app: ask for the position again.
+    // Back from the settings app: ask for the position again. Only for the
+    // problems fixed outside the app: the permission dialog also pauses and
+    // resumes the app, so re-asking after a plain "denied" would pop the
+    // dialog a second time. That case has its own "allow" button.
     _lifecycle = AppLifecycleListener(
       onResume: () {
-        if (ref.read(currentLocationProvider).value is LocationMissing) {
+        if (ref.read(currentLocationProvider).value case LocationMissing(
+          problem: LocationProblem.deniedForever ||
+              LocationProblem.serviceDisabled,
+        )) {
           ref.invalidate(currentLocationProvider);
         }
       },
@@ -49,11 +55,15 @@ class _RoadScreenState extends ConsumerState<RoadScreen> {
     super.dispose();
   }
 
+  /// Own messenger: the "sent" SnackBar stays on this screen instead of
+  /// following the user onto the incident detail opened from a marker.
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+
   Future<void> _report() async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final created = await context.push<ReportCreated>(Routes.roadReportNew);
-    if (created == null || !mounted) return;
+    final messenger = _messenger.currentState;
+    if (created == null || !mounted || messenger == null) return;
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -75,34 +85,37 @@ class _RoadScreenState extends ConsumerState<RoadScreen> {
     final l10n = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.roadTitle),
-          actions: [
-            IconButton(
-              key: const Key('road.myReports'),
-              tooltip: l10n.roadMyReports,
-              icon: const Icon(Icons.history_rounded),
-              onPressed: () => context.push(Routes.roadMyReports),
-            ),
-          ],
-          bottom: TabBar(
-            tabs: [
-              Tab(key: const Key('road.tabMap'), text: l10n.roadTabMap),
-              Tab(key: const Key('road.tabNearby'), text: l10n.roadTabNearby),
+      child: ScaffoldMessenger(
+        key: _messenger,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.roadTitle),
+            actions: [
+              IconButton(
+                key: const Key('road.myReports'),
+                tooltip: l10n.roadMyReports,
+                icon: const Icon(Icons.history_rounded),
+                onPressed: () => context.push(Routes.roadMyReports),
+              ),
             ],
+            bottom: TabBar(
+              tabs: [
+                Tab(key: const Key('road.tabMap'), text: l10n.roadTabMap),
+                Tab(key: const Key('road.tabNearby'), text: l10n.roadTabNearby),
+              ],
+            ),
           ),
-        ),
-        body: const TabBarView(
-          // Horizontal drags belong to the map.
-          physics: NeverScrollableScrollPhysics(),
-          children: [_MapTab(), _NearbyTab()],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          key: const Key('road.report'),
-          onPressed: _report,
-          icon: const Icon(Icons.add_location_alt_outlined),
-          label: Text(l10n.roadReportAction),
+          body: const TabBarView(
+            // Horizontal drags belong to the map.
+            physics: NeverScrollableScrollPhysics(),
+            children: [_MapTab(), _NearbyTab()],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            key: const Key('road.report'),
+            onPressed: _report,
+            icon: const Icon(Icons.add_location_alt_outlined),
+            label: Text(l10n.roadReportAction),
+          ),
         ),
       ),
     );
