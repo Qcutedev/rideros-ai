@@ -293,8 +293,16 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · Tests: `test/helpers/road_fakes.dart` (`RoadFakes` = repo + location + photos; `fakeRepositories(..., road)` ตำแหน่งที่ 6) · `test/widget/road_screens_test.dart` 31 · `test/unit/features/road_test.dart` 18 · `navigation_test.dart` +1 (การ์ด → แผนที่ → รายงาน → SnackBar อยู่บน RoadScreen → รายละเอียด → กลับ) · `auth_interceptor_test.dart` +1 · กดปุ่มบนแผนที่ใน Test ด้วย `tester.tap` ตรงๆ (`tapKey`/`ensureVisible` เลื่อน TabBarView)
   · ผล: `flutter analyze` No issues · `flutter test` **478 passed** (+51)
   · ตรวจบน Emulator แล้วแค่: การ์ดหน้าหลัก, Dialog สิทธิ์ตำแหน่ง, แผนที่ OSM โหลด + ป้าย "0 เหตุในบริเวณนี้" (APK ที่ลงไว้ยังเป็นรุ่นก่อนแก้ Attribution: เห็น "© ©" ซ้ำ + ทับปุ่ม FAB — แก้ในโค้ดแล้ว ยังไม่ได้ดูซ้ำ)
+- **P5b ตรวจบน Emulator ครบ 2026-11-12 (Profile APK, `emulator-5554`, บัญชี `p3b.check@example.com`) — ยังไม่ Commit**
+  · ผ่าน: Attribution "©" ตัวเดียว ไม่ทับ FAB · รายงานน้ำท่วม + รูปจากคลังภาพ (Android Photo Picker) → Marker + SnackBar → รายละเอียด + รูปของฉัน · ไฟล์บน Server = JPEG 717×1600 ไม่มี EXIF ชื่อ UUID (ต้นฉบับ PNG 1280×2856) · ปุ่มถ่ายรูปเปิดแอปกล้อง (`CaptureActivity`) ได้โดยไม่ประกาศ CAMERA และรูปกลับมาที่ฟอร์ม · รายงานซ้ำ → แถบ `already_reported` + "เปิดเหตุนี้" · ยังอยู่ → คลี่คลายแล้ว (คำตอบใหม่แทนของเดิม) · ใกล้ฉัน เรียงตามระยะ (0 ม./110 ม.) · รายงานของฉัน ("มีรูป") · Dialog สิทธิ์มีแค่ "ขณะใช้งาน/ครั้งนี้/ไม่อนุญาต" · ปฏิเสธ → ใกล้ฉันแสดง "เปิดการตั้งค่า" · ฟอร์มปักหมุดเอง → พิกัดใน DB ตรงกับที่ปัก (13.75567, 100.50257) · บัญชีที่ 2 (สร้างทิ้งผ่าน API) → รวมเหตุ `corroborated` แอปแสดง "มีผู้รายงานหลายคน" → แจ้งคลี่คลาย 2 คน → `resolved` แผนที่ไม่แสดงแล้ว หน้ารายละเอียดแสดง "เหตุนี้ปิดแล้ว" · ตอบเหตุที่ปิดแล้ว → 409 `incident_closed` · `DELETE /me` บัญชีที่ 2 → 204 + ตัวนับกลับเป็น 1/1 · Dark mode แผนที่/รายละเอียด/ฟอร์ม
+  · แก้ Bug 2 จุดที่เจอ (มี Test ที่ล้มก่อนแก้): (1) SnackBar "ส่งรายงานแล้ว" ตามไปทับหน้ารายละเอียด/ฟอร์มเมื่อเปิดเหตุจาก Marker (ทับปุ่ม "เปิดเหตุนี้" จนกดไม่ได้) → `RoadScreen` มี `ScaffoldMessenger` ของตัวเอง · (2) ปฏิเสธสิทธิ์ตำแหน่งครั้งแรกแล้ว Dialog เด้งซ้ำทันที เพราะ Dialog ทำให้แอป pause/resume แล้ว `onResume` ถามใหม่ → ถามใหม่ตอน Resume เฉพาะ `deniedForever`/`serviceDisabled` (`denied` มีปุ่ม "อนุญาต" อยู่แล้ว) · Tests +3 (`navigation_test` 1, `road_screens_test` 2) → **481 passed**, analyze No issues
+  · ข้อมูลทดสอบใน Dev DB ของ `p3b.check@example.com`: 4 เหตุ (น้ำท่วม resolved, ถนนชำรุด/สิ่งกีดขวาง/อุบัติเหตุ unverified) + รูป 1 ไฟล์
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
+**2026-11-12: P5b ตรวจบน Emulator ครบ + แก้ Bug 2 จุด (§4.11) → รายงาน P5b แล้ว รอผู้ใช้สั่ง P5c (CV)** · ยังไม่ Commit (`road_screen.dart`, 2 ไฟล์ Test, HANDOFF) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+- P5c ตาม §4.11 ข้อ 8, 9, 10, 11: ตรวจ License Dataset ก่อน (RDD2022 + AlleyFloodNet/Flood10k) → `cv_service/` uv project แยก → Train MobileNetV3-Large → `POST /classify` → Background classify → แสดง "AI แนะนำ" (UI ทำไว้แล้วใน P5b) → Phase 5 Report แล้วรออนุมัติ
+
+**(เดิม) 2026-11-12: P5b โค้ด + Tests เสร็จ**
 **2026-11-12: P5b โค้ด + Tests เสร็จและ Commit แล้ว (§4.11) → Session ถัดไป: ตรวจ P5b บน Emulator ให้ครบ แล้วรายงาน P5b และรอสั่ง P5c** · ห้าม Commit จนกว่าผู้ใช้สั่ง
 - ตรวจสถานะ: `git status` (สะอาด ยกเว้น CRLF noise ใน `mobile/lib/l10n/*.dart`) · `docker compose ps` + `/ready` · `flutter devices` เห็น `emulator-5554` · `flutter analyze` No issues · `flutter test` **478 passed**
 - บน Emulator (`flutter build apk --profile` + `adb install -r`, `adb emu geo fix 100.5018 13.7563`, บัญชี `p3b.check@example.com`): Attribution ไม่ซ้ำ/ไม่ทับ FAB · ส่งรายงานพร้อมรูป (กล้อง/คลังภาพ; ตรวจ `image_picker` บน Android ว่าเปิดกล้องได้ไม่ต้องประกาศ CAMERA) → Marker + SnackBar → รายละเอียด + รูปของฉัน · รายงานซ้ำ → `already_reported` · ยังอยู่/คลี่คลายแล้ว · ใกล้ฉัน · ปฏิเสธสิทธิ์ตำแหน่ง → ปักหมุดเอง · รายงานของฉัน · Dark mode · ใช้บัญชีที่ 2 (สร้างทิ้งผ่าน API) ทดสอบ corroborated/resolved แล้วลบบัญชีทิ้ง
@@ -377,6 +385,9 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 
 - ~~(P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…"~~ · ~~(P3c-c) SnackBar "ลบแล้ว" ทับแถบเลือก Scenario~~ → แก้แล้วใน P4b (§4.9)
 - (P3b) หลังแก้ 2 จุด (ป้ายจำนวนรายการ, ระยะขอบกราฟ) ยังไม่ได้ Screenshot ซ้ำบน Emulator (Tests ผ่าน)
+- (P5b) Marker ของเหตุต่างหมวดที่จุดเดียวกันซ้อนกันบนแผนที่ (ไม่มี Clustering) → กดได้แค่ตัวบนสุด ตัวอื่นเปิดจากแท็บ "ใกล้ฉัน"
+- (P5b) หลังมีคนรายงานเหตุเดิมเพิ่ม คำตอบ "คลี่คลายแล้ว" ที่ตอบไว้ก่อนหน้าไม่นับแล้ว (กฎ Backend: นับเฉพาะหลัง Report ล่าสุด) แต่หน้ารายละเอียดยังแสดง "คุณแจ้งว่าคลี่คลายแล้ว · X นาทีที่แล้ว" → ผู้ใช้ไม่รู้ว่าต้องตอบใหม่
+- (P5b) OSM tiles ไม่มีโหมดมืด แผนที่จึงสว่างใน Dark mode
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
 - ร้านที่ไม่มีใน Train: MAE 7.24, Coverage 65.1% (215 orders) → Backend แสดงคำเตือนตาม `data_availability` แล้ว (P2c) และ `/pickup/model` ระบุใน `limitations`
