@@ -11,6 +11,8 @@ from typing import Literal
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.modules.road.rules import Category, RoadRule, default_road_rules
+
 Environment = Literal["development", "test", "production"]
 
 _PLACEHOLDER_MARKERS = ("change-me", "changeme", "example", "placeholder", "secret")
@@ -48,20 +50,38 @@ class Settings(BaseSettings):
     active_model_name: str = "pickup_o2p"
     active_model_version: str = "1.0.0"
 
+    # ---- RoadContext (Phase 5) ----
+    # Per-category duplicate radius / window and TTL. ROAD_RULES (JSON) overrides single categories.
+    road_rules: dict[Category, RoadRule] = Field(default_factory=default_road_rules)
+    road_corroborate_min_reporters: int = Field(default=2, ge=2, le=20)
+    road_resolve_min_cleared: int = Field(default=2, ge=1, le=20)
+    # Where report photos are stored (a docker volume). Unset -> reports with a photo answer 503.
+    road_image_dir: Path | None = None
+    road_image_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024)
+
     # ---- Rate limits (per process, in memory; `limits` syntax) ----
     rate_limit_enabled: bool = True
     rate_limit_default: str = "60/minute"  # per user (valid access token), else per IP
     rate_limit_login: str = "5/minute"  # per IP, and separately per e-mail
     rate_limit_register: str = "3/minute"  # per IP
     rate_limit_password_reset: str = "3/minute"  # per IP, and per e-mail for forgot-password
+    rate_limit_road_report: str = "10/minute"  # per user: new road reports and confirmations
 
     cors_origins: list[str] = Field(default_factory=list)
     docs_enabled: bool | None = None  # None -> enabled everywhere except production
 
-    @field_validator("model_dir", mode="before")
+    @field_validator("model_dir", "road_image_dir", mode="before")
     @classmethod
-    def _empty_model_dir_is_none(cls, value: object) -> object:
+    def _empty_path_is_none(cls, value: object) -> object:
         return None if isinstance(value, str) and not value.strip() else value
+
+    @field_validator("road_rules", mode="before")
+    @classmethod
+    def _merge_road_rules(cls, value: object) -> object:
+        """A partial ROAD_RULES only replaces the categories it names."""
+        if isinstance(value, dict):
+            return {**default_road_rules(), **value}
+        return value
 
     @field_validator("jwt_secret")
     @classmethod

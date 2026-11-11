@@ -7,9 +7,11 @@ from zoneinfo import ZoneInfo
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings
 from app.core.errors import AppError, ForbiddenError
 from app.core.security import verify_password
 from app.core.timezones import get_zone, is_valid_timezone
+from app.modules.road import service as road_service
 from app.modules.users import repository as users
 from app.modules.users.models import DEFAULT_CURRENCY, DEFAULT_TIMEZONE, User
 from app.modules.users.schemas import RiderProfileIn, RiderProfileOut, UserUpdate
@@ -30,13 +32,20 @@ async def update_me(session: AsyncSession, user: User, body: UserUpdate) -> User
     return user
 
 
-async def delete_me(session: AsyncSession, user: User, password: str) -> None:
-    """PDPA account deletion. Re-checks the password so a leaked access token alone cannot do it."""
+async def delete_me(session: AsyncSession, settings: Settings, user: User, password: str) -> None:
+    """PDPA account deletion. Re-checks the password so a leaked access token alone cannot do it.
+
+    Road reports cascade with the user; the shared incidents they belonged to get their counters
+    recomputed (and are removed when no report is left), and the report photos are deleted.
+    """
     if not verify_password(password, user.password_hash):
         raise ForbiddenError("Password is incorrect", code="invalid_password")
     user_id = user.id
+    cleanup = await road_service.prepare_user_deletion(session, user_id)
     await users.delete_user(session, user_id)
+    await road_service.finish_user_deletion(session, settings, cleanup)
     await session.commit()
+    road_service.delete_images(settings, cleanup.image_keys)
     log.info("user_deleted", user_id=str(user_id))
 
 

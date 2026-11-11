@@ -16,8 +16,10 @@ RUN uv sync --locked --no-dev --no-install-project --no-editable
 
 FROM python:3.14.6-slim-trixie AS runtime
 # libgomp1: OpenMP runtime used by xgboost and scikit-learn.
+# /data/road_images: RoadContext photos; a new named volume takes this owner, so `app` can write.
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/* \
-    && useradd --system --uid 10001 --no-create-home app
+    && useradd --system --uid 10001 --no-create-home app \
+    && mkdir -p /data/road_images && chown app:app /data/road_images
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \

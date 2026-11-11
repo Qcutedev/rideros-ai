@@ -364,6 +364,7 @@ Index: GiST `(location)`, `(status, expires_at)`, `(category, last_reported_at D
 - `UNIQUE (incident_id, user_id) WHERE report_type = 'report'` ทำให้ผู้ใช้หนึ่งคนนับเป็น 1 Report ต่อ Incident
 - `ai_confidence` CHECK 0–1; `ai_*` เป็น "คำแนะนำ" เท่านั้น
 - Index: `(incident_id, created_at)`, `(user_id, created_at DESC)`
+- **Phase 5 (P5a, Migration `0004`):** เพิ่ม `UNIQUE (incident_id, user_id) WHERE report_type IN ('still_present','cleared')` — ยืนยันใหม่แทนที่ของเดิม (1 คำตอบต่อคนต่อเหตุ) · `location` มีเฉพาะ `report_type = 'report'` · การยืนยันไม่มีรูป/คำอธิบาย · `road_incidents` เพิ่ม `status_changed_at`, `created_at`, `updated_at` · `distinct_reporters` = ผู้ใช้ที่ report หรือ still_present
 
 ---
 
@@ -390,6 +391,8 @@ stateDiagram-v2
 | road_closure | 200 m | 12 ชม. | 24 ชม. |
 | road_obstacle | 100 m | 3 ชม. | 6 ชม. |
 | traffic_incident | 200 m | 2 ชม. | 3 ชม. |
+
+**Phase 5 (P5a):** `unverified` → `resolved` ก็ได้ (≥ 2 cleared หลัง report ล่าสุด) เพื่อไม่ให้ Report ผิดค้างจนหมด TTL · Admin ตั้งได้เฉพาะ `resolved`/`rejected` · `expired` คิดตอนอ่าน แล้วเขียนลงแถวเมื่อมีการเขียนครั้งถัดไป (ไม่มี Scheduler) · Corroborate นับผู้ใช้ที่ report/still_present ภายในช่วงเวลาตรวจซ้ำนับจากตอนนี้
 
 ค่าเหล่านี้เป็น **ค่าเริ่มต้นที่ยังไม่ได้ Validate** ต้องเก็บไว้ใน Config ไม่ Hardcode และ UI ต้องแสดง "รายงานโดยผู้ใช้ · อัปเดตล่าสุด X นาทีที่แล้ว" **ห้ามใช้คำว่า Real-time**
 

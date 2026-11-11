@@ -18,6 +18,7 @@ from app.modules.health.router import router as health_router
 from app.modules.pickup import service as pickup_service
 from app.modules.pickup.router import router as pickup_router
 from app.modules.profit.router import router as profit_router
+from app.modules.road.router import router as road_router
 from app.modules.shifts.router import router as shifts_router
 from app.modules.users.router import router as users_router
 
@@ -82,6 +83,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router, prefix=API_PREFIX)
     app.include_router(auth_router, prefix=API_PREFIX)  # per-endpoint limits (router.py)
     limited = [Depends(default_limit)]
-    for router in (users_router, profit_router, pickup_router, shifts_router):
+    for router in (users_router, profit_router, pickup_router, shifts_router, road_router):
         app.include_router(router, prefix=API_PREFIX, dependencies=limited)
     return app

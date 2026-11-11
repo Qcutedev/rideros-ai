@@ -52,7 +52,7 @@ except in `tests/api/test_rate_limits.py`.
 docker compose up -d db
 cd backend
 python -m uv sync
-python -m uv run pytest --cov=app/modules     # 317 tests, ~45 s
+python -m uv run pytest --cov=app/modules     # 380 tests, ~80 s
 python -m uv run ruff check . ; python -m uv run ruff format --check .
 ```
 
@@ -98,7 +98,7 @@ Errors always use `{"error": {"code", "message", "details"}}`. Every response ca
 | Endpoint | Success | Notable errors |
 |---|---|---|
 | `PATCH /me` | 200 user (`display_name` only) | 422 |
-| `DELETE /me` + `{"password"}` | 204; the user and all of their data are deleted (PDPA) | 403 `invalid_password` |
+| `DELETE /me` + `{"password"}` | 204; the user and all of their data are deleted (PDPA), road report photos included; shared incidents get their counters recomputed and are removed when no report is left | 403 `invalid_password` |
 | `GET /me/rider-profile` | 200; defaults with `is_configured: false` until the first save | — |
 | `PUT /me/rider-profile` | 200; replaces the whole profile | 400 `invalid_timezone`, 422 |
 
@@ -167,6 +167,43 @@ prediction carries the `foreign_dataset` warning and a disclaimer. `/pickup/mode
 - Scenarios are always estimates (`is_estimate: true`) and never count in TrueProfit summaries.
   `actual_work_session_id` may link one of the rider's own work sessions (else 400 `invalid_work_session`).
 
+## RoadContext (Phase 5)
+
+| Endpoint | Success | Notable errors |
+|---|---|---|
+| `POST /road/reports` (multipart: `category`, `lat`, `lng`, `description?` ≤ 500, `image?`) | 201 `{report_id, incident_id, merged, status, incident}` | 409 `already_reported` (details: `incident_id`), 413 `image_too_large`, 415 `unsupported_image`, 503 `image_storage_unavailable`, 422 |
+| `GET /road/reports` | 200 page of the rider's own reports (`has_image`, `ai_status`, `ai_label`, `ai_confidence`, `incident_status`) | — |
+| `GET /road/reports/{id}/image` | 200 `image/jpeg`, own reports only | 404 `image_not_found` |
+| `GET /road/incidents?bbox=min_lng,min_lat,max_lng,max_lat` | 200 `{items, truncated, notice}`; open incidents only, ≤ 300, newest report first | 400 `invalid_bbox` (span > 2°) |
+| `GET /road/incidents/nearby?lat=&lng=&radius_m=` | 200 same shape + `distance_m`; radius 50–5,000 (default 2,000), ≤ 100, closest first | 422 |
+| `GET /road/incidents/{id}` | 200 incident + `my_report`, `my_confirmation`, `notice` (any status) | 404 `incident_not_found` |
+| `POST /road/incidents/{id}/confirmations` + `{"still_present": bool}` | 200 incident detail; a new answer replaces the rider's previous one | 404, 409 `incident_closed` |
+| `PATCH /road/incidents/{id}/status` + `{"status": "resolved"\|"rejected"}` | 200 incident; admin only | 403 `admin_only`, 409 `incident_closed` |
+
+- Categories: `flooding`, `road_damage`, `road_closure`, `road_obstacle`, `traffic_incident`. Status: `unverified`,
+  `corroborated`, `resolved`, `expired`, `rejected`. Incidents never show who reported them.
+- Grouping: a report joins the closest open incident of the same category within the category's radius whose last
+  report is within its window; otherwise it opens a new incident at its own location. Reports and "still present"
+  move `last_reported_at` and set `expires_at` = last report + TTL. Defaults (not validated yet; `ROAD_RULES`):
+
+  | Category | Radius | Window | TTL |
+  |---|---|---|---|
+  | flooding | 300 m | 6 h | 12 h |
+  | road_damage | 50 m | 30 d | 90 d |
+  | road_closure | 200 m | 12 h | 24 h |
+  | road_obstacle | 100 m | 3 h | 6 h |
+  | traffic_incident | 200 m | 2 h | 3 h |
+
+- `unverified` → `corroborated` when ≥ 2 riders (`ROAD_CORROBORATE_MIN_REPORTERS`) reported or said "still present"
+  within the window. Open → `resolved` when ≥ 2 riders (`ROAD_RESOLVE_MIN_CLEARED`) said "cleared" after the last
+  report. An open incident past `expires_at` reads as `expired` at once and is written as `expired` by the next
+  RoadContext write (no scheduler). `corroborated` means "several riders reported it", never "verified".
+- Photos: JPEG / PNG / WebP by magic bytes, ≤ 5 MB (`ROAD_IMAGE_MAX_BYTES`), ≤ 40 MP; re-encoded to JPEG
+  ≤ 1600 px without EXIF (GPS included) and stored as `<uuid>.jpg` under `ROAD_IMAGE_DIR` (docker volume
+  `road-images`). Only the author can fetch a photo.
+- Admins: `python -m scripts.set_role <email> admin` (in docker: `docker compose exec backend python -m
+  scripts.set_role <email> admin`). There is no API to grant roles.
+
 ## Rate limits
 
 In-memory moving window per process (`limits`). Over the limit: 429 `rate_limited` with `Retry-After`.
@@ -177,7 +214,8 @@ In-memory moving window per process (`limits`). Over the limit: 429 `rate_limite
 | `POST /auth/login` | 5/minute | IP, and separately per e-mail |
 | `POST /auth/forgot-password` | 3/minute | IP, and separately per e-mail |
 | `POST /auth/reset-password` | 3/minute | IP |
+| `POST /road/reports`, `POST /road/incidents/{id}/confirmations` (together) | 10/minute | User |
 | Everything else under `/api/v1`, except health | 60/minute | User from a valid access token, else IP |
 
 Settings: `RATE_LIMIT_ENABLED`, `RATE_LIMIT_DEFAULT`, `RATE_LIMIT_LOGIN`, `RATE_LIMIT_REGISTER`,
-`RATE_LIMIT_PASSWORD_RESET`. The client IP is the socket address; `X-Forwarded-For` is not trusted yet.
+`RATE_LIMIT_PASSWORD_RESET`, `RATE_LIMIT_ROAD_REPORT`. The client IP is the socket address; `X-Forwarded-For` is not trusted yet.

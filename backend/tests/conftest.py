@@ -103,10 +103,16 @@ def model_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(scope="session")
-def settings(database_url: str, model_dir: Path) -> Settings:
+def road_image_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return tmp_path_factory.mktemp("road_images")
+
+
+@pytest.fixture(scope="session")
+def settings(database_url: str, model_dir: Path, road_image_dir: Path) -> Settings:
     return make_settings(
         database_url,
         model_dir=model_dir,
+        road_image_dir=road_image_dir,
         active_model_name=fake_artifact.NAME,
         active_model_version=fake_artifact.VERSION,
     )
