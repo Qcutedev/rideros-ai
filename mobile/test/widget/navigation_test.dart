@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/app/app.dart';
 import 'package:rideros_ai/app/intro/brand_intro.dart';
-import 'package:rideros_ai/app/intro/brand_logo.dart';
+import 'package:rideros_ai/app/intro/ride_scene.dart';
 import 'package:rideros_ai/app/router.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/network/api_client.dart';
@@ -89,7 +89,7 @@ void main() {
     expect(find.byType(BrandIntro), findsOneWidget);
     expect(
       find.byWidgetPredicate(
-        (w) => w is CustomPaint && w.painter is BrandLogoPainter,
+        (w) => w is CustomPaint && w.painter is RideScenePainter,
       ),
       findsNothing,
     );

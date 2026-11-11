@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/app/intro/brand_logo.dart';
@@ -14,17 +13,9 @@ void main() {
       expect(box.contains(bounds.topLeft), isTrue, reason: layer.svgId);
       expect(box.contains(bounds.bottomRight), isTrue, reason: layer.svgId);
     }
-    // The emblem sits above the wordmark.
-    expect(logo.emblemBounds.bottom, lessThan(logo.wordmarkBounds.top));
-  });
-
-  test('a pen outline grows with its progress', () {
-    final logo = BrandLogo.parse(File(BrandLogo.asset).readAsStringSync());
-    final half = logo.outline(BrandLayer.body, 0.5).computeMetrics().toList();
-    final full = logo.outline(BrandLayer.body, 1).computeMetrics().toList();
-    double length(Iterable<PathMetric> ms) =>
-        ms.fold(0, (sum, m) => sum + m.length);
-    expect(length(half), closeTo(length(full) / 2, length(full) * 0.01));
+    // The rider and its trails sit above the wordmark; the trails trail it.
+    expect(logo.riderBounds.bottom, lessThan(logo.wordmarkBounds.top));
+    expect(logo.speedLinesBounds.left, lessThan(logo.riderBounds.left));
   });
 
   test('a missing layer is a format error', () {

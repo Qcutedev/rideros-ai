@@ -101,9 +101,9 @@ abstract final class AppDurations {
   static const fast = Duration(milliseconds: 150);
   static const medium = Duration(milliseconds: 250);
 
-  /// Brand intro at app start: logo reveal and hold, then the hand-over fade (≈3 s).
-  static const introReveal = Duration(milliseconds: 2600);
-  static const introExit = Duration(milliseconds: 400);
+  /// Ride intro at app start: ride in and hold, then ride off and fade (≈3 s).
+  static const introReveal = Duration(milliseconds: 2400);
+  static const introExit = Duration(milliseconds: 600);
 }
 
 /// Type scale (§2.4): IBM Plex Sans Thai, bundled under `assets/fonts/` (OFL).

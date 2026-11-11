@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/app/intro/brand_intro.dart';
-import 'package:rideros_ai/app/intro/brand_logo.dart';
+import 'package:rideros_ai/app/intro/ride_scene.dart';
 import 'package:rideros_ai/app/theme/tokens.dart';
 import 'package:rideros_ai/l10n/app_localizations.dart';
 
@@ -27,7 +27,7 @@ void main() {
   );
 
   final logo = find.byWidgetPredicate(
-    (w) => w is CustomPaint && w.painter is BrandLogoPainter,
+    (w) => w is CustomPaint && w.painter is RideScenePainter,
   );
   const frame = Duration(milliseconds: 16);
 
@@ -69,7 +69,6 @@ void main() {
     await tester.pump();
     await play(tester, const Duration(seconds: 6));
     expect(logo, findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
     await tester.pumpWidget(app(waiting: false));
     await play(tester, const Duration(milliseconds: 600));
