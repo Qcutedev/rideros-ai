@@ -1,7 +1,7 @@
 # HANDOFF — RiderOS AI
 
-> อัปเดตล่าสุด: 2026-11-11 · สถานะ: **Phase 3 อนุมัติแล้ว 2026-11-11 · ถัดไป Phase 4 Integration (W9) — เริ่มใน Session ใหม่ที่ §4.2** · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
-> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
+> อัปเดตล่าสุด: 2026-11-12 · สถานะ: **Phase 3 อนุมัติแล้ว 2026-11-11 · ถัดไป Phase 4 Integration (W9) — เริ่มใน Session ใหม่ที่ §4.2** · Brand intro + ไอคอนแอป (`cdb78ba`, §4.8, ก่อนเริ่ม Phase 4) · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
+> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) → `cdb78ba` (Brand intro) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
 
 **Session ใหม่ (Phase 3) ให้อ่านตามลำดับ:** ไฟล์นี้ (โดยเฉพาะ §4) → `docs/DEVELOPMENT_ROADMAP.md` (W6–W8 + Phase 3 Exit Criteria) → `docs/SYSTEM_ARCHITECTURE.md` (§2.1 Flutter, §3 Data Flows, §4 API, §5 Security, §6 Folder Structure `mobile/`) → `backend/README.md` (API Contract จริงที่ App ต้องเรียก) → `docs/PROJECT_PLAN.md` (Scope ของหน้าจอ)
 
@@ -216,6 +216,17 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - **ตรวจบน Emulator กับ API จริง:** แท็บ 5 อันเรียงถูก · รายการ 3 Scenario ใน Dev DB (Late night, Lunch rush, Friday evening) · รายละเอียด Late night 22:00–02:00 "เลิกวันถัดไป" + คำเตือนระยะทาง · ฟอร์ม: Dev DB มีประวัติ 2 วัน → มีแค่ "จากสมมติฐาน" · สร้าง "Emu check" 2.5 ออเดอร์/ชม. × ฿45 × 5 ชม. → ฿562.50 ตรง Server · กลับรายการ → เลือก 2 รายการ → แถบเปรียบเทียบไม่ถูกบัง → หน้าเปรียบเทียบติดป้ายถูก · ลบ (Dialog ยืนยัน) → ที่เลือกเหลือ 1 · ลบ "Emu check" แล้ว (Dev DB เหลือ 3 Scenario เดิม)
 - Emulator จอดำ (แอป `HAS_DRAWN` แต่ `dumpsys window` บอก `shown=false` และ Layer Splash Screen ค้างบนสุด) = แอนิเมชัน Splash ของระบบค้าง ไม่ใช่โค้ดแอป → `adb emu kill` แล้ว `emulator.exe -avd Pixel_9_Pro -no-snapshot-load` (เมนู Cold Boot ใน Device Manager กดไม่ได้ตอน Emulator รันอยู่)
 - ไม่ได้ตรวจบน Emulator: Dark mode หน้า Shift · วิธี historical (ประวัติไม่พอ) · ผูกช่วงทำงาน · คำนวณใหม่ (มี Widget test ทั้งหมด)
+
+### 4.8 Brand intro (Splash แอนิเมชัน) + ไอคอนแอป — **เสร็จ 2026-11-12 (Commit `cdb78ba` ตามที่ผู้ใช้สั่ง · ผู้ใช้ขอก่อนเริ่ม Phase 4 ไม่นับเป็นงานของ Phase ใด)**
+- ที่มา: ภาพ `Premium RiderOS Emblem.png` ของผู้ใช้ + Spec "Minimal Luxury" (พื้นเขียวป่า, โลโก้สีงาช้าง, Accent มิ้นต์หม่น, ~3 วินาที, Flutter native animation, SVG, ไม่ใช้ GIF/Glow/Particle, ห้ามแก้ Dashboard)
+- โลโก้ Vector: `mobile/assets/brand/rideros_logo.svg` (viewBox 808×600) แปลงจาก PNG ด้วย potrace (Script อยู่นอก Repo) · 1 `<path id>` ต่อ 1 Layer: `speed-lines`, `body`, `shoulder`, `helmet`, `wordmark-rider`, `wordmark-os` · ต่างจากภาพต้นฉบับ: เงารอยพับของตัว R เป็นสีงาช้างเรียบ · "OS" สีมิ้นต์ทึบ (`#8FD1A6`) ไม่ไล่สี · เส้นความเร็วจางจากซ้ายเหมือนเดิม
+- `lib/app/intro/brand_logo.dart`: `BrandLogo` (อ่าน SVG → `Path` ด้วย Package `path_parsing`), `LogoReveal` (Timeline: `Interval` + `TweenSequence`), `BrandLogoPainter` (CustomPainter, repaint จาก Animation ไม่ Rebuild) · `lib/app/intro/brand_intro.dart`: `BrandIntro` Overlay ใน `MaterialApp.builder` (`app.dart`) · Router/หน้าจอเดิมไม่แก้ · `SplashScreen` เดิมยังอยู่ใต้ Overlay (ใช้แสดง Error ตอน Restore ไม่ได้)
+- Timeline (`AppDurations.introReveal` 2600 ms + `introExit` 400 ms): พื้นหลังเฟดเข้า 0–0.36 s → ปากกาวาดเส้นขอบ (ความเร็ว → R → ไหล่ → หมวก) 0.16–1.4 s → สีเติมกวาดซ้าย→ขวา 1.04–1.7 s → Wordmark เฟด + Scale 0.94→1 1.5–2.1 s → ค้าง → Overlay จางออก + โลโก้ Scale 1→1.03 2.6–3.0 s
+- พฤติกรรม: ระหว่างเล่นกดหน้าข้างใต้ไม่ได้ · Session ยัง Restore อยู่ → ค้างโลโก้ + แถบโหลดบางสีมิ้นต์ แล้วค่อยจางออก · Restore ไม่สำเร็จ → จางออกไปหน้า Error เดิม · ระบบเปิดลดการเคลื่อนไหว → ข้ามแอนิเมชัน · ขนาดโลโก้ 62% ของด้านสั้น (160–340) · Token ใหม่ `AppColors.logoIvory`/`logoMint`
+- Android: Adaptive icon (`mipmap-anydpi-v26`: พื้นไล่เฉดเขียว + โลโก้พร้อม Wordmark ในพื้นที่ปลอดภัย + monochrome) + ไอคอนแบบเก่าทุกขนาด · หน้าต่างก่อน Flutter และ Splash ของ Android 12+ (`values-v31`, `values-night-v31`) เป็น `#0D1915` แทนสีขาว · ไม่มีโฟลเดอร์ `ios` จึงทำแค่ Android
+- Test: `brandIntroEnabledProvider` (ปิด Intro ใน `navigation_test.dart` เพราะ Overlay บังหน้าจอ) + Navigation test ใหม่ 1 ตัวที่เปิด Intro จริง · `test/helpers/file_bundle.dart` (โหลด Asset จากดิสก์ใน Fake time) · `brand_logo_test.dart` 3 + `brand_intro_test.dart` 2
+- ผล: `flutter analyze` No issues · `flutter test` **421 passed** (+6) · `flutter build apk --debug` ผ่าน · ตรวจเฟรมแอนิเมชันจากภาพ Golden ชั่วคราว (ลบแล้ว) · gitleaks `dir` (379 ไฟล์) + `git` (12 commits) → no leaks found
+- ยังไม่ได้ดูบน Emulator/เครื่องจริง (ความลื่น 60 FPS, ไอคอนบน Launcher, Splash Android 12+) → ดูพร้อม Phase 4
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
 **Phase 3 อนุมัติแล้ว 2026-11-11 (ผู้ใช้ยืนยันการตัดสินใจ §4.6 + §4.7 ตามที่เสนอ) → Session ถัดไป: เริ่ม Phase 4 Integration (W9)**
