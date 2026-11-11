@@ -1,0 +1,310 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:rideros_ai/app/app.dart';
+import 'package:rideros_ai/app/router.dart';
+import 'package:rideros_ai/core/errors/app_failure.dart';
+import 'package:rideros_ai/core/network/api_client.dart';
+import 'package:rideros_ai/core/storage/refresh_token_store.dart';
+import 'package:rideros_ai/features/auth/presentation/login_screen.dart';
+import 'package:rideros_ai/features/auth/presentation/register_screen.dart';
+import 'package:rideros_ai/features/auth/presentation/splash_screen.dart';
+import 'package:rideros_ai/features/dashboard/presentation/home_screen.dart';
+import 'package:rideros_ai/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:rideros_ai/features/profit/presentation/expense_form_screen.dart';
+import 'package:rideros_ai/features/profit/presentation/income_form_screen.dart';
+import 'package:rideros_ai/features/profit/presentation/records_screen.dart';
+import 'package:rideros_ai/features/profit/presentation/true_profit_screen.dart';
+import 'package:rideros_ai/features/profit/presentation/work_session_form_screen.dart';
+
+import '../helpers/fake_http_adapter.dart';
+import '../helpers/fakes.dart';
+import '../helpers/profit_fakes.dart';
+import '../helpers/pump.dart';
+
+/// The real app (router, guard, theme) with fake repositories.
+Future<void> pumpApp(WidgetTester tester, List<Override> overrides) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: overrides,
+      retry: (retryCount, error) => null,
+      child: const RiderOsApp(),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> login(WidgetTester tester) async {
+  await enter(tester, 'login.email', 'rider@example.com');
+  await enter(tester, 'login.password', 'secret pw');
+  await tapKey(tester, 'login.submit');
+}
+
+void main() {
+  late FakeAuthRepository auth;
+  late FakeRiderProfileRepository profiles;
+
+  setUp(() {
+    auth = FakeAuthRepository();
+    profiles = FakeRiderProfileRepository();
+  });
+
+  testWidgets('no stored session: start → login', (tester) async {
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    expect(find.byType(LoginScreen), findsOneWidget);
+  });
+
+  testWidgets('first login → onboarding → home → logout → login', (
+    tester,
+  ) async {
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    await login(tester);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+
+    await tapKey(tester, 'onboarding.skip');
+    expect(find.byType(HomeScreen), findsOneWidget);
+
+    await tapKey(tester, 'home.logout');
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text(t.loginSessionExpired), findsNothing);
+  });
+
+  testWidgets('configured profile goes straight to home', (tester) async {
+    profiles.configured = true;
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    await login(tester);
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('stored session resumes on home without the login screen', (
+    tester,
+  ) async {
+    auth.restoreUser = testUser;
+    profiles.configured = true;
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(LoginScreen), findsNothing);
+  });
+
+  testWidgets(
+    'register is pushed over login; back returns; success → onboarding',
+    (tester) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles));
+      await tapKey(tester, 'login.register');
+      expect(find.byType(RegisterScreen), findsOneWidget);
+
+      await tester.binding.handlePopRoute(); // Android back
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+
+      await tapKey(tester, 'login.register');
+      await enter(tester, 'register.displayName', 'Somchai');
+      await enter(tester, 'register.email', 'new@example.com');
+      await enter(tester, 'register.password', 'pass word 1');
+      await enter(tester, 'register.confirm', 'pass word 1');
+      await tapKey(tester, 'register.submit');
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+      expect(find.byType(RegisterScreen), findsNothing);
+    },
+  );
+
+  testWidgets('forgot password → reset → login with notice', (tester) async {
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    await tapKey(tester, 'login.forgot');
+    await enter(tester, 'forgot.email', 'rider@example.com');
+    await tapKey(tester, 'forgot.submit');
+    await tapKey(tester, 'forgot.sent.haveToken');
+    await enter(tester, 'reset.token', 'AbCdEf0123456789_-xyz');
+    await enter(tester, 'reset.password', 'new pass 123');
+    await enter(tester, 'reset.confirm', 'new pass 123');
+    await tapKey(tester, 'reset.submit');
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text(t.loginPasswordResetDone), findsOneWidget);
+  });
+
+  testWidgets('session expiring on home returns to login with a banner', (
+    tester,
+  ) async {
+    auth.restoreUser = testUser;
+    profiles.configured = true;
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    auth.expireSession();
+    await tester.pumpAndSettle();
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text(t.loginSessionExpired), findsOneWidget);
+  });
+
+  testWidgets('offline at start: splash error, retry → home', (tester) async {
+    auth.restoreError = const NetworkFailure();
+    profiles.configured = true;
+    await pumpApp(tester, fakeRepositories(auth, profiles));
+    expect(find.byType(SplashScreen), findsOneWidget);
+    expect(find.text(t.splashRestoreFailedTitle), findsOneWidget);
+
+    auth
+      ..restoreError = null
+      ..restoreUser = testUser;
+    await tester.tap(find.text(t.commonRetry));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets(
+    'full stack: real repositories, dio and interceptor against a fake API',
+    (tester) async {
+      final store = InMemoryRefreshTokenStore();
+      var configured = false;
+      final adapter = FakeHttpAdapter(
+        (o) => switch ((o.method, o.path)) {
+          ('POST', '/auth/login') => json(
+            200,
+            tokenJson(access: 'a1', refresh: 'r1-0000000000000000'),
+          ),
+          ('GET', '/me') => json(200, userJson()),
+          ('GET', '/me/rider-profile') => json(
+            200,
+            profileJson(configured: configured),
+          ),
+          ('PUT', '/me/rider-profile') => () {
+            configured = true;
+            return json(200, profileJson(configured: true));
+          }(),
+          ('POST', '/auth/logout') => json(204),
+          ('GET', '/profit/summary') => json(200, {
+            'period': o.queryParameters['period'],
+            'start_date': '2026-11-09',
+            'end_date': o.queryParameters['period'] == 'day'
+                ? '2026-11-09'
+                : '2026-11-15',
+            'timezone': 'Asia/Bangkok',
+            'currency': 'THB',
+            'total_revenue': '1200.00',
+            'total_expenses': '150.50',
+            'net_profit': '1049.50',
+            'working_hours': '0.00',
+            'revenue_per_hour': null,
+            'net_profit_per_hour': null,
+            'reason': 'no_working_hours',
+            'income_count': 2,
+            'expense_count': 1,
+            'work_session_count': 0,
+          }),
+          _ => apiError(404, 'not_found'),
+        },
+      );
+      await pumpApp(tester, [
+        refreshTokenStoreProvider.overrideWithValue(store),
+        baseDioProvider.overrideWith(
+          (ref) =>
+              Dio(BaseOptions(baseUrl: 'http://test/api/v1'))
+                ..httpClientAdapter = adapter,
+        ),
+      ]);
+      expect(find.byType(LoginScreen), findsOneWidget);
+
+      await login(tester);
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+      expect(store.value, 'r1-0000000000000000');
+
+      await enter(tester, 'onboarding.fuelPrice', '38.50');
+      await tapKey(tester, 'onboarding.submit');
+      expect(find.byType(HomeScreen), findsOneWidget);
+      final put = adapter.requests.firstWhere((r) => r.method == 'PUT');
+      expect((put.data as Map)['fuel_price_per_liter'], '38.5');
+      expect(put.headers['Authorization'], 'Bearer a1');
+      // Home numbers come from the real summary endpoint (decimal strings).
+      expect(find.text('฿1,049.50'), findsNWidgets(2));
+      expect(adapter.count('/profit/summary'), 2);
+
+      await tapKey(tester, 'home.logout');
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(store.value, isNull);
+      expect(adapter.paths.last, '/auth/logout');
+    },
+  );
+
+  group('signed in', () {
+    late ProfitFakes profit;
+
+    setUp(() {
+      auth.restoreUser = testUser;
+      profiles.configured = true;
+      profit = ProfitFakes();
+    });
+
+    testWidgets('tabs → records → add income over the tabs → back to list', (
+      tester,
+    ) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      await tapKey(tester, 'nav.profit');
+      expect(find.byType(TrueProfitScreen), findsOneWidget);
+
+      await tapKey(tester, 'profit.records');
+      expect(find.byType(RecordsScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      await tapKey(tester, 'records.add');
+      expect(find.byType(IncomeFormScreen), findsOneWidget);
+      // Forms cover the bottom navigation.
+      expect(find.byType(NavigationBar), findsNothing);
+
+      await enter(tester, 'income.amount', '450');
+      await tapKey(tester, 'income.submit');
+      expect(find.byType(RecordsScreen), findsOneWidget);
+      expect(find.text('450.00'), findsOneWidget);
+
+      // Home keeps its own stack and reloaded its numbers after the save.
+      await tapKey(tester, 'nav.home');
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(
+        profit.profit.calls.where((c) => c == 'summary:day:-').length,
+        greaterThanOrEqualTo(2),
+      );
+      await tapKey(tester, 'nav.profit');
+      expect(find.byType(RecordsScreen), findsOneWidget);
+      // Tapping the open tab again returns to its first screen.
+      await tapKey(tester, 'nav.profit');
+      expect(find.byType(TrueProfitScreen), findsOneWidget);
+    });
+
+    testWidgets('home shortcut → expense form → back without saving', (
+      tester,
+    ) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'home.addExpense');
+      expect(find.byType(ExpenseFormScreen), findsOneWidget);
+      await tester.binding.handlePopRoute(); // Android back
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(profit.expenses.calls, isEmpty);
+    });
+
+    testWidgets('home shortcut → work session saved → home', (tester) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'home.addSession');
+      expect(find.byType(WorkSessionFormScreen), findsOneWidget);
+      await tapKey(tester, 'session.submit');
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(profit.sessions.items, hasLength(1));
+    });
+
+    testWidgets('the guard keeps signed-out users out of record forms', (
+      tester,
+    ) async {
+      auth.restoreUser = null;
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(LoginScreen)),
+      ).read(routerProvider);
+      router.go(Routes.incomeNew);
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.byType(IncomeFormScreen), findsNothing);
+    });
+  });
+}

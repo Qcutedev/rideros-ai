@@ -1,6 +1,6 @@
 # HANDOFF — RiderOS AI
 
-> อัปเดตล่าสุด: 2026-11-09 · สถานะ: **Phase 2 อนุมัติแล้ว + Commit แล้ว → งานถัดไปคือ Phase 3 (Flutter) ใน Session ใหม่ — ดู §4** · การตัดสินใจ §3.1 P2a, §3.2 P2b, §3.3 P2c ยืนยันครบ
+> อัปเดตล่าสุด: 2026-11-10 · สถานะ: **Phase 3 กำลังทำ — P3a + P3b เสร็จ + ปรับ UI ตาม RIDEROS_UI_DESIGN.md (§4.4) (ยังไม่ Commit) · §4.1 + §4.3 ยืนยันแล้ว · **P3c ยังไม่เริ่ม — ผู้ใช้สั่งให้เริ่มใน Session ใหม่ที่ §4.2** · Phase 2 อนุมัติ + Commit แล้ว · การตัดสินใจ §3.1 P2a, §3.2 P2b, §3.3 P2c ยืนยันครบ
 > Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
 
 **Session ใหม่ (Phase 3) ให้อ่านตามลำดับ:** ไฟล์นี้ (โดยเฉพาะ §4) → `docs/DEVELOPMENT_ROADMAP.md` (W6–W8 + Phase 3 Exit Criteria) → `docs/SYSTEM_ARCHITECTURE.md` (§2.1 Flutter, §3 Data Flows, §4 API, §5 Security, §6 Folder Structure `mobile/`) → `backend/README.md` (API Contract จริงที่ App ต้องเรียก) → `docs/PROJECT_PLAN.md` (Scope ของหน้าจอ)
@@ -104,13 +104,23 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 
 **ตรวจสถานะจริงก่อนเริ่ม:** `git status` (ต้องสะอาด) · `docker version` (Daemon ต้องรัน) · `flutter --version` (2026-11-09 ติดตั้งแล้ว: Flutter 3.47.0 stable) · `flutter doctor` · มี `ml/artifacts/` อยู่ในเครื่อง (ไม่มีก็ได้ แต่ Prediction จะ 503)
 
-**ผู้ใช้ต้องทำเองก่อน:** `flutter doctor --android-licenses` · เตรียม Android Emulator หรือเครื่องจริง (Phase 4 ต้องใช้ E2E บน Emulator)
+**ผู้ใช้ต้องทำเองก่อน:** ~~`flutter doctor --android-licenses` · เตรียม Android Emulator~~ → **ทำแล้ว 2026-11-10**: Licenses Accept แล้ว (`flutter doctor` Android toolchain ✓) · ติดตั้ง Android Studio + AVD · Emulator `emulator-5554` = sdk gphone64 x86_64, Android 17 (API 37), System image `android-37.0;google_apis_playstore;x86_64`
 
 **Backend สำหรับ Dev:** `docker compose up --build` ที่ Root → API `http://127.0.0.1:8000/api/v1`, Docs `/docs` · Android Emulator เข้าถึงเครื่อง Host ผ่าน `http://10.0.2.2:8000` แต่ Compose bind แค่ `127.0.0.1` (Emulator ผ่าน 10.0.2.2 ได้เพราะเป็น Loopback ของ Host; เครื่องจริงต้องใช้ `adb reverse tcp:8000 tcp:8000`)
 
 **ลำดับงาน (Roadmap):**
 - **P3a (W6):** `flutter create` ที่ `mobile/` (`.gitignore` ที่ Root มี Pattern `mobile/` แล้ว) · Design System (Tokens, Light/Dark) · go_router + Auth Guard · dio Client + Interceptor Refresh Token (มี Lock กัน Refresh ซ้ำ) + `AppFailure` แบบ Typed · Splash/Onboarding/Login/Register/Forgot
+  → **เสร็จ 2026-11-10 (ยังไม่ Commit · §4.1 ยืนยันแล้ว)** — `flutter create --project-name rideros_ai --org com.rideros --platforms android mobile`; Package: flutter_riverpod 3.5, go_router 18.1, dio 5.11, flutter_secure_storage 11.2, freezed 4.0 + json_serializable 6.15, decimal 3.2, intl 0.20 (+ flutter_localizations), dev: build_runner, mocktail
+  · โครงสร้าง/วิธีรันดู `mobile/README.md` · หน้าจอ: Splash (Loading/Error+Retry), Login, Register, Forgot (ส่งแล้ว + DEV ONLY note), Reset (วางลิงก์หรือ Token), Onboarding (Rider profile), Home (ชั่วคราว: ทักทาย + Logout จนกว่า P3b)
+  · Tests **135 passed** (`flutter test`, ~12 s): unit 82 (failure mapper, validators, token manager single-flight, interceptor refresh/retry/concurrency/no-loop, repository ผ่าน Fake HTTP adapter, session controller, router guard table) + widget/navigation 53 (ทุก Form validation + states, ทั้งแอปผ่าน Router จริง, Full-stack ผ่าน dio จริง) · Coverage `lib/` (ไม่รวม generated) **95.6%** · `flutter analyze` → No issues · `dart format` สะอาด
+  · `flutter build apk --debug` ผ่าน (~191 s; Manifest + Network security config ของ Debug ถูกต้อง)
+  · **รันบน Emulator แล้ว 2026-11-10**: `docker compose up -d` (`/ready` → database ok, model ok `pickup_o2p/1.0.0`) + `flutter run -d emulator-5554` → Splash → หน้า Login แสดงถูกต้อง (ธีม Light, ภาษาไทย) · ผู้ใช้ลองใช้เองบน Emulator (ยังไม่ได้รับ Feedback เรื่อง UI)
+  · ยังไม่ได้ทำ: gitleaks (ทำตอนจบ Phase 3 ก่อน Commit) · Deep link `rideros://reset-password` (เลื่อนไป Phase 4 เพราะต้องทดสอบบน Emulator)
 - **P3b (W7):** Home Dashboard · TrueProfit Dashboard · Income/Expense Management (Forms + Validation + States)
+  → **เสร็จ 2026-11-10 (ยังไม่ Commit · รอยืนยัน §4.3)** — เพิ่ม `fl_chart ^1.3.1` · Bottom navigation (`StatefulShellRoute.indexedStack`: หน้าหลัก + กำไร) · Feature ใหม่ `lib/features/profit/` (domain: `profit_records.dart`, `profit_summary.dart`, `profit_period.dart`, `session_times.dart`, `profit_repositories.dart` · data: `ApiRecordRepository<T, I>` generic + `ProfitRepositoryImpl` · presentation: `profit_providers.dart`, `true_profit_screen.dart`, `records_screen.dart`, ฟอร์ม income/expense/work-session, widgets) · `app/routes.dart` (แยก Routes ออกจาก router; `router.dart` export ต่อ) · `app/app_shell.dart` · Home ใหม่ (`features/dashboard/presentation/home_screen.dart`) · core: `utils/date_json.dart`, `utils/formatters.dart`, `utils/clock.dart`, `network/paged_result.dart`, Validators เพิ่ม `requiredDecimal`/`optionalInt`/`optionalText`/`max`
+  · หน้าจอ: Home (วันนี้ + สัปดาห์นี้ + บันทึกด่วน), TrueProfit (วัน/สัปดาห์/เดือน, ย้อน/ถัดไป, สรุปละเอียด, กราฟแท่งกำไรสุทธิ), รายการทั้งหมด (3 แท็บ รายได้/ค่าใช้จ่าย/ช่วงทำงาน, Cursor pagination + โหลดเพิ่ม, Pull-to-refresh, DEMO chip), ฟอร์มเพิ่ม/แก้/ลบ 3 แบบ (ยืนยันก่อนลบ)
+  · Tests **255 passed** (`flutter test`, ~15 s; เดิม 135 + ใหม่ 120: unit formatters/dates/models/validators/repository ผ่าน Fake HTTP/notifiers + widget ทุกหน้าและทุก Form + navigation รวม Full-stack `/profit/summary`) · Coverage `lib/` **96.2%** · `flutter analyze` No issues · `dart format` สะอาด
+  · **ทดสอบบน Emulator กับ API จริง 2026-11-10**: Login → Home/TrueProfit แสดงตัวเลขตรง `/profit/summary` · แก้รายได้ 780→800 ผ่านแอป → DB = 800.00 และ Link ช่วงทำงานยังอยู่ · Dev DB มีบัญชีทดสอบ `p3b.check@example.com` (รหัส `p3b check pass`; ชื่อแสดงเป็น `????? P3b` เพราะ curl บน Windows แปลงอักษรไทยตอน Seed — ไม่ใช่บั๊กแอป)
 - **P3c (W8):** Pickup Intelligence + Restaurant Details · Shift Simulator + Scenario Comparison · Profile/Settings
 
 **Stack ที่กำหนดแล้ว (SYSTEM_ARCHITECTURE §2.1):** Feature-first + Clean Architecture (`data/` → `domain/` → `presentation/`) · Riverpod (Notifier/AsyncNotifier) · go_router · dio · freezed + json_serializable · flutter_secure_storage (Refresh Token) · fl_chart · flutter_map · geolocator
@@ -123,6 +133,56 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - **Pickup:** แสดงเป็น **ช่วง** (`interval.low`–`interval.high`) ไม่แสดงตัวเลขเดี่ยว · Label **"Order-to-Pickup"** เสมอ (ห้ามเรียกเวลารอ Rider / เวลาทำอาหาร) · แสดง `warnings` (`foreign_dataset` = "ค่าประมาณจากข้อมูลต่างประเทศ") และ `disclaimer` · หน้า Model Info ต้องแสดง Acknowledgement *This research was supported by data provided by Meituan.* · ร้านที่ User สร้างเองทำนายไม่ได้ (400 `restaurant_not_supported`) → ซ่อนปุ่มทำนาย
 - **Shift:** Scenario เป็นค่าประมาณเสมอ (`is_estimate`) · วิธี `ml` ยังไม่เปิด → **ซ่อน** ใน UI (Exit criteria: ห้ามมีปุ่มที่ไม่ทำงาน)
 - ไม่มี RoadContext ใน Phase 3 (Phase 5)
+
+### 4.1 การตัดสินใจใน P3a — **ผู้ใช้ยืนยันแล้ว (OK ทั้ง 13 ข้อ, 2026-11-10; ข้อ 10 = Commit ไฟล์ Generated · ไม่มี Feedback UI)**
+1. `applicationId` = `com.rideros.rideros_ai`, สร้างเฉพาะ Platform `android` · ชื่อแอป "RiderOS AI"
+2. UI ภาษาไทยอย่างเดียว ผ่าน gen-l10n (`lib/l10n/app_th.arb`) · Locale `th` คงที่ · เพิ่มภาษาอื่นภายหลังได้ด้วย ARB ใหม่
+3. Onboarding = ตั้งค่า Rider profile หลัง Login ครั้งแรก (`is_configured: false`) · ทุกช่องไม่บังคับ · "ข้ามไปก่อน" = `PUT` ค่า Default → ไม่ถามซ้ำ · ไม่มีหน้า Intro/Carousel · Timezone `Asia/Bangkok` + THB แสดงเป็นข้อมูล (แก้ใน Profile P3c)
+4. Register สำเร็จ → Login ต่ออัตโนมัติ · ถ้า Login ต่อไม่ผ่าน (เช่น 429) → หน้า Login พร้อมข้อความ "สมัครสำเร็จ"
+5. Reset password: ยังไม่ทำ Deep link · หน้า Reset รับ "ลิงก์ทั้งเส้น" หรือ Token (Flow D5 อ่านลิงก์จาก Log) · Deep link `rideros://reset-password` เลื่อนไป Phase 4 (ทดสอบบน Emulator)
+6. Access token อยู่ใน Memory เท่านั้น · Refresh token ใน `flutter_secure_storage` · `android:allowBackup="false"` · Logout ตอน Offline ลบ Token ในเครื่องเสมอ
+7. Refresh ถูกปฏิเสธ (401/422) → ลบ Token + กลับหน้า Login พร้อม "เซสชันหมดอายุ" · Network/5xx ระหว่าง Refresh → แจ้ง Error ไม่ Logout · เปิดแอปตอน Offline → Splash แสดง Error + ลองใหม่ (เก็บ Token ไว้)
+8. ปิด Automatic retry ของ Riverpod 3 ทั้งแอป (Error แสดงทันทีพร้อมปุ่มลองใหม่)
+9. Riverpod แบบเขียน Provider เอง (ไม่ใช้ riverpod_generator) · Model ใช้ freezed + fromJson ตรงใน `domain/` (ไม่แยก DTO ถ้า Shape เหมือนกัน)
+10. **Commit ไฟล์ Generated** (`*.g.dart`, `*.freezed.dart`, `lib/l10n/app_localizations*.dart`) เพื่อให้ Clone แล้ว `flutter analyze`/`test` ได้ทันที — ทางเลือก: gitignore แล้วให้ CI รัน `build_runner`
+11. HTTP ธรรมดาได้เฉพาะ Debug build ไปที่ `10.0.2.2`/`127.0.0.1`/`localhost` · Release ต้อง `https` (ตรวจใน `AppConfig`) · ไม่มี Request/Response logging (กัน Password/Token หลุดลง Log)
+12. Validation ฝั่ง App ตรงกับ Backend (Email ≤ 254, Password 8–128 และไม่เท่าชื่อหน้า @, Display name ≤ 80, ทศนิยมตาม NUMERIC ของคอลัมน์) · ตรวจรหัสผ่านที่พบบ่อยที่ Server อย่างเดียว
+13. Home เป็นหน้าชั่วคราว (ทักทาย + Logout) จนกว่า P3b · ข้อความ DEV ONLY ในหน้า Forgot แสดงเฉพาะ Build ที่ไม่ใช่ Release
+
+### 4.3 การตัดสินใจใน P3b — **ผู้ใช้ยืนยันแล้ว (ตามคำแนะนำทั้ง 11 ข้อ, 2026-11-10)**
+1. Bottom navigation แสดงเฉพาะ Feature ที่เสร็จ: ตอนนี้ "หน้าหลัก" + "กำไร" · P3c เพิ่ม Pickup / Shift / Profile · ปุ่ม Logout อยู่ที่ AppBar ของ Home ชั่วคราวจนมีหน้า Profile
+2. **ทำหน้าจัดการ "ช่วงทำงาน" (Work sessions) ใน P3b ด้วย** (นอก Roadmap เดิม) เพราะเป็นแหล่งชั่วโมงทำงาน (กำไร/ชม.) และ Shift `historical` ใน P3c ต้องใช้
+3. รายได้ผูกกับช่วงทำงานที่ "เริ่มในวันเดียวกัน" ได้ · ผูกแล้วซ่อนช่องชั่วโมงและส่ง `working_hours: null` (Backend ไม่นับอยู่แล้ว กันชั่วโมงซ้ำ) · ฟอร์มค่าใช้จ่ายไม่มีการผูก (ไม่ส่ง `work_session_id` → Link เดิมไม่หาย)
+4. ช่วงทำงานกรอกเป็น วันที่เริ่ม + เวลาเริ่ม + เวลาเลิก (24 ชม.) · เวลาเลิก ≤ เวลาเริ่ม = วันถัดไป · เวลาเท่ากัน = Error (ไม่เดาว่า 0 หรือ 24 ชม.) · ส่งเวลาพร้อม Offset ของเครื่อง และแสดงตามเวลาเครื่อง
+5. Date picker เลือกได้ 2000-01-01 ถึง "วันนี้" ของเครื่อง (ไม่ให้บันทึกอนาคต; Backend รับถึง 2100) · ถ้าข้อมูลเดิมเป็นวันอนาคตยังเปิดแก้ได้
+6. ไม่มีการคำนวณเงินฝั่งแอป: ตัวเลขสรุปทั้งหมดมาจาก Server · หลังบันทึก/ลบทุกครั้ง Reload ทุกรายการและสรุป (`profitDataRevisionProvider`) · แสดงเงินจาก Decimal (ไม่ผ่าน `double`) · กราฟแปลงเป็น `double` เฉพาะความสูงแท่ง
+7. TrueProfit: ช่วงปัจจุบันให้ Server ตัดสิน "วันนี้" ตามเขตเวลาของ Rider · ปุ่ม "ถัดไป" ซ่อนที่ช่วงปัจจุบัน · การกลับมาช่วงปัจจุบันใช้วันที่ของเครื่อง · กราฟใช้หน้าต่าง Default ของ Backend (30 วัน / 12 สัปดาห์ / 12 เดือน) ที่จบที่ช่วงที่แสดง
+8. รายการ (List) แสดงจำนวนเงินไม่มีสัญลักษณ์สกุลเงิน (API ของรายการไม่มี currency) · หน้าสรุปใช้ `currency` จาก API (THB → ฿)
+9. แก้ไขใช้ `PATCH` ส่งทุกช่องในฟอร์ม (ช่องว่าง = `null` = ล้างค่า) · จำนวนเงิน 0 ได้ (ตาม Backend `ge=0`) · ลบจริง (Hard delete) หลังยืนยัน
+10. รายการเรียงใหม่→เก่า, โหลดหน้าถัดไปอัตโนมัติเมื่อเลื่อนใกล้ท้าย + ปุ่ม "โหลดเพิ่ม" · ยังไม่มีตัวกรอง/ค้นหา
+11. Record ที่ `is_demo: true` แสดงป้าย "DEMO" ในรายการ (DoD)
+
+### 4.4 ปรับ UI ตาม `docs/RIDEROS_UI_DESIGN.md` (Rider Green) — **เสร็จ 2026-11-10 (ยังไม่ Commit · ผู้ใช้สั่งให้แก้ตามเอกสาร)**
+- ขอบเขต: เฉพาะหน้าจอที่มีแล้ว (P3a + P3b) · หน้า Pickup / Shift / Profile ยังไม่ทำ (รอยืนยัน §4.3 ก่อน P3c) แต่ Component พร้อมใช้แล้ว
+- Tokens (`app/theme/tokens.dart`): `AppColors` ครบทั้ง Light/Dark ตาม §2.2–2.3 · `AppTypography` (Display 32 … Caption 12) · Spacing เพิ่ม 20 (`card`) · Radius input 12 / button 14 / card 16 / dialog 20 · `AppSemanticColors` เพิ่ม mint, border, hero (การ์ดเขียวเข้ม)
+- ฟอนต์ **IBM Plex Sans Thai** (Regular/Medium/SemiBold/Bold) bundle ใน `mobile/assets/fonts/` + `OFL.txt` (SIL OFL 1.1 → Commit ได้) · ตัวเลขกว้างเท่ากันอยู่แล้ว
+- Theme (`app/theme/app_theme.dart`): ColorScheme กำหนดเองทั้งหมด (ไม่ใช้ `fromSeed`) · AppBar สี Rider Green (Light) · NavigationBar active = Mint + Brand · Card ขอบบาง + เงาอ่อน · Input ขาว ขอบ 12 · Dialog 20
+- **เบี่ยงจากเอกสาร (Contrast, §2.3 สั่งให้ตรวจ):** ตัวอักษรขาวบน `#00A884` = ~3.0:1 (ต่ำกว่า 4.5:1) → ปุ่มหลักใช้ Brand `#00796B` (~5.4:1) ใน Light และ `#55C7A5` + ตัวอักษรเข้ม (~8.5:1) ใน Dark · `#00A884` ใช้กับ Progress indicator · ขอบ Input ใช้ `#84968D`/`#5E7A6C` (≥3:1, WCAG 1.4.11) เพราะ Border `#DCE8E1` จางเกินสำหรับขอบช่องกรอก
+- Components ใหม่: `LabeledField` (Label เหนือช่อง + ผูก Label ให้ Screen reader), `AppBadge` (DEMO/ค่าประมาณ/Dataset/neutral), `app_cards.dart` (`SectionHeader`, `SectionCard` ย้ายมาจาก profit, `MetricTile`, `MetricTileRow`), `SkeletonBox`/`SummarySkeleton`, `AppDestructiveButton`, `AppLogoMark` · `AsyncValueView` รับ `loading:` ได้
+- หน้าจอ: Splash พื้น Forest Green + Loading ด้านล่าง · Login = Header สีเขียวเข้ม (โลโก้ + ชื่อแอป + Tagline) ด้านบน + ฟอร์มในการ์ดขาวซ้อนขึ้นมา (ทำใหม่หลังผู้ใช้ทักว่า Login ยังไม่เปลี่ยน) · Register / Forgot (ทั้งฟอร์มและหน้าส่งแล้ว) / Reset ใช้ `AuthLayout` เดียวกัน (`core/widgets/auth_layout.dart`: Header + ปุ่มย้อนกลับเมื่อ pop ได้ + การ์ดฟอร์ม) แทน AppBar · ฟอร์มทั้งหมด Label เหนือช่อง · Home = การ์ด "วันนี้" สีเขียวเข้ม (กำไรสุทธิ 32) + การ์ดสัปดาห์ + บันทึกด่วน 3 ช่อง · TrueProfit แถบช่วงเวลาเป็นการ์ด + ปุ่มใหม่ "กลับช่วงปัจจุบัน" (`profit.current`) + หมายเหตุเป็น Banner · Records = ไอคอนวงกลม Mint + ป้าย DEMO + chevron · Dialog ลบ ปุ่มแดง · Skeleton แทน Spinner ที่ Home/TrueProfit
+- ข้อความปรับตามเอกสาร: `เชื่อมต่อไม่สำเร็จ`, `ส่งลิงก์รีเซ็ตรหัสผ่าน`, `มีลิงก์/รหัสแล้ว`, `ตั้งรหัสผ่านใหม่`, `ถ้ามีบัญชีนี้ เราได้ส่งลิงก์ไปแล้ว…`, Onboarding "ใช้ข้อมูลนี้คำนวณต้นทุนต่อกิโลเมตร…", `สกุลเงิน THB`
+- ไม่ได้ทำ: ภาพประกอบไรเดอร์ใน Splash (ไม่มี Asset ที่มีสิทธิ์ใช้ → ใช้โลโก้ไอคอนแทน)
+- ผล: `flutter analyze` No issues · `flutter test` **261 passed** (+6: ปุ่มย้อนกลับของ AuthHeader, skeleton, label semantics, badges/ปุ่มลบ Light+Dark, theme tokens, กลับช่วงปัจจุบัน) · ตรวจบน Emulator กับ API จริง: Login, Register, Home, TrueProfit, Records, ฟอร์มรายได้, Home ใน Dark mode
+- หลังตรวจบน Emulator แก้แล้ว: Status bar หน้า Login (ไอคอนขาวบนพื้นขาว) · ข้อความใน Dropdown ใหญ่กว่าช่องอื่น (ยังไม่ได้ Screenshot ซ้ำหลังแก้ Dropdown; Tests ผ่าน)
+
+### 4.2 Session ถัดไปเริ่มตรงนี้
+1. ตรวจสถานะ: `git status` (ควรเห็นแค่ `?? mobile/` + `?? docs/UI_STRUCTURE.md` + `?? docs/RIDEROS_UI_DESIGN.md` + `M docs/HANDOFF.md`) · `docker compose ps` (ถ้าหยุด → `docker compose up -d`) · `flutter devices` (ต้องเห็น `emulator-5554`; ถ้าไม่เห็น ให้ผู้ใช้เปิด Emulator จาก Android Studio → Device Manager) · `cd mobile; flutter analyze; flutter test` (ต้องได้ No issues + **261 passed**)
+2. ~~ยืนยัน §4.1, §4.3~~ (ยืนยันแล้วทั้งคู่) · ถ้าผู้ใช้มีภาพ Mockup / ไฟล์ .docx ต้นฉบับของ UI ให้ขอมาเทียบก่อน (ไฟล์ .md ไม่มีภาพ — น่าจะหายตอนแปลงด้วย pandoc)
+3. **เริ่ม P3c** ตามลำดับ: (a) Profile / Rider profile form / Account delete — ย้ายปุ่ม Logout ออกจาก AppBar ของ Home + เพิ่มแท็บ (b) Pickup Intelligence ทุกหน้า (c) Shift Simulator ทุกหน้า → แต่ละกลุ่ม: `dart format` + `flutter analyze` + `flutter test` + ดูบน Emulator แล้วรายงาน → Phase 3 Report → รออนุมัติ (ห้ามเริ่ม Phase 4 · ห้าม Commit จนกว่าผู้ใช้สั่ง)
+   · หน้าใหม่ทุกหน้าต้องตาม `docs/RIDEROS_UI_DESIGN.md` §4.4–4.6 และใช้ Component ของ §4.4 ในไฟล์นี้ (`SectionCard`, `MetricTile`, `AppBadge` สำหรับ `ค่าประมาณ`/`Dataset`/`ร้านของฉัน`/ระดับข้อมูล, `LabeledField`, `SummarySkeleton`, `AppDestructiveButton` สำหรับลบบัญชี) · ห้ามแสดงตัวเลือก Shift `ml` · RoadContext ไม่มีแท็บ (Phase 5)
+4. (P3b ใช้แล้ว) Widget ที่มี: `AsyncValueView` (Loading/Empty/Error/Data), `AppBanner`, `SubmitNotifier`, `Validators.optionalDecimal`, `DecimalConverter` · แทนที่ `features/dashboard/presentation/home_screen.dart` (ตอนนี้เป็นหน้าชั่วคราว) · ข้อความใหม่ใส่ใน `lib/l10n/app_th.arb` แล้ว `flutter gen-l10n` · Model ใหม่ → `dart run build_runner build`
+5. รันแอปบน Emulator: `flutter run -d emulator-5554` (รันเบื้องหลังแล้ว Session หลุดได้ `Lost connection to device` แต่แอปยังเปิดอยู่) · Screenshot: `adb -s emulator-5554 exec-out screencap -p > <scratchpad>/x.png`
+6. Test helper ที่ควรรู้: `test/helpers/pump.dart` (`pumpScreen`, `enter`, `tapKey`, `t` = ข้อความไทย), `fakes.dart` (`FakeAuthRepository`, `FakeRiderProfileRepository`), `profit_fakes.dart` (`ProfitFakes`, `FakeRecordRepository`, `testNow` = อ. 10 พ.ย. 2026 14:07), `pushScreen` (เปิดฟอร์มทับ Home เพื่อทดสอบ pop), `fake_http_adapter.dart` (Fake API สำหรับ dio) · `tester.pageBack()` หา Back button ไม่เจอ → ใช้ `tester.binding.handlePopRoute()`
 
 **Exit criteria Phase 3:** ทุกหน้ามี Loading/Empty/Error/Success · ทุก Form มี Validation + Widget Test · Navigation Tests + Notifier/State Unit Tests · ไม่มีปุ่มที่ไม่ทำงาน (Feature ไม่พร้อม → ซ่อน) · `flutter analyze` ไม่มี Warning
 
@@ -153,9 +213,12 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 - Acknowledgement ต้องแสดงใน README และหน้า Model Info ของแอป: *This research was supported by data provided by Meituan.*
 - Label ผลทำนายว่า **Order-to-Pickup** เสมอ ห้ามเรียกว่าเวลารอของ Rider หรือเวลาทำอาหาร
 - uv ไม่อยู่ใน PATH → `python -m uv`. ถ้า Shell มี `VIRTUAL_ENV` ของ `ml/.venv` ค้าง `python` จะชี้ venv (ไม่มี uv) → ใช้ `%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe -m uv ...` หรือ `ml\.venv\Scripts\*.exe` ตรงๆ
-- ผู้ใช้ต้องทำเองก่อน Phase 3: `flutter doctor --android-licenses`
+- ~~ผู้ใช้ต้องทำเองก่อน Phase 3: `flutter doctor --android-licenses`~~ ทำแล้ว 2026-11-10
 
 ## 7. Known issues (ไม่บล็อก Phase 3)
+
+- (P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…" ในหน้ารายการราว 4 วินาที (SnackBar แสดงบน Scaffold ของ Shell ซึ่งไม่รู้จัก FAB ของหน้าข้างใน) — ไม่บล็อก
+- (P3b) หลังแก้ 2 จุด (ป้ายจำนวนรายการ, ระยะขอบกราฟ) ยังไม่ได้ Screenshot ซ้ำบน Emulator (Tests ผ่าน)
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
 - ร้านที่ไม่มีใน Train: MAE 7.24, Coverage 65.1% (215 orders) → Backend แสดงคำเตือนตาม `data_availability` แล้ว (P2c) และ `/pickup/model` ระบุใน `limitations`
