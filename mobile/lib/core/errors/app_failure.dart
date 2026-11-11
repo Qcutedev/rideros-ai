@@ -86,6 +86,12 @@ abstract final class ApiErrorCode {
   static const workSessionTooLong = 'work_session_too_long';
   static const invalidWorkSession = 'invalid_work_session';
 
+  // Pickup.
+  static const modelUnavailable = 'model_unavailable';
+  static const restaurantNotSupported = 'restaurant_not_supported';
+  static const invalidPickupTimes = 'invalid_pickup_times';
+  static const pickupWaitTooLong = 'pickup_wait_too_long';
+
   // Access-token problems: the client refreshes once and retries.
   static const tokenExpired = 'token_expired';
   static const invalidToken = 'invalid_token';

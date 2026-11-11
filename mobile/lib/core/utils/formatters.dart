@@ -13,6 +13,10 @@ abstract final class Formats {
     return '$sign$integer${fixed.substring(dot)}';
   }
 
+  /// Whole count with thousands separators: `64701` → `64,701`.
+  static String count(int value) =>
+      value < 0 ? '-${_group('${-value}')}' : _group('$value');
+
   /// `฿1,234.50` for THB, otherwise `1,234.50 USD`.
   static String currency(Decimal value, String currency) =>
       currency == 'THB' ? '฿${money(value)}' : '${money(value)} $currency';

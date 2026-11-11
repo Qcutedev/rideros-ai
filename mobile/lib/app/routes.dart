@@ -11,11 +11,35 @@ abstract final class Routes {
   // Bottom-navigation tabs (signed in).
   static const home = '/home';
   static const profit = '/profit';
+  static const pickup = '/pickup';
 
   static const profile = '/profile';
 
   /// TrueProfit records: `?tab=` one of [RecordsTab] names.
   static const records = '/profit/records';
+
+  // Pickup screens inside the Pickup tab.
+  static const restaurantPattern = '/pickup/restaurants/:id';
+  static const predictionPattern = '/pickup/restaurants/:id/prediction';
+  static const predictionHistory = '/pickup/predictions';
+  static const pickupLogs = '/pickup/logs';
+
+  // Pickup forms and pages, shown over the tabs.
+  static const pickupLogNew = '/pickup/logs/new';
+  static const ownRestaurantNew = '/pickup/own-restaurant';
+  static const restaurantPicker = '/pickup/select-restaurant';
+  static const modelInfo = '/pickup/model';
+
+  static String restaurant(String id) => '/pickup/restaurants/$id';
+  static String prediction(String id) => '/pickup/restaurants/$id/prediction';
+
+  /// The log form, optionally with the restaurant already chosen.
+  static String pickupLogNewFor({String? restaurantId, String? name}) => Uri(
+    path: pickupLogNew,
+    queryParameters: restaurantId == null
+        ? null
+        : {'restaurant_id': restaurantId, 'restaurant_name': ?name},
+  ).toString();
 
   // Profile screens, shown over the tabs.
   static const profileDisplayName = '/profile/display-name';

@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/errors/app_failure.dart';
-import '../../../core/errors/failure_mapper.dart';
 import '../../../core/network/paged_result.dart';
+import '../../../core/presentation/paged_list.dart';
 import '../../../core/presentation/submit_notifier.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/utils/date_json.dart';
@@ -11,6 +10,8 @@ import '../domain/profit_period.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
 import '../domain/profit_summary.dart';
+
+export '../../../core/presentation/paged_list.dart';
 
 /// Bumped after every create/update/delete of a TrueProfit record. Every list and
 /// summary watches it, so they reload with the server's numbers (no local maths).
@@ -102,88 +103,25 @@ final trueProfitDataProvider = FutureProvider.autoDispose<TrueProfitData>((
 
 // ---- record lists (cursor pagination) ----
 
-class PagedState<T> {
-  const PagedState({
-    required this.items,
-    this.nextCursor,
-    this.isLoadingMore = false,
-    this.loadMoreError,
-  });
-
-  final List<T> items;
-  final String? nextCursor;
-  final bool isLoadingMore;
-
-  /// Loading the next page failed; the loaded items stay on screen.
-  final AppFailure? loadMoreError;
-
-  bool get hasMore => nextCursor != null;
-}
-
-/// First page on build (and after every data change); [loadMore] appends the next one.
-abstract class PagedListNotifier<T> extends AsyncNotifier<PagedState<T>> {
-  Future<PagedResult<T>> fetchPage(String? cursor);
-
+/// A TrueProfit list: reloads after every record change.
+abstract class ProfitPagedListNotifier<T> extends PagedListNotifier<T> {
   @override
-  Future<PagedState<T>> build() async {
-    ref.watch(profitDataRevisionProvider);
-    final page = await fetchPage(null);
-    return PagedState(items: page.items, nextCursor: page.nextCursor);
-  }
-
-  Future<void> loadMore() async {
-    final current = state.value;
-    if (state.isLoading ||
-        current == null ||
-        !current.hasMore ||
-        current.isLoadingMore) {
-      return;
-    }
-    final loading = PagedState(
-      items: current.items,
-      nextCursor: current.nextCursor,
-      isLoadingMore: true,
-    );
-    state = AsyncData(loading);
-    try {
-      final page = await fetchPage(current.nextCursor);
-      if (_superseded(loading)) return;
-      state = AsyncData(
-        PagedState(
-          items: [...current.items, ...page.items],
-          nextCursor: page.nextCursor,
-        ),
-      );
-    } catch (error) {
-      if (_superseded(loading)) return;
-      state = AsyncData(
-        PagedState(
-          items: current.items,
-          nextCursor: current.nextCursor,
-          loadMoreError: mapToFailure(error),
-        ),
-      );
-    }
-  }
-
-  /// A reload (pull-to-refresh, data change) started meanwhile: its first page wins.
-  bool _superseded(PagedState<T> loading) =>
-      !ref.mounted || state.isLoading || !identical(state.value, loading);
+  void watchDependencies() => ref.watch(profitDataRevisionProvider);
 }
 
-class IncomeListNotifier extends PagedListNotifier<Income> {
+class IncomeListNotifier extends ProfitPagedListNotifier<Income> {
   @override
   Future<PagedResult<Income>> fetchPage(String? cursor) =>
       ref.read(incomeRepositoryProvider).list(cursor: cursor);
 }
 
-class ExpenseListNotifier extends PagedListNotifier<Expense> {
+class ExpenseListNotifier extends ProfitPagedListNotifier<Expense> {
   @override
   Future<PagedResult<Expense>> fetchPage(String? cursor) =>
       ref.read(expenseRepositoryProvider).list(cursor: cursor);
 }
 
-class WorkSessionListNotifier extends PagedListNotifier<WorkSession> {
+class WorkSessionListNotifier extends ProfitPagedListNotifier<WorkSession> {
   @override
   Future<PagedResult<WorkSession>> fetchPage(String? cursor) =>
       ref.read(workSessionRepositoryProvider).list(cursor: cursor);

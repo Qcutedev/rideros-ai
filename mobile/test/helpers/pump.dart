@@ -9,12 +9,14 @@ import 'package:rideros_ai/app/router.dart';
 import 'package:rideros_ai/app/theme/app_theme.dart';
 import 'package:rideros_ai/core/utils/clock.dart';
 import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
+import 'package:rideros_ai/features/pickup/data/pickup_repository_impl.dart';
 import 'package:rideros_ai/features/profile/data/rider_profile_repository_impl.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
 import 'package:rideros_ai/l10n/app_localizations.dart';
 import 'package:rideros_ai/l10n/app_localizations_th.dart';
 
 import 'fakes.dart';
+import 'pickup_fakes.dart';
 import 'profit_fakes.dart';
 
 /// Overrides that replace the network layer with fakes and fix "now" to [testNow].
@@ -22,9 +24,13 @@ List<Override> fakeRepositories(
   FakeAuthRepository auth, [
   FakeRiderProfileRepository? profiles,
   ProfitFakes? profit,
+  FakePickupRepository? pickup,
 ]) {
   final p = profit ?? ProfitFakes();
   return [
+    pickupRepositoryProvider.overrideWithValue(
+      pickup ?? FakePickupRepository(),
+    ),
     authRepositoryProvider.overrideWithValue(auth),
     riderProfileRepositoryProvider.overrideWithValue(
       profiles ?? FakeRiderProfileRepository(),
@@ -44,6 +50,15 @@ const allRoutePatterns = [
   Routes.onboarding,
   Routes.home,
   Routes.profit,
+  Routes.pickup,
+  Routes.restaurantPattern,
+  Routes.predictionPattern,
+  Routes.predictionHistory,
+  Routes.pickupLogs,
+  Routes.pickupLogNew,
+  Routes.ownRestaurantNew,
+  Routes.restaurantPicker,
+  Routes.modelInfo,
   Routes.records,
   Routes.incomeNew,
   Routes.incomeEditPattern,

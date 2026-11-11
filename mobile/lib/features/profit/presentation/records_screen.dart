@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
-import '../../../core/errors/failure_messages.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_badge.dart';
+import '../../../core/widgets/paged_list_view.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_records.dart';
@@ -78,160 +77,43 @@ class _RecordsScreenState extends State<RecordsScreen>
       body: TabBarView(
         controller: _tabs,
         children: [
-          _PagedList<Income>(
+          PagedListView<Income>(
             provider: incomeListProvider,
-            emptyTitle: l10n.incomeEmptyTitle,
-            emptyMessage: l10n.incomeEmptyMessage,
-            emptyAction: l10n.incomeAdd,
-            onEmptyAction: () => context.push(Routes.incomeNew),
+            empty: StatusView(
+              icon: Icons.inbox_outlined,
+              title: l10n.incomeEmptyTitle,
+              message: l10n.incomeEmptyMessage,
+              actionLabel: l10n.incomeAdd,
+              onAction: () => context.push(Routes.incomeNew),
+            ),
             itemBuilder: (income) => _IncomeTile(income: income),
           ),
-          _PagedList<Expense>(
+          PagedListView<Expense>(
             provider: expenseListProvider,
-            emptyTitle: l10n.expenseEmptyTitle,
-            emptyMessage: l10n.expenseEmptyMessage,
-            emptyAction: l10n.expenseAdd,
-            onEmptyAction: () => context.push(Routes.expenseNew),
+            empty: StatusView(
+              icon: Icons.inbox_outlined,
+              title: l10n.expenseEmptyTitle,
+              message: l10n.expenseEmptyMessage,
+              actionLabel: l10n.expenseAdd,
+              onAction: () => context.push(Routes.expenseNew),
+            ),
             itemBuilder: (expense) => _ExpenseTile(expense: expense),
           ),
-          _PagedList<WorkSession>(
+          PagedListView<WorkSession>(
             provider: workSessionListProvider,
-            emptyTitle: l10n.sessionEmptyTitle,
-            emptyMessage: l10n.sessionEmptyMessage,
-            emptyAction: l10n.sessionAdd,
-            onEmptyAction: () => context.push(Routes.workSessionNew),
+            empty: StatusView(
+              icon: Icons.inbox_outlined,
+              title: l10n.sessionEmptyTitle,
+              message: l10n.sessionEmptyMessage,
+              actionLabel: l10n.sessionAdd,
+              onAction: () => context.push(Routes.workSessionNew),
+            ),
             itemBuilder: (session) => _SessionTile(session: session),
           ),
         ],
       ),
     );
   }
-}
-
-/// Loading / error / empty / items, pull-to-refresh, and the next page when the
-/// end comes near (or on the "load more" button).
-class _PagedList<T> extends ConsumerWidget {
-  const _PagedList({
-    required this.provider,
-    required this.itemBuilder,
-    required this.emptyTitle,
-    required this.emptyMessage,
-    required this.emptyAction,
-    required this.onEmptyAction,
-  });
-
-  final AsyncNotifierProvider<PagedListNotifier<T>, PagedState<T>> provider;
-  final Widget Function(T item) itemBuilder;
-  final String emptyTitle;
-  final String emptyMessage;
-  final String emptyAction;
-  final VoidCallback onEmptyAction;
-
-  /// Distance from the end (px) at which the next page is requested.
-  static const _prefetchExtent = 400.0;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(provider);
-    return AsyncValueView(
-      value: state,
-      onRetry: () => ref.invalidate(provider),
-      isEmpty: (s) => s.items.isEmpty,
-      empty: StatusView(
-        icon: Icons.inbox_outlined,
-        title: emptyTitle,
-        message: emptyMessage,
-        actionLabel: emptyAction,
-        onAction: onEmptyAction,
-      ),
-      data: (s) => NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification.metrics.extentAfter < _prefetchExtent &&
-              s.hasMore &&
-              !s.isLoadingMore &&
-              s.loadMoreError == null) {
-            ref.read(provider.notifier).loadMore();
-          }
-          return false;
-        },
-        child: RefreshIndicator(
-          onRefresh: () => ref.refresh(provider.future),
-          child: ListView.separated(
-            // Room for the floating button over the last item.
-            padding: const EdgeInsets.only(bottom: AppSpacing.xxxl * 2),
-            itemCount: s.items.length + 1,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) => index < s.items.length
-                ? itemBuilder(s.items[index])
-                : _ListFooter(
-                    state: s,
-                    onLoadMore: () => ref.read(provider.notifier).loadMore(),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ListFooter extends StatelessWidget {
-  const _ListFooter({required this.state, required this.onLoadMore});
-
-  final PagedState<Object?> state;
-  final VoidCallback onLoadMore;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final Widget child;
-    if (state.isLoadingMore) {
-      child = const CircularProgressIndicator();
-    } else if (state.loadMoreError case final error?) {
-      child = Column(
-        children: [
-          Text(failureMessage(l10n, error), textAlign: TextAlign.center),
-          TextButton(
-            key: const Key('records.loadMoreRetry'),
-            onPressed: onLoadMore,
-            child: Text(l10n.commonRetry),
-          ),
-        ],
-      );
-    } else if (state.hasMore) {
-      child = TextButton(
-        key: const Key('records.loadMore'),
-        onPressed: onLoadMore,
-        child: Text(l10n.recordsLoadMore),
-      );
-    } else {
-      child = Text(
-        l10n.recordsEnd,
-        style: Theme.of(context).textTheme.bodySmall,
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Center(child: child),
-    );
-  }
-}
-
-/// Round mint icon in front of each record.
-class _RecordIcon extends StatelessWidget {
-  const _RecordIcon(this.icon);
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 40,
-    height: 40,
-    decoration: BoxDecoration(
-      color: context.semanticColors.mint,
-      shape: BoxShape.circle,
-    ),
-    child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-  );
 }
 
 /// Record row on the surface colour (the list sits on the app background).
@@ -256,7 +138,7 @@ class _RecordTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     tileColor: Theme.of(context).colorScheme.surface,
-    leading: _RecordIcon(icon),
+    leading: RoundIcon(icon),
     title: Text(title),
     subtitle: Text(
       subtitle,

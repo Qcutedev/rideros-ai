@@ -13,6 +13,12 @@ import 'package:rideros_ai/features/auth/presentation/register_screen.dart';
 import 'package:rideros_ai/features/auth/presentation/splash_screen.dart';
 import 'package:rideros_ai/features/dashboard/presentation/home_screen.dart';
 import 'package:rideros_ai/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/model_info_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/pickup_log_form_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/pickup_logs_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/pickup_search_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/prediction_result_screen.dart';
+import 'package:rideros_ai/features/pickup/presentation/restaurant_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/delete_account_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/display_name_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/profile_screen.dart';
@@ -25,6 +31,7 @@ import 'package:rideros_ai/features/profit/presentation/work_session_form_screen
 
 import '../helpers/fake_http_adapter.dart';
 import '../helpers/fakes.dart';
+import '../helpers/pickup_fakes.dart';
 import '../helpers/profit_fakes.dart';
 import '../helpers/pump.dart';
 
@@ -293,6 +300,90 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(profit.expenses.calls, isEmpty);
+    });
+
+    testWidgets('tabs in order: home, pickup, profit, profile', (tester) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      final xs = [
+        for (final key in [
+          'nav.home',
+          'nav.pickup',
+          'nav.profit',
+          'nav.profile',
+        ])
+          tester.getCenter(find.byKey(Key(key))).dx,
+      ];
+      expect(xs, orderedEquals([...xs]..sort()));
+    });
+
+    testWidgets('pickup: search → restaurant → prediction → log saved', (
+      tester,
+    ) async {
+      final pickup = FakePickupRepository();
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit, pickup));
+      await tapKey(tester, 'nav.pickup');
+      expect(find.byType(PickupSearchScreen), findsOneWidget);
+
+      await tapKey(tester, 'restaurant.r-1');
+      expect(find.byType(RestaurantScreen), findsOneWidget);
+      // Details stay inside the tab.
+      expect(find.byType(NavigationBar), findsOneWidget);
+
+      await tapKey(tester, 'restaurant.predict');
+      expect(find.byType(PredictionResultScreen), findsOneWidget);
+      expect(pickup.calls, contains('predict:r-1'));
+
+      await scrollAndTap(tester, 'prediction.log');
+      expect(find.byType(PickupLogFormScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.text('POI-1'), findsOneWidget);
+      await tapKey(tester, 'logForm.submit');
+      expect(find.byType(PredictionResultScreen), findsOneWidget);
+      expect(pickup.lastLog!.restaurantId, 'r-1');
+
+      // Back to the restaurant, back to the search.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(RestaurantScreen), findsOneWidget);
+    });
+
+    testWidgets('pickup: logs → new log → picker → saved in the list', (
+      tester,
+    ) async {
+      final pickup = FakePickupRepository();
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit, pickup));
+      await tapKey(tester, 'nav.pickup');
+      await tapKey(tester, 'pickup.logs');
+      expect(find.byType(PickupLogsScreen), findsOneWidget);
+      await tapKey(tester, 'logs.add');
+      expect(find.byType(PickupLogFormScreen), findsOneWidget);
+
+      await tapKey(tester, 'logForm.restaurant');
+      expect(find.text(t.pickerTitle), findsOneWidget);
+      await tapKey(tester, 'restaurant.r-2');
+      expect(find.byType(PickupLogFormScreen), findsOneWidget);
+      expect(find.text('POI-2'), findsOneWidget);
+
+      await tapKey(tester, 'logForm.submit');
+      expect(find.byType(PickupLogsScreen), findsOneWidget);
+      expect(pickup.lastLog!.restaurantId, 'r-2');
+      expect(
+        find.byKey(Key('log.${pickup.logItems.single.id}')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('profile → Pickup model card over the tabs → back', (
+      tester,
+    ) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'nav.profile');
+      await scrollAndTap(tester, 'profile.modelInfo');
+      expect(find.byType(ModelInfoScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileScreen), findsOneWidget);
     });
 
     testWidgets('home shortcut → work session saved → home', (tester) async {

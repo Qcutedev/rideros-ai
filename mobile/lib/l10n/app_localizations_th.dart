@@ -717,6 +717,432 @@ class AppLocalizationsTh extends AppLocalizations {
       'ไม่พบช่วงทำงานที่เลือก (อาจถูกลบไปแล้ว)';
 
   @override
+  String get navPickup => 'Pickup';
+
+  @override
+  String get pickupTitle => 'Pickup';
+
+  @override
+  String get pickupSearchHint => 'ค้นหาชื่อร้าน เช่น POI-12';
+
+  @override
+  String get pickupSearchLabel => 'ค้นหาร้าน';
+
+  @override
+  String get pickupSearchClear => 'ล้างคำค้นหา';
+
+  @override
+  String get pickupFilterAll => 'ทั้งหมด';
+
+  @override
+  String get pickupFilterDataset => 'Dataset';
+
+  @override
+  String get pickupFilterOwn => 'ร้านของฉัน';
+
+  @override
+  String get pickupDatasetNote =>
+      'ร้าน Dataset (ชื่อ POI-…) มาจากข้อมูล Meituan ของเมืองหนึ่งในประเทศจีน ไม่ใช่ร้านในไทย · ร้านของฉันใช้บันทึกเวลารับจริงของคุณ';
+
+  @override
+  String get pickupHistory => 'ประวัติการทำนาย';
+
+  @override
+  String get pickupMyLogs => 'เวลารับของฉัน';
+
+  @override
+  String get pickupModelInfo => 'ข้อมูลโมเดล';
+
+  @override
+  String get pickupAddOwn => 'เพิ่มร้านของฉัน';
+
+  @override
+  String get pickupEmptyTitle => 'ไม่พบร้าน';
+
+  @override
+  String get pickupEmptyMessage =>
+      'ลองคำค้นหาอื่น หรือเพิ่มร้านของคุณเองเพื่อบันทึกเวลารับ';
+
+  @override
+  String get badgeDataset => 'Dataset';
+
+  @override
+  String get badgeOwn => 'ร้านของฉัน';
+
+  @override
+  String get badgeEstimate => 'ค่าประมาณ';
+
+  @override
+  String get dataSufficient => 'ข้อมูลเพียงพอ';
+
+  @override
+  String get dataLimited => 'ข้อมูลจำกัด';
+
+  @override
+  String get dataInsufficient => 'ข้อมูลไม่เพียงพอ';
+
+  @override
+  String pickupOrdersInData(String count) {
+    return '$count ออเดอร์ในข้อมูล';
+  }
+
+  @override
+  String pickupMinutesRange(String low, String high) {
+    return '$low–$high นาที';
+  }
+
+  @override
+  String pickupMinutesValue(String value) {
+    return '$value นาที';
+  }
+
+  @override
+  String get restaurantTitle => 'รายละเอียดร้าน';
+
+  @override
+  String get restaurantPredictNow => 'ทำนาย Order-to-Pickup ตอนนี้';
+
+  @override
+  String get restaurantOwnNoPrediction =>
+      'ร้านของฉันใช้บันทึกเวลารับเท่านั้น โมเดลทำนายได้เฉพาะร้านจากข้อมูลชุดฝึก (Dataset)';
+
+  @override
+  String restaurantLocation(String lat, String lng) {
+    return 'ตำแหน่ง $lat, $lng (เห็นเฉพาะคุณ)';
+  }
+
+  @override
+  String get restaurantStatsTitle => 'สถิติจากข้อมูลชุดฝึก';
+
+  @override
+  String get restaurantStatsHint =>
+      'Order-to-Pickup = เวลาตั้งแต่ลูกค้าสั่งจนไรเดอร์รับอาหารที่ร้าน (ไม่ใช่เวลารอของไรเดอร์)';
+
+  @override
+  String get restaurantMedian => 'มัธยฐาน';
+
+  @override
+  String get restaurantP25P75 => 'ช่วงกลาง P25–P75';
+
+  @override
+  String get restaurantOrders => 'จำนวนออเดอร์';
+
+  @override
+  String get restaurantPeakHour => 'ชั่วโมงที่สั่งมากสุด';
+
+  @override
+  String restaurantHourValue(String hour) {
+    return '$hour:00';
+  }
+
+  @override
+  String get restaurantNoOverall =>
+      'ร้านนี้มีออเดอร์ในข้อมูลน้อยเกินไป จึงไม่มีสถิติ';
+
+  @override
+  String get heatmapTitle => 'มัธยฐานรายชั่วโมง (นาที)';
+
+  @override
+  String get heatmapWeekday => 'วันธรรมดา';
+
+  @override
+  String get heatmapWeekend => 'เสาร์–อาทิตย์';
+
+  @override
+  String get heatmapLegend =>
+      'ตัวเลขในช่อง = มัธยฐาน (นาที) · สียิ่งเข้มข้น = ยิ่งนาน · ช่องว่าง = ไม่มีข้อมูล · ชั่วโมงตามเวลาท้องถิ่นของเมืองในข้อมูล';
+
+  @override
+  String heatmapCell(String hour, String median, int count) {
+    return '$hour:00 · มัธยฐาน $median นาที · $count ออเดอร์';
+  }
+
+  @override
+  String heatmapCellEmpty(String hour) {
+    return '$hour:00 · ไม่มีข้อมูล';
+  }
+
+  @override
+  String get waitStatsTitle => 'เวลารอจริงของฉัน';
+
+  @override
+  String get waitStatsHint =>
+      'จากบันทึกเวลารับของคุณเอง (รับอาหาร − ถึงร้าน) ไม่ผสมกับข้อมูลชุดฝึก';
+
+  @override
+  String get waitStatsMedian => 'มัธยฐาน';
+
+  @override
+  String get waitStatsP80 => 'P80 (80% รอไม่เกิน)';
+
+  @override
+  String waitStatsCount(int count) {
+    return 'บันทึกแล้ว $count ครั้ง';
+  }
+
+  @override
+  String waitStatsNeedMore(int count) {
+    return 'บันทึกอีก $count ครั้งเพื่อดูสถิติ (ต้องมีอย่างน้อย 5 ครั้ง)';
+  }
+
+  @override
+  String get confidenceLow => 'ความมั่นใจต่ำ (น้อยกว่า 20 ครั้ง)';
+
+  @override
+  String get confidenceOk => 'ความมั่นใจใช้ได้';
+
+  @override
+  String get restaurantLogPickup => 'บันทึกเวลารับที่ร้านนี้';
+
+  @override
+  String get predictionTitle => 'Order-to-Pickup โดยประมาณ';
+
+  @override
+  String get predictionLoading => 'กำลังทำนาย…';
+
+  @override
+  String predictionMidpoint(String value) {
+    return 'ค่ากลางประมาณ $value นาที';
+  }
+
+  @override
+  String predictionCoverage(String percent) {
+    return 'ช่วงนี้ครอบคลุมราว $percent% ของออเดอร์ในข้อมูลทดสอบ';
+  }
+
+  @override
+  String get predictionWarningForeign =>
+      'ค่าประมาณจากข้อมูลต่างประเทศ (ร้านในจีน ต.ค. 2022) ร้านในไทยอาจต่างออกไป';
+
+  @override
+  String get predictionWarningLimited =>
+      'ข้อมูลร้านนี้มีจำกัด ช่วงอาจคลาดเคลื่อนมากกว่าปกติ';
+
+  @override
+  String get predictionWarningInsufficient =>
+      'ข้อมูลร้านนี้ไม่เพียงพอ ช่วงอาจคลาดเคลื่อนมาก';
+
+  @override
+  String predictionWarningOther(String code) {
+    return 'มีคำเตือนจากระบบ: $code';
+  }
+
+  @override
+  String get predictionDisclaimerTitle => 'ข้อควรทราบ';
+
+  @override
+  String get predictionDisclaimerThai =>
+      'เป็นค่าประมาณเวลาตั้งแต่สั่งจนไรเดอร์รับอาหาร เรียนรู้จากข้อมูลของเมืองหนึ่งในจีน ไม่ใช่เวลาทำอาหารหรือเวลารอของคุณที่ร้าน';
+
+  @override
+  String get predictionServerText => 'ข้อความจากระบบ';
+
+  @override
+  String predictionMeta(String version, String time) {
+    return 'โมเดล $version · ขอเมื่อ $time';
+  }
+
+  @override
+  String get predictionAgain => 'ทำนายอีกครั้ง';
+
+  @override
+  String get historyEmptyTitle => 'ยังไม่มีประวัติการทำนาย';
+
+  @override
+  String get historyEmptyMessage =>
+      'เลือกร้านจาก Dataset แล้วกด “ทำนาย Order-to-Pickup ตอนนี้”';
+
+  @override
+  String get historyFindRestaurant => 'ค้นหาร้าน';
+
+  @override
+  String get historyDeletedRestaurant => 'ร้านที่ถูกลบ';
+
+  @override
+  String get logsTitle => 'เวลารับของฉัน';
+
+  @override
+  String get logsAdd => 'บันทึกเวลารับ';
+
+  @override
+  String get logsEmptyTitle => 'ยังไม่มีบันทึกเวลารับ';
+
+  @override
+  String get logsEmptyMessage =>
+      'บันทึกเวลาถึงร้านและเวลารับอาหาร เพื่อดูเวลารอจริงของแต่ละร้าน';
+
+  @override
+  String logsWait(String minutes) {
+    return 'รอ $minutes นาที';
+  }
+
+  @override
+  String get logsDelete => 'ลบบันทึกนี้';
+
+  @override
+  String get logsDeleteTitle => 'ลบบันทึกเวลารับ?';
+
+  @override
+  String get logsDeleteMessage =>
+      'ลบแล้วกู้คืนไม่ได้ และเวลารอจริงของร้านนี้จะคำนวณใหม่';
+
+  @override
+  String get logFormTitle => 'บันทึกเวลารับ';
+
+  @override
+  String get logFormRestaurant => 'ร้าน';
+
+  @override
+  String get logFormChooseRestaurant => 'เลือกร้าน';
+
+  @override
+  String get logFormRestaurantRequired => 'กรุณาเลือกร้าน';
+
+  @override
+  String get logFormDate => 'วันที่ถึงร้าน';
+
+  @override
+  String get logFormArrived => 'เวลาถึงร้าน';
+
+  @override
+  String get logFormPickedUp => 'เวลารับอาหาร';
+
+  @override
+  String logFormWait(String wait) {
+    return 'รอ $wait';
+  }
+
+  @override
+  String get logFormNextDay => 'รับวันถัดไป';
+
+  @override
+  String get logFormWaitTooLong =>
+      'เวลารับต้องหลังเวลาถึงร้าน และรอได้ไม่เกิน 3 ชั่วโมง';
+
+  @override
+  String get pickerTitle => 'เลือกร้าน';
+
+  @override
+  String get ownFormTitle => 'เพิ่มร้านของฉัน';
+
+  @override
+  String get ownFormName => 'ชื่อร้าน';
+
+  @override
+  String get ownFormLocationTitle => 'ตำแหน่ง (ไม่บังคับ · เห็นเฉพาะคุณ)';
+
+  @override
+  String get ownFormLat => 'ละติจูด (lat)';
+
+  @override
+  String get ownFormLng => 'ลองจิจูด (lng)';
+
+  @override
+  String get ownFormLocationHelper => 'กรอกทั้งสองช่อง หรือเว้นว่างทั้งสองช่อง';
+
+  @override
+  String get ownFormLocationPair => 'กรอกให้ครบทั้งละติจูดและลองจิจูด';
+
+  @override
+  String get ownFormSaved => 'เพิ่มร้านแล้ว';
+
+  @override
+  String validationRange(String min, String max) {
+    return 'ต้องอยู่ระหว่าง $min ถึง $max';
+  }
+
+  @override
+  String get modelTitle => 'ข้อมูลโมเดล Pickup';
+
+  @override
+  String get modelWhatTitle => 'สิ่งที่โมเดลทำนาย';
+
+  @override
+  String get modelWhatBody =>
+      'Order-to-Pickup: นาทีตั้งแต่ลูกค้าสั่งอาหาร จนไรเดอร์รับอาหารที่ร้าน · ไม่ใช่เวลาทำอาหาร และไม่ใช่เวลารอของไรเดอร์ที่ร้าน · แสดงผลเป็นช่วงเสมอ';
+
+  @override
+  String modelVersion(String name, String version) {
+    return '$name เวอร์ชัน $version';
+  }
+
+  @override
+  String modelAlgorithm(String name) {
+    return 'อัลกอริทึม $name';
+  }
+
+  @override
+  String modelTrainedAt(String date) {
+    return 'ฝึกเมื่อ $date';
+  }
+
+  @override
+  String get modelTestTitle => 'ผลทดสอบ (วันทดสอบที่แยกไว้ ประเมินครั้งเดียว)';
+
+  @override
+  String get modelMae => 'MAE ของโมเดล';
+
+  @override
+  String get modelBaselineMae => 'MAE ของ Baseline';
+
+  @override
+  String get modelBaselineHint =>
+      'Baseline = มัธยฐานเดิมของแต่ละร้าน · MAE = คลาดเคลื่อนเฉลี่ย ยิ่งน้อยยิ่งดี';
+
+  @override
+  String modelTestOrders(String count) {
+    return 'ออเดอร์ทดสอบ $count';
+  }
+
+  @override
+  String get modelCoverageTitle => 'ความครอบคลุมของช่วง';
+
+  @override
+  String get modelNominalCoverage => 'เป้าหมาย';
+
+  @override
+  String get modelTestCoverage => 'จริงในข้อมูลทดสอบ';
+
+  @override
+  String modelMeanWidth(String value) {
+    return 'ช่วงกว้างเฉลี่ย $value นาที';
+  }
+
+  @override
+  String get modelLimitationsTitle => 'ข้อจำกัด';
+
+  @override
+  String get modelLimitationsBody =>
+      'ข้อมูลมาจากเมืองเดียวในจีนช่วง 16–24 ต.ค. 2022 จึงไม่ใช่ตัวแทนร้านในไทย · ร้านที่ไม่มีในข้อมูลฝึก ช่วงจะครอบคลุมได้น้อยกว่าเป้าหมาย';
+
+  @override
+  String get modelServerLimitations => 'รายละเอียดจากระบบ (ภาษาอังกฤษ)';
+
+  @override
+  String get modelSourceTitle => 'แหล่งข้อมูลและสัญญาอนุญาต';
+
+  @override
+  String get modelLicense =>
+      'Meituan INFORMS TSL Research Challenge · สัญญาอนุญาต CC BY-NC 4.0 (ไม่ใช่เชิงพาณิชย์) · แอปไม่ได้แจกจ่ายชุดข้อมูลนี้';
+
+  @override
+  String get profileModelInfo => 'ข้อมูลโมเดล Pickup';
+
+  @override
+  String get failureModelUnavailable =>
+      'โมเดล Pickup ยังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง';
+
+  @override
+  String get failureRestaurantNotSupported =>
+      'ร้านนี้ทำนายไม่ได้ (ทำนายได้เฉพาะร้านจากข้อมูลชุดฝึก)';
+
+  @override
+  String get failureInvalidPickupTimes => 'เวลารับอาหารต้องไม่ก่อนเวลาถึงร้าน';
+
+  @override
+  String get failurePickupWaitTooLong => 'เวลารอยาวได้ไม่เกิน 3 ชั่วโมง';
+
+  @override
   String get failureNetwork =>
       'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
 
