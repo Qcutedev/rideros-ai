@@ -1,6 +1,6 @@
 # DEVELOPMENT_ROADMAP.md — RiderOS AI (Phase 0)
 
-> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09**
+> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09** · **Phase 4 อนุมัติแล้ว 2026-11-12 (MVP Freeze)**
 > ระยะเวลา: 13 สัปดาห์ (≈ 3 เดือน) เริ่ม **จันทร์ 2026-11-09** ถ้าอนุมัติ Phase 0 ภายในสัปดาห์นี้
 > MVP (Module 1–3) เสร็จสิ้นปลายสัปดาห์ที่ 9 · RoadContext เป็น Extension
 > ทุก Phase จบด้วย **Phase Report** และ **รอการอนุมัติ** ก่อนเริ่ม Phase ถัดไป
@@ -83,9 +83,9 @@ gantt
 - [ ] `flutter analyze` ไม่มี Warning
 
 ### Phase 4 — Integration (W9)
-**Exit criteria**
-- [ ] E2E: Register → Login → Dashboard → Pickup Prediction → Add Income → Add Expense → View Profit → Create Scenario → Compare (`integration_test` บน Emulator + API จริง)
-- [ ] ตัวเลขใน App ตรงกับ DB (ตรวจด้วย SQL)
+**Exit criteria** (ตรวจ 2026-11-12 · **อนุมัติแล้ว 2026-11-12**, `cc2a8b9`, Tag `mvp-freeze`)
+- [x] E2E: Register → Login → Dashboard → Pickup Prediction → Add Income → Add Expense → View Profit → Create Scenario → Compare (`integration_test` บน Emulator + API จริง) — `mobile/integration_test/app_journey_test.dart` บน `emulator-5554` + `docker compose` stack; สมัครแล้วแอป Login ให้เอง จึงมี Logout → Login คั่น (Register → Onboarding → Logout → Login → …) · All tests passed หลายรอบติดกัน
+- [x] ตัวเลขใน App ตรงกับ DB (ตรวจด้วย SQL) — `mobile/test_driver/integration_test.dart` เทียบ 21 ค่ากับ `psql` (โปรไฟล์, ช่วง Pickup + ค่ากลาง, รายได้/ค่าใช้จ่าย/กำไร/ชั่วโมง/กำไรต่อชม. วันนี้ทั้ง Home และ TrueProfit, ค่าของ Scenario ทั้ง 2 ใน Compare, กำไรสูงสุด) → 21/21 ตรง แล้วลบบัญชีทดสอบผ่าน `DELETE /me` ไม่มีแถวเหลือ
 
 ### Phase 5 — RoadContext AI (W10–W11)
 **Exit criteria**

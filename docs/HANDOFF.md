@@ -1,7 +1,7 @@
 # HANDOFF — RiderOS AI
 
-> อัปเดตล่าสุด: 2026-11-12 · สถานะ: **Phase 3 อนุมัติแล้ว 2026-11-11 · ถัดไป Phase 4 Integration (W9) — เริ่มใน Session ใหม่ที่ §4.2** · Intro ขี่รถ + ไอคอนแอป (`cdb78ba` → `4a364e1`, §4.8, ก่อนเริ่ม Phase 4) · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
-> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) → `cdb78ba` (Brand intro) → `4a364e1` (Ride intro) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
+> อัปเดตล่าสุด: 2026-11-12 · สถานะ: **Phase 3 อนุมัติแล้ว 2026-11-11 · Phase 4 อนุมัติแล้ว 2026-11-12 (`cc2a8b9`, §4.9) · MVP Freeze (Tag `mvp-freeze`) · ถัดไป Phase 5 RoadContext — เริ่มใน Session ใหม่ที่ §4.2** · Intro ขี่รถ + ไอคอนแอป (`cdb78ba` → `4a364e1`, §4.8, ก่อนเริ่ม Phase 4) · P3a + P3b + UI (§4.4, `56526ee`) · P3c (a) Profile (`549c27b`, §4.5) · (b) Pickup (`f76d050`, §4.6) · (c) Shift (`aed472f`, §4.7) · การตัดสินใจ §4.1, §4.3, §4.6, §4.7 ยืนยันครบ · Phase 2 อนุมัติ + Commit แล้ว
+> Phase 0 + Decisions D1–D7 อนุมัติแล้ว (ดู `docs/PROJECT_PLAN.md` §4) · Git บน `main`: `a7fe027` (Phase 0–1) → `5d7be02` (Phase 2) → `56526ee` (Phase 3 P3a–P3b + UI) → `549c27b` (P3c-a) → `f76d050` (P3c-b) → `aed472f` (P3c-c) → `cdb78ba` (Brand intro) → `4a364e1` (Ride intro) → `cc2a8b9` (Phase 4) · ยังไม่มี Remote / ยังไม่ Push · Commit เฉพาะเมื่อผู้ใช้สั่ง
 
 **Session ใหม่ (Phase 3) ให้อ่านตามลำดับ:** ไฟล์นี้ (โดยเฉพาะ §4) → `docs/DEVELOPMENT_ROADMAP.md` (W6–W8 + Phase 3 Exit Criteria) → `docs/SYSTEM_ARCHITECTURE.md` (§2.1 Flutter, §3 Data Flows, §4 API, §5 Security, §6 Folder Structure `mobile/`) → `backend/README.md` (API Contract จริงที่ App ต้องเรียก) → `docs/PROJECT_PLAN.md` (Scope ของหน้าจอ)
 
@@ -230,7 +230,39 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - **ตรวจบน Emulator (Profile build `flutter build apk --profile` + `adb install -r`):** Splash ของระบบเป็นพื้นเขียวเข้มไม่มีไอคอน → ฉากขี่รถ → ไรเดอร์ออกขวา → หน้าหลัก · ไอคอนใหม่บน Launcher · Debug build ที่เปิดจาก Launcher เองช้า (Frame แรก +9.8 s, กระตุก) ต้องดูความลื่นด้วย Profile build (Frame แรก +2.4 s) · แอปที่ลงใน Emulator ตอนนี้เป็น Profile build
 - ยังไม่ได้วัด FPS ด้วย DevTools
 
+### 4.9 Phase 4 Integration (W9) — **อนุมัติแล้ว 2026-11-12 (Commit `cc2a8b9` · การตัดสินใจ 10 ข้อยืนยันตามที่แนะนำ · ข้อ 7 ที่ต่างจากแผนผู้ใช้ยืนยันแล้ว)**
+- งานย่อย: **P4a** E2E `integration_test` + ตรวจตัวเลขกับ DB → **P4b** Deep link `rideros://reset-password` + งานค้าง (SnackBar §7, ดูบน Emulator: Dark mode Profile/Shift/ผลทำนาย, Shift `historical`, ผูกช่วงทำงาน, 503) → **P4c** แก้ Bug + MVP Freeze + Phase 4 Report แล้วรออนุมัติ
+- การตัดสินใจ (ยืนยันแล้ว):
+  1. รัน E2E ด้วย `flutter drive` + Driver ฝั่ง Host (`mobile/test_driver/integration_test.dart`) ตรวจ SQL ผ่าน `docker compose exec db psql` ในคำสั่งเดียว
+  2. บัญชีใหม่ทุกรอบ `e2e+<timestamp>@example.com` · ตรวจ SQL ผ่านแล้ว Driver ลบผ่าน `DELETE /me` แล้วนับแถวที่เหลือต้องเป็น 0 · `E2E_KEEP=1` เก็บบัญชีไว้ · ถ้า Check ไม่ผ่านบัญชีจะค้างไว้ให้ดู
+  3. ใช้ Dev stack (`docker compose`) ไม่แก้ Rate limit
+  4. Intro ขี่รถเปิดใน E2E (Flow จริง) · ล้าง secure storage ก่อนเริ่ม
+  5. เทียบกับ DB: ยอดรายได้/ค่าใช้จ่าย, กำไรสุทธิวันนี้ (หน้า Home + TrueProfit), ชั่วโมง, กำไร/ชม., ช่วง Pickup low–high + ค่ากลาง (`pickup_predictions`), ค่าใน Compare ของ Scenario ทั้ง 2 (`shift_scenarios`) + ชื่อที่กำไรสูงสุด · ตรวจ `rider_profiles` ที่กรอกตอน Onboarding ด้วย
+  6. ร้านที่ทำนาย: ค้น `POI-203` (Meituan, `sufficient`, 2,433 orders)
+  7. Deep link ตอน Login อยู่ยังเปิดหน้า Reset
+  8. SnackBar แสดงบน ScaffoldMessenger ของหน้าที่มี FAB/แถบ ไม่ใช่ของ Shell
+  9. MVP Freeze = หลังอนุมัติ Phase 4 ไม่เพิ่ม Feature ให้ Module 1–3 แก้ได้เฉพาะ Bug · Tag `mvp-freeze` เมื่อผู้ใช้สั่ง Commit
+  10. ไม่มี CI ใน Phase 4 (Phase 6/7)
+- พบระหว่างทำ: สมัครสมาชิกแล้วแอป Login ให้ทันที (`RegisterOutcome.signedIn`) จึงทดสอบ Login ด้วยการ Logout จากหน้าโปรไฟล์แล้ว Login ใหม่ · Journey จริง: Register → Onboarding → Logout → Login → Dashboard → Pickup → รายได้ → ค่าใช้จ่าย → TrueProfit → Scenario 2 อัน → Compare
+- **P4a เสร็จ 2026-11-12** — `mobile/integration_test/app_journey_test.dart` (Journey ผ่าน UI ทั้งหมด) + `mobile/test_driver/integration_test.dart` (Driver ฝั่ง Host: เทียบ SQL แล้วลบบัญชี) · dev deps `integration_test`, `flutter_driver` (SDK) · วิธีรันใน `mobile/README.md` หัวข้อ "End-to-end journey"
+  · ผล: `flutter drive ... -d emulator-5554` → All tests passed + **21 DB checks passed** + ลบบัญชีแล้วไม่มีแถวเหลือ (ผ่านติดกันหลายรอบ, ~40 s ต่อรอบหลัง Build) · ค่าที่ตรวจ: `rider_profiles` (motorcycle/40.00/38.50/0.6000), Pickup `POI-203` ช่วง `5–21 นาที` + ค่ากลาง (1 แถวใน `pickup_predictions`), วันนี้ รายได้ 850.50 / ค่าใช้จ่าย 120.25 / กำไร 730.25 / 5 ชม. / 146.05 ต่อชม. (หน้า Home + TrueProfit), Scenario A 562.50/58.59/503.91/100.78 และ B 600.00/82.50/517.50/103.50, กำไรสูงสุด = B
+  · สิ่งที่แก้ใน Test harness ระหว่างทำ (ไม่ใช่บั๊กแอป): รอเมนู Dropdown ปิดก่อนแตะ, แตะซ้ำจนจุดแตะโดนเป้าหมาย (`hitTestWarningShouldBeFatal`) ระหว่างเปลี่ยนหน้า, เลื่อนหน้าเมื่อแถวอยู่นอก Lazy list, หาแถวร้านด้วย Key `restaurant.<id>` (ข้อความ `POI-203` ซ้ำกับช่องค้นหา)
+- **P4b เสร็จ 2026-11-12**
+  · Deep link: `AndroidManifest.xml` intent-filter `rideros://reset-password` + `flutter_deeplinking_enabled` · `router.dart`: `resetLinkLocation()` (Android ส่งลิงก์ทั้งเส้น path ว่าง → `/reset-password?token=`) + `AppRedirect` (จำลิงก์ไว้ระหว่าง Restore session แล้วเปิดหลัง Restore) + `authRedirect` ให้ Reset เปิดได้ตอน Login อยู่ (ข้อ 7) · `reset_password_screen.dart`: Reset สำเร็จตอน Login อยู่ → Logout ในเครื่องก่อน แล้วไปหน้า Login + Notice
+    → **ต่างจากที่เสนอในข้อ 7 ("Reset สำเร็จแล้วกลับหน้าเดิม")**: Backend `reset-password` Revoke Refresh token ทุกเครื่อง (`revoke_all_for_user`) ถ้ากลับหน้าเดิม Session จะหลุดภายใน 15 นาที จึงพาไป Login ทันที — **ผู้ใช้ยืนยันแล้ว 2026-11-12**
+    · ตรวจบน Emulator: Cold start ด้วยลิงก์ → หน้า Reset + Token เติมให้ · Warm start ตอน Login อยู่ (บัญชีทิ้ง `p4.reset@`) → หน้า Reset → ตั้งรหัสใหม่ → หน้า Login + "ตั้งรหัสผ่านใหม่แล้ว…" · API: รหัสเก่า 401, รหัสใหม่เข้าได้ · ลบบัญชีทิ้งแล้ว
+  · SnackBar (§7 สองข้อ, ข้อ 8): `app_shell.dart` ห่อ Body ของ Shell ด้วย `ScaffoldMessenger` (`shellMessengerKeyProvider`) + `HeroMode(enabled: false)` (ไม่งั้น SnackBar ของหลายหน้าใน Route เดียวกันได้ Hero tag ซ้ำ) · `closeForm` ส่งข้อความไปที่ Messenger นี้หลังปิดฟอร์ม → SnackBar อยู่บน Scaffold ของหน้าที่มี FAB/แถบ · ตรวจบน Emulator: "บันทึกแล้ว" อยู่เหนือปุ่ม "+ เพิ่มรายได้" · "ลบแล้ว" อยู่เหนือปุ่ม "+ เพิ่ม Scenario" และแถบ "เลือกแล้ว 2 รายการ" · ไม่มีแอปใช้ Hero อื่น
+  · ดูบน Emulator (Profile build, บัญชีทิ้ง `p4.visual@` + ประวัติ 7 วันจาก API): Shift `historical` → รายได้ 700.00 / ค่าใช้จ่าย 82.00 / กำไร 618.00 / ช่วง 578.40–657.60 (ตรง DB) · ผูกช่วงทำงาน 11 พ.ย. → `actual_work_session_id` ตรง + SnackBar "ผูกกับช่วงทำงานแล้ว" เหนือแถบนำทาง · Dark mode หน้า Shift detail, Profile, ผลทำนาย อ่านง่าย สีถูก · 503: รัน Backend ด้วย `MODEL_DIR=` → หน้าผลทำนายแสดง "โมเดล Pickup ยังไม่พร้อมใช้งาน…" + ลองใหม่ → เปิดโมเดลคืน → ลองใหม่ได้ผล · ลบบัญชีทิ้งแล้ว Dev DB เหลือ `p3b.check@` เท่านั้น
+  · Tests ใหม่: `router_redirect_test.dart` (+4: map ลิงก์, เปิดได้ทุกสถานะ, จำระหว่าง Restore, ที่อื่นตาม Guard) · `password_reset_screens_test.dart` (+1: Reset ตอน Login อยู่ → logout → Login) · `navigation_test.dart` (SnackBar อยู่ใน `RecordsScreen` และไม่ทับปุ่มเพิ่ม — Fail ถ้าไม่มีการแก้)
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
+**2026-11-12: Phase 4 อนุมัติแล้ว + Commit `cc2a8b9` + Tag `mvp-freeze` (ผู้ใช้สั่ง) → Session ถัดไป: Phase 5 RoadContext AI (W10–W11)**
+- MVP Freeze (ข้อ 9): Module 1–3 (Auth, TrueProfit, Pickup, Shift) แก้ได้เฉพาะ Bug ห้ามเพิ่ม Feature
+- เริ่ม Phase 5 ด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยันก่อน (แบบ Phase 4) · Exit criteria ใน Roadmap §Phase 5 · ลำดับตัด Scope: Object Detection → CV Classifier → (K-Means) → RoadContext ทั้ง Module · CV ต้องตรวจ License ของ Dataset ก่อน (Roadmap W11)
+- ยังไม่ได้ตรวจ: `E2E_KEEP=1` (รอบที่รันถูกระบบหยุดเพราะหน่วยความจำเครื่องเหลือน้อย) · FPS ด้วย DevTools
+- ผลตรวจตอน Commit: `flutter analyze` No issues · `dart format` สะอาด · `flutter test` **425 passed** · Coverage `lib/` (ไม่รวม generated/l10n) **97.1%** (5,371/5,534) · E2E 21/21 DB checks · gitleaks `dir` (383 ไฟล์) + `git` → no leaks found
+- E2E ต้องมี: `docker compose up -d` (`/api/v1/ready` model ok) + `emulator-5554` · คำสั่งใน `mobile/README.md`
+
 **Phase 3 อนุมัติแล้ว 2026-11-11 (ผู้ใช้ยืนยันการตัดสินใจ §4.6 + §4.7 ตามที่เสนอ) → Session ถัดไป: เริ่ม Phase 4 Integration (W9)**
 - Exit criteria (Roadmap §Phase 4): E2E Register → Login → Dashboard → Pickup Prediction → Add Income → Add Expense → View Profit → Create Scenario → Compare ด้วย `integration_test` บน Emulator + API จริง · ตัวเลขใน App ตรงกับ DB (ตรวจด้วย SQL)
 - งานค้างที่ยกมา Phase 4: Deep link `rideros://reset-password` (§4.1 ข้อ 5) · สิ่งที่ยังไม่ได้ดูบน Emulator (Dark mode หน้า Profile/Shift/ผลทำนาย, Shift historical, ผูกช่วงทำงาน, 503) · Known issues §7 (Snackbar ทับ FAB/แถบเปรียบเทียบ) · Roadmap W9 = แก้ Bug → MVP Freeze
@@ -288,10 +320,9 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 - uv ไม่อยู่ใน PATH → `python -m uv`. ถ้า Shell มี `VIRTUAL_ENV` ของ `ml/.venv` ค้าง `python` จะชี้ venv (ไม่มี uv) → ใช้ `%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe -m uv ...` หรือ `ml\.venv\Scripts\*.exe` ตรงๆ
 - ~~ผู้ใช้ต้องทำเองก่อน Phase 3: `flutter doctor --android-licenses`~~ ทำแล้ว 2026-11-10
 
-## 7. Known issues (ไม่บล็อก Phase 3)
+## 7. Known issues
 
-- (P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…" ในหน้ารายการราว 4 วินาที (SnackBar แสดงบน Scaffold ของ Shell ซึ่งไม่รู้จัก FAB ของหน้าข้างใน) — ไม่บล็อก
-- (P3c-c) SnackBar "ลบแล้ว" หลังลบ Scenario ลอยทับแถบ "เลือกแล้ว/ล้างที่เลือก" ของหน้ารายการกะงานราว 4 วินาที (สาเหตุเดียวกับข้อบน) — ไม่บล็อก
+- ~~(P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…"~~ · ~~(P3c-c) SnackBar "ลบแล้ว" ทับแถบเลือก Scenario~~ → แก้แล้วใน P4b (§4.9)
 - (P3b) หลังแก้ 2 จุด (ป้ายจำนวนรายการ, ระยะขอบกราฟ) ยังไม่ได้ Screenshot ซ้ำบน Emulator (Tests ผ่าน)
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
