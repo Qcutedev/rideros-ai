@@ -29,7 +29,7 @@ from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundErr
 from app.core.pagination import InvalidCursorError, Page, decode_cursor, encode_cursor
 from app.modules.road.images import ImageStorageUnavailableError, ImageStore, reencode
 from app.modules.road.models import IncidentReport, RoadIncident
-from app.modules.road.rules import ACTIVE_STATUSES, Category
+from app.modules.road.rules import ACTIVE_STATUSES, AI_PENDING_TIMEOUT, Category
 from app.modules.road.schemas import (
     Coordinates,
     IncidentDetail,
@@ -255,7 +255,8 @@ async def create_report(
             description=body.description,
             location=_ewkt(body.lat, body.lng),
             image_key=key,
-            ai_status="none",
+            # The router queues the classifier for a photo when cv_service is configured.
+            ai_status="pending" if key is not None and settings.cv_service_url else "none",
             created_at=now,
         )
         session.add(report)
@@ -315,7 +316,15 @@ async def confirm(
 # ---- reads ----
 
 
-def _own_report_out(report: IncidentReport, lat: float, lng: float, incident_status: str) -> OwnReportOut:
+def _ai_status(report: IncidentReport, now: datetime) -> str:
+    if report.ai_status == "pending" and report.created_at < now - AI_PENDING_TIMEOUT:
+        return "failed"
+    return report.ai_status
+
+
+def _own_report_out(
+    report: IncidentReport, lat: float, lng: float, incident_status: str, now: datetime
+) -> OwnReportOut:
     return OwnReportOut(
         id=report.id,
         incident_id=report.incident_id,
@@ -323,7 +332,7 @@ def _own_report_out(report: IncidentReport, lat: float, lng: float, incident_sta
         description=report.description,
         location=Coordinates(lat=lat, lng=lng),
         has_image=report.image_key is not None,
-        ai_status=report.ai_status,  # type: ignore[arg-type]
+        ai_status=_ai_status(report, now),  # type: ignore[arg-type]
         ai_label=report.ai_label,
         ai_confidence=report.ai_confidence,
         created_at=report.created_at,
@@ -360,7 +369,7 @@ async def get_incident(
     ).scalar_one_or_none()
     return IncidentDetail(
         **base,
-        my_report=_own_report_out(mine[0], mine[1], mine[2], base["status"]) if mine else None,
+        my_report=_own_report_out(mine[0], mine[1], mine[2], base["status"], now) if mine else None,
         my_confirmation=MyConfirmation(
             still_present=confirmation.report_type == "still_present", created_at=confirmation.created_at
         )
@@ -437,7 +446,7 @@ async def list_own_reports(
         stmt = stmt.where(tuple_(IncidentReport.created_at, IncidentReport.id) < tuple_(*after))
     stmt = stmt.order_by(IncidentReport.created_at.desc(), IncidentReport.id.desc()).limit(limit + 1)
     rows = (await session.execute(stmt)).all()
-    items = [_own_report_out(r[0], r[1], r[2], _effective_status(r[3], now)) for r in rows[:limit]]
+    items = [_own_report_out(r[0], r[1], r[2], _effective_status(r[3], now), now) for r in rows[:limit]]
     next_cursor = None
     if len(rows) > limit:
         last = rows[limit - 1][0]

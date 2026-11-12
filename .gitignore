@@ -15,6 +15,10 @@ ml/data/**
 !ml/data/.gitkeep
 ml/artifacts/
 ml/reports/**/quick-smoke/
+# Phase 5 CV: RDD2022 / Flood10k / AlleyFloodNet images and the trained weights stay local
+cv_service/data/**
+!cv_service/data/SOURCES.md
+cv_service/artifacts/
 *.csv
 *.csv.zip
 *.parquet

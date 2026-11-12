@@ -34,6 +34,8 @@ REPORT_TYPES: tuple[ReportType, ...] = ("report", "still_present", "cleared")
 
 AiStatus = Literal["none", "pending", "done", "failed"]
 AI_STATUSES: tuple[AiStatus, ...] = ("none", "pending", "done", "failed")
+# A photo still "pending" after this long (task lost to a restart) is reported as "failed" when read.
+AI_PENDING_TIMEOUT = timedelta(minutes=10)
 
 DESCRIPTION_MAX_LENGTH = 500
 MAX_NEARBY_RADIUS_M = 5000

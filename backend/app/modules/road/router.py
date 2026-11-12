@@ -3,7 +3,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Query, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, File, Form, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import StringConstraints
 
@@ -11,6 +11,7 @@ from app.core.deps import CurrentUser, SessionDep, SettingsDep
 from app.core.pagination import DEFAULT_PAGE_SIZE, CursorQuery, LimitQuery, Page
 from app.core.rate_limit import get_limiter
 from app.modules.road import service
+from app.modules.road.classify import classify_report
 from app.modules.road.images import ImageTooLargeError
 from app.modules.road.rules import DESCRIPTION_MAX_LENGTH, MAX_NEARBY_RADIUS_M, Category
 from app.modules.road.schemas import (
@@ -48,6 +49,7 @@ def _limit_reports(request: Request, settings: SettingsDep, user: CurrentUser) -
 )
 async def create_report(
     request: Request,
+    background: BackgroundTasks,
     user: CurrentUser,
     session: SessionDep,
     settings: SettingsDep,
@@ -71,7 +73,15 @@ async def create_report(
         if not data:
             data = None
     body = service.NewReport(category=category, lat=lat, lng=lng, description=description or None, image=data)
-    return await service.create_report(session, settings, user.id, body)
+    created = await service.create_report(session, settings, user.id, body)
+    client = request.app.state.cv_client
+    store = service.image_store(settings)
+    if data is not None and settings.cv_service_url and client is not None and store is not None:
+        # Runs after the response: the rider never waits for the classifier (AD-3).
+        background.add_task(
+            classify_report, request.app.state.session_factory, client, store, created.report_id
+        )
+    return created
 
 
 @router.get("/reports", response_model=Page[OwnReportOut])

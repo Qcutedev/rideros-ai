@@ -832,6 +832,7 @@ dependencies = [
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "geoalchemy2" },
+    { name = "httpx" },
     { name = "joblib" },
     { name = "limits" },
     { name = "numpy" },
@@ -854,7 +855,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -869,6 +869,7 @@ requires-dist = [
     { name = "email-validator", specifier = ">=2.3" },
     { name = "fastapi", specifier = ">=0.120" },
     { name = "geoalchemy2", specifier = ">=0.18" },
+    { name = "httpx", specifier = ">=0.28" },
     { name = "joblib", specifier = "==1.6.0" },
     { name = "limits", specifier = ">=5.0" },
     { name = "numpy", specifier = "==2.5.4" },
@@ -891,7 +892,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28" },
     { name = "pytest", specifier = ">=8.4" },
     { name = "pytest-asyncio", specifier = ">=1.2" },
     { name = "pytest-cov", specifier = ">=7.0" },

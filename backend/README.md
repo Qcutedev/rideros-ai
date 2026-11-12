@@ -201,6 +201,14 @@ prediction carries the `foreign_dataset` warning and a disclaimer. `/pickup/mode
 - Photos: JPEG / PNG / WebP by magic bytes, ≤ 5 MB (`ROAD_IMAGE_MAX_BYTES`), ≤ 40 MP; re-encoded to JPEG
   ≤ 1600 px without EXIF (GPS included) and stored as `<uuid>.jpg` under `ROAD_IMAGE_DIR` (docker volume
   `road-images`). Only the author can fetch a photo.
+- Photo suggestion (P5c, `app/modules/road/classify.py`): when `CV_SERVICE_URL` is set, a report with a photo
+  is saved with `ai_status = "pending"`. After the response, a background task sends the stored JPEG to
+  `cv_service` `POST /classify` and writes `ai_label` (`flooding` / `road_damage` / `other`), `ai_confidence`
+  (3 decimals) and `ai_model_version_id`. The first time a classifier version answers, its row is added to
+  `model_versions` from `GET /model`, with the test metrics copied verbatim. The suggestion never changes the
+  category or the status. Any failure (timeout, 5xx, an unknown label, a model without metrics) leaves
+  `ai_status = "failed"` and does not affect the report. A row still `pending` after 10 minutes (a task lost
+  to a restart) reads as `failed`. With no `CV_SERVICE_URL`, photos keep `ai_status = "none"`.
 - Admins: `python -m scripts.set_role <email> admin` (in docker: `docker compose exec backend python -m
   scripts.set_role <email> admin`). There is no API to grant roles.
 

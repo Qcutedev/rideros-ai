@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     # Where report photos are stored (a docker volume). Unset -> reports with a photo answer 503.
     road_image_dir: Path | None = None
     road_image_max_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024)
+    # Photo classifier (cv_service, Phase 5). Unset -> photos are not classified (ai_status stays "none").
+    cv_service_url: str | None = None
+    cv_timeout_seconds: float = Field(default=15.0, gt=0, le=120)
 
     # ---- Rate limits (per process, in memory; `limits` syntax) ----
     rate_limit_enabled: bool = True
@@ -70,7 +73,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=list)
     docs_enabled: bool | None = None  # None -> enabled everywhere except production
 
-    @field_validator("model_dir", "road_image_dir", mode="before")
+    @field_validator("model_dir", "road_image_dir", "cv_service_url", mode="before")
     @classmethod
     def _empty_path_is_none(cls, value: object) -> object:
         return None if isinstance(value, str) and not value.strip() else value

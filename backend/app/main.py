@@ -18,6 +18,7 @@ from app.modules.health.router import router as health_router
 from app.modules.pickup import service as pickup_service
 from app.modules.pickup.router import router as pickup_router
 from app.modules.profit.router import router as profit_router
+from app.modules.road.classify import create_client as create_cv_client
 from app.modules.road.router import router as road_router
 from app.modules.shifts.router import router as shifts_router
 from app.modules.users.router import router as users_router
@@ -36,6 +37,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
         app.state.model = app.state.model_version_id = None
+        # Photo classifier client (None when CV_SERVICE_URL is unset); tests may replace it.
+        app.state.cv_client = create_cv_client(settings)
         if settings.model_dir is not None:
             # Fails fast (ArtifactError) on a missing, altered or incompatible artifact.
             model = load_model(settings.model_dir, settings.active_model_name, settings.active_model_version)
@@ -56,6 +59,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
+            if app.state.cv_client is not None:
+                await app.state.cv_client.aclose()
             await engine.dispose()
             log.info("shutdown")
 

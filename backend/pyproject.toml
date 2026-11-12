@@ -31,6 +31,8 @@ dependencies = [
     "joblib==1.6.0",
     "pillow>=12.0",
     "python-multipart>=0.0.20",
+    # Calls the photo classifier (cv_service) from a background task.
+    "httpx>=0.28",
 ]
 
 [dependency-groups]
@@ -38,7 +40,6 @@ dev = [
     "pytest>=8.4",
     "pytest-asyncio>=1.2",
     "pytest-cov>=7.0",
-    "httpx>=0.28",
     "ruff>=0.14",
     "python-dotenv>=1.2.4",
 ]

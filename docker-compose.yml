@@ -28,6 +28,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cv:
+        condition: service_started
     environment:
       ENV: ${ENV:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
@@ -40,11 +42,24 @@ services:
       RESTAURANT_STATS_DIR: ${RESTAURANT_STATS_DIR-/artifacts/restaurant_stats/1.0.0}
       # RoadContext report photos (re-encoded JPEGs, no EXIF). Set ROAD_IMAGE_DIR= to turn uploads off.
       ROAD_IMAGE_DIR: ${ROAD_IMAGE_DIR-/data/road_images}
+      # Photo classifier (background, suggestion only). Set CV_SERVICE_URL= to turn it off.
+      CV_SERVICE_URL: ${CV_SERVICE_URL-http://cv:8100}
     volumes:
       - ./ml/artifacts:/artifacts:ro
       - road-images:/data/road_images
     ports:
       - "127.0.0.1:${API_HOST_PORT:-8000}:8000"
+
+  # Photo classifier (Phase 5). Internal only: no published port, the backend calls it on this network.
+  cv:
+    build:
+      context: ./cv_service
+    environment:
+      # cv_service/artifacts is mounted read-only. Set CV_MODEL_DIR= to run without the model (503).
+      CV_MODEL_DIR: ${CV_MODEL_DIR-/models/road_cv/1.0.0}
+      CV_THREADS: ${CV_THREADS:-1}
+    volumes:
+      - ./cv_service/artifacts:/models:ro
 
 volumes:
   db-data:
