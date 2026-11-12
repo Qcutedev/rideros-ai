@@ -261,7 +261,7 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - Tests: `test/widget/app_logo_mark_test.dart` (+2) + `brand_logo_test.dart` (emblemBounds) · `flutter analyze` No issues · `flutter test` **427 passed** · ดูบน Emulator (Profile build) หน้า Login + สมัครสมาชิก ถูกต้อง
 - หัวหน้า สมัครสมาชิก / ลืมรหัสผ่าน / ตั้งรหัสใหม่ (`AuthHeader.page` ใน `core/widgets/auth_layout.dart`): โลโก้ (56) + หัวข้อ + คำอธิบาย **จัดกึ่งกลาง** เหมือนหน้า Login · ปุ่มย้อนกลับยังอยู่ซ้ายบน · Test: `design_system_test.dart` ตรวจตำแหน่งกึ่งกลาง (Fail ถ้าไม่มีการแก้) · `flutter test` **427 passed** · ดูบน Emulator หน้าสมัคร + ลืมรหัสผ่าน ถูกต้อง
 
-### 4.11 Phase 5 RoadContext AI (W10–W11) — **แผน + การตัดสินใจ 12 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-12**
+### 4.11 Phase 5 RoadContext AI (W10–W11) — **อนุมัติแล้ว 2026-11-12** (แผน + การตัดสินใจ 12 ข้อ ยืนยันตามที่แนะนำ · การตัดสินใจระหว่าง P5c 2 ข้อ (Alley val, Commit reports) อนุมัติพร้อม Phase 5)
 - งานย่อย: **P5a** Backend RoadContext (ยังไม่มี CV): Migration `0004` (`road_incidents`, `incident_reports`), Module `road` 6 Endpoint ตาม SYSTEM_ARCHITECTURE §4, กฎรวมซ้ำ `ST_DWithin` + หมวด + ช่วงเวลา (ค่าใน Config), Status machine §4, อัปโหลดรูป (Magic bytes, ≤ 5 MB, Re-encode ลบ EXIF, ชื่อ UUID), Tests → **P5b** Mobile (แผนที่ `flutter_map` + OSM, รายการใกล้ตัว, ฟอร์มรายงาน, รายละเอียด + ยังอยู่/คลี่คลายแล้ว) → **P5c** CV (ตรวจ License 3 ส่วน → Transfer learning torchvision → `cv_service/` `POST /classify` → Background classify → แสดง "AI แนะนำ") + Phase 5 Report แล้วรออนุมัติ · License ไม่ผ่าน → ตัด CV ตามลำดับตัด Scope แล้วรายงานตรงๆ
 - การตัดสินใจ (ยืนยันแล้ว):
   1. ทางเข้า: คง 5 แท็บ + การ์ด "เหตุบนถนนใกล้คุณ" ที่หน้าหลัก → Route `/road`
@@ -308,8 +308,26 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · Tests: `cv_service` **33 passed** (ruff สะอาด) · Backend **390 passed** (+10 `tests/api/test_road_classify.py`), ruff สะอาด, Coverage `app/modules` 98% (`classify.py` 95%) · Mobile ไม่ได้แก้ (UI "AI แนะนำ" ทำไว้แล้วใน P5b)
   · ช่องว่างที่ผู้ใช้ทักระหว่าง Session: TrueProfit "รูปแบบการทำงาน" (K-Means Work Patterns, `GET /profit/patterns` ใน Architecture §4) **ยังไม่ได้ทำ** · Roadmap P2 ไม่ได้อยู่ใน Phase ใด · ติด MVP Freeze (Module 1–3 แก้ได้แค่ Bug) → ต้องให้ผู้ใช้ตัดสินใจก่อนทำ
 
+- **P5c เสร็จ 2026-11-12 (Train + Evaluate + E2E) → Phase 5 Report → ผู้ใช้อนุมัติ Phase 5 + สั่ง Commit 2026-11-12**
+  · AlleyFloodNet: ผู้ใช้โหลด `archive.zip` จาก Kaggle (67,114,993 bytes, SHA-256 `4378b0ab…cb0d1`) → Pin ใน `training/sources.py` + SOURCES.md · `download` ตรวจผ่านครบ 6 ไฟล์ (`data/raw/manifest.json`)
+  · โครง zip จริงไม่ตรงที่คาด: `AlleyFloodNet/flood_train_/{flooded,non_flooded}` + `flood_test_/…` **ไม่มี val** (paper มี val 79/90 แต่ไม่อยู่ใน zip) · โค้ดเดิมจะติดป้าย `flooding` ทุกภาพ (`flood_train_` ขึ้นต้นด้วย flood) → แก้ `build._alley_label` อ่านจากโฟลเดอร์ชั้นในสุดแบบตรงชื่อ · `_alley_split` อ่านเป็น Token · `alley_val()` ย้าย ~15/85 ของ train ไป val ด้วย Hash คงที่ · Tests +5 (cv_service **38 passed**)
+  · `build`: 8,826 ภาพ (train 6,106 / val 1,340 / test 1,380) · ทุกแหล่งมีครบทุก split · ซ้ำ 189 · ป้ายขัดกัน 6
+  · `train`: 278 s บน RTX 3060 · เลือก finetune epoch 6 (val macro-F1 0.8831) · early stop epoch 10 · `git_commit` ใน metadata = `528477e-dirty` (Train ก่อน Commit ตัวแก้ Alley — ระบุใน model card)
+  · `evaluate` (Test n = 1,380): Accuracy **0.8804** · Macro-F1 **0.8755** · Baseline คลาสส่วนใหญ่ 0.2717 · F1 flooding 0.981 / road_damage 0.806 / other 0.840 · Threshold 0.6 แสดง 91.4% ของภาพ แม่น 0.9136 · Latency host 1 thread median 19.4 / p95 24.9 ms · ใน Container `cv` median **16.5** / p95 **22.8** ms (60 ภาพ, `Classifier.classify`)
+  · จุดอ่อน (ใน model card): US/China road_damage 100% = Shortcut (ประเทศนั้นมีแต่ภาพชำรุด) · ค่าที่ควรดูคือ Czech 0.60 / India 0.78 · ภาพแห้ง → flooding 14/520 (2.7%) · ไม่มีภาพไทย
+  · `cv_service/reports/1.0.0/`: `metrics.json` + `confusion_matrix.png` (สร้างจาก `evaluate`) + `model_card.md` (เขียนจากตัวเลขจริง) · `artifacts/` ไม่ Commit
+  · E2E: `docker compose up -d --build` → backend/cv/db healthy · `/health` cv = ok `road_cv/1.0.0` · รายงานน้ำท่วม + รูป AlleyFloodNet test ผ่าน API → `ai_status=done`, `flooding` 0.917, `model_versions` เพิ่ม `road_cv/1.0.0` · รายงานสิ่งกีดขวาง + รูปซอยแห้ง → `other` 0.989 · Emulator: "AI แนะนำ: น้ำท่วม (92%)" / "AI แนะนำ: อื่นๆ (99%)" + `ค่าประมาณ` (Emulator ค้างจอดำ → Cold boot ตาม memory)
+  · ข้อมูลทดสอบเพิ่มใน Dev DB ของ `p3b.check@example.com`: 2 รายงานมีรูป (คำอธิบาย "P5c E2E test photo")
+  · License ส่วนที่ 3 (Package ใน Image `cv`) ตรวจซ้ำใน Container ตรงกับ SOURCES.md §4: MIT/BSD/Apache-2.0/PSF ไม่มี Copyleft
+  · อัปเดต: `DATASET_ANALYSIS.md` (ตาราง CV ✅) · `DEVELOPMENT_ROADMAP.md` (Exit criteria Phase 5 ✅ 3 ข้อ, รออนุมัติ) · `cv_service/README.md` (Alley split)
+  · ผลตรวจ: Backend **390 passed** · Mobile `flutter analyze` No issues + **481 passed** · cv_service **38 passed** + ruff สะอาด · gitleaks `dir` (440 ไฟล์) + `git` → no leaks found · ไฟล์ที่ Commit ได้ไม่มี `data/raw`/`data/interim`/`artifacts`/`*.pt`
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-12: P5c ทำไปครึ่งทาง (§4.11) → Session ถัดไป: Train CV แล้วจบ P5c + Phase 5 Report** · ห้าม Commit จนกว่าผู้ใช้สั่ง
+**2026-11-12: Phase 5 อนุมัติแล้ว + Commit (ผู้ใช้สั่ง) → ถัดไป: K-Means Work Patterns (ผู้ใช้เลือกให้ทำ ยกเว้นจาก MVP Freeze)** · ห้าม Commit จนกว่าผู้ใช้สั่ง
+- ผู้ใช้ตอบ Phase 5 Report: (1) อนุมัติ (2) K-Means Work Patterns = ทำ (3) Commit
+- เริ่ม K-Means ด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยันก่อนลงมือ → ทำ → รายงาน · หลังจากนั้น Phase 6 QA (W12) เริ่มด้วยการเสนอแผนเช่นกัน
+
+**(เดิม) 2026-11-12: P5c ทำไปครึ่งทาง**
 1. ตรวจสถานะ: `git status` (สะอาด ยกเว้น CRLF noise ใน `mobile/lib/l10n/*.dart`) · `docker compose up -d db` · `cd cv_service; python -m uv sync; python -m uv run pytest` (**33 passed**) · ไฟล์ใน `cv_service/data/raw/` ยังอยู่ (5 zip)
 2. **ต้องได้ zip AlleyFloodNet จากผู้ใช้ก่อน** (Kaggle ต้องล็อกอิน; ดู `~/Downloads`) → `python -m uv run python -m training download --alley <zip>` → ครั้งแรกจะ fail พร้อม hash → ดูโครงสร้าง zip (`build._alley_items` คาดโฟลเดอร์ train/val/test + flooding/non-flooding; ไม่ตรงจะ `ValueError`) → Pin hash + bytes ใน `training/sources.py` + ตาราง SOURCES.md → รัน `download` อีกครั้งจนผ่าน (เขียน `data/raw/manifest.json`)
    · ถ้าผู้ใช้ไม่อยากรอ: ทางเลือกคือ Train โดยไม่มี Alley (ต้องถามก่อน — คลาส other จะเหลือแค่ถนน RDD)
