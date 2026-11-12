@@ -1,0 +1,177 @@
+{
+  "method": "app/modules/profit/patterns.py",
+  "note": "Synthetic riders with known groups; not accuracy on real riders.",
+  "false_pattern_rate": 0.017,
+  "detection_rate": 0.992,
+  "correct_k_rate": 0.945,
+  "results": [
+    {
+      "scenario": "uniform random",
+      "has_pattern": false,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 0.033,
+      "median_ms": 584.8
+    },
+    {
+      "scenario": "uniform random",
+      "has_pattern": false,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 0.067,
+      "median_ms": 579.2
+    },
+    {
+      "scenario": "uniform random",
+      "has_pattern": false,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 0.0,
+      "median_ms": 801.6
+    },
+    {
+      "scenario": "one habit (evening, every day)",
+      "has_pattern": false,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 0.0,
+      "median_ms": 713.8
+    },
+    {
+      "scenario": "one habit (evening, every day)",
+      "has_pattern": false,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 0.0,
+      "median_ms": 940.0
+    },
+    {
+      "scenario": "one habit (evening, every day)",
+      "has_pattern": false,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 0.0,
+      "median_ms": 789.3
+    },
+    {
+      "scenario": "2 groups clear",
+      "has_pattern": true,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 889.6,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 1.0
+    },
+    {
+      "scenario": "2 groups clear",
+      "has_pattern": true,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 831.3,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 1.0
+    },
+    {
+      "scenario": "2 groups clear",
+      "has_pattern": true,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 842.0,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 1.0
+    },
+    {
+      "scenario": "2 groups noisy",
+      "has_pattern": true,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 0.967,
+      "median_ms": 785.7,
+      "correct_k_rate": 0.967,
+      "mean_ari_when_shown": 0.964
+    },
+    {
+      "scenario": "2 groups noisy",
+      "has_pattern": true,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 812.2,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 0.973
+    },
+    {
+      "scenario": "2 groups noisy",
+      "has_pattern": true,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 866.6,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 0.973
+    },
+    {
+      "scenario": "3 groups",
+      "has_pattern": true,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 881.0,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 1.0
+    },
+    {
+      "scenario": "3 groups",
+      "has_pattern": true,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 1048.1,
+      "correct_k_rate": 0.967,
+      "mean_ari_when_shown": 0.995
+    },
+    {
+      "scenario": "3 groups",
+      "has_pattern": true,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 942.7,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 0.999
+    },
+    {
+      "scenario": "night across midnight + lunch",
+      "has_pattern": true,
+      "sessions": 30,
+      "reps": 30,
+      "shown_rate": 0.933,
+      "median_ms": 1041.1,
+      "correct_k_rate": 0.633,
+      "mean_ari_when_shown": 0.889
+    },
+    {
+      "scenario": "night across midnight + lunch",
+      "has_pattern": true,
+      "sessions": 60,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 890.5,
+      "correct_k_rate": 0.767,
+      "mean_ari_when_shown": 0.925
+    },
+    {
+      "scenario": "night across midnight + lunch",
+      "has_pattern": true,
+      "sessions": 150,
+      "reps": 30,
+      "shown_rate": 1.0,
+      "median_ms": 916.2,
+      "correct_k_rate": 1.0,
+      "mean_ari_when_shown": 0.993
+    }
+  ]
+}

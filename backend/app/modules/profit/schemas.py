@@ -177,3 +177,48 @@ class ProfitTrends(BaseModel):
     timezone: str
     currency: str
     points: list[TrendPoint]
+
+
+# ---- work patterns (K-Means) ----
+
+PatternStatus = Literal["ok", "insufficient_data", "no_clear_pattern"]
+
+
+class PatternGroup(BaseModel):
+    """One group of similar sessions. Labels are codes; the app turns them into words."""
+
+    time_of_day: Literal["morning", "midday", "evening", "night"] = Field(
+        description="Of the mean local start: morning 05-11, midday 11-15, evening 15-20, night 20-05"
+    )
+    length: Literal["short", "medium", "long"] = Field(description="Mean length: short < 4 h, medium < 8 h")
+    day_type: Literal["weekday", "weekend", "mixed"] = Field(
+        description="weekend when >= 70% of the sessions start on Sat/Sun, weekday when <= 30%"
+    )
+    mean_start_minute: int = Field(ge=0, lt=1440, description="Circular mean of the local start time")
+    mean_hours: Decimal
+    weekend_share: float
+    session_count: int
+    share: float = Field(description="session_count / all sessions in the window")
+    profit_session_count: int = Field(
+        description="Sessions with linked income; the per-hour figures use only these"
+    )
+    revenue_per_hour: Decimal | None = Field(description="Estimate; null when no session has linked income")
+    net_profit_per_hour: Decimal | None = Field(
+        description="Estimate: (linked income - linked expenses) / hours of those sessions"
+    )
+
+
+class WorkPatterns(BaseModel):
+    status: PatternStatus
+    window_days: int
+    start_date: date
+    end_date: date = Field(description="Inclusive")
+    session_count: int = Field(description="Sessions in the window")
+    min_sessions: int = Field(description="Sessions needed before patterns are computed")
+    k: int | None
+    silhouette: float | None = Field(description="Separation of the chosen grouping (-1..1)")
+    null_silhouette: float | None = Field(description="Best silhouette on shuffled data; must be beaten")
+    stability: float | None = Field(description="Mean adjusted Rand index over bootstrap refits (0..1)")
+    groups: list[PatternGroup] = Field(description="Largest first; empty unless status is ok")
+    timezone: str
+    currency: str

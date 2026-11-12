@@ -2,15 +2,17 @@
 
 import uuid
 from dataclasses import asdict
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.pagination import InvalidCursorError, Page, decode_cursor, encode_cursor
 from app.core.timezones import local_dates_to_utc_range, today_in
 from app.modules.profit import calculator as calc
+from app.modules.profit import patterns as pat
 from app.modules.profit import repository as repo
 from app.modules.profit.models import (
     WORK_SESSION_OVERLAP_CONSTRAINT,
@@ -25,9 +27,11 @@ from app.modules.profit.schemas import (
     IncomeCreate,
     IncomeOut,
     IncomeUpdate,
+    PatternGroup,
     ProfitSummary,
     ProfitTrends,
     TrendPoint,
+    WorkPatterns,
     WorkSessionCreate,
     WorkSessionOut,
     WorkSessionUpdate,
@@ -401,4 +405,35 @@ async def trends(
         timezone=locale.timezone,
         currency=locale.currency,
         points=points,
+    )
+
+
+# ---- work patterns ----
+
+
+async def work_patterns(
+    session: AsyncSession, user_id: uuid.UUID, *, now: datetime | None = None
+) -> WorkPatterns:
+    """K-Means groups of the sessions that started in the last WINDOW_DAYS local days (incl. today)."""
+    locale = await get_locale(session, user_id)
+    last = (now or datetime.now(UTC)).astimezone(locale.zone).date()
+    first = last - timedelta(days=pat.WINDOW_DAYS - 1)
+    start, end = local_dates_to_utc_range(first, last, locale.zone)
+    rows = await repo.sessions_with_money(session, user_id, start, end)
+    # ~0.3–0.9 s of CPU on a miss, so off the event loop; unchanged data hits the cache.
+    result = await run_in_threadpool(pat.find_patterns_cached, tuple(rows), locale.zone)
+    return WorkPatterns(
+        status=result.status,
+        window_days=pat.WINDOW_DAYS,
+        start_date=first,
+        end_date=last,
+        session_count=result.session_count,
+        min_sessions=pat.MIN_SESSIONS,
+        k=result.k,
+        silhouette=result.silhouette,
+        null_silhouette=result.null_silhouette,
+        stability=result.stability,
+        groups=[PatternGroup.model_validate(g, from_attributes=True) for g in result.groups],
+        timezone=locale.timezone,
+        currency=locale.currency,
     )

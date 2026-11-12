@@ -9,6 +9,7 @@ from sqlalchemy import Select, delete, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.profit.models import ExpenseRecord, IncomeRecord, WorkSession
+from app.modules.profit.patterns import SessionRow
 
 type Owned = WorkSession | IncomeRecord | ExpenseRecord
 type RecordCursor = tuple[date, datetime, uuid.UUID]  # (occurred_on, created_at, id), newest first
@@ -186,3 +187,39 @@ async def session_spans(
         WorkSession.user_id == user_id, WorkSession.started_at >= start, WorkSession.started_at < end
     )
     return [(s, e) for s, e in await session.execute(stmt)]
+
+
+async def sessions_with_money(
+    session: AsyncSession, user_id: uuid.UUID, start: datetime, end: datetime
+) -> list[SessionRow]:
+    """Sessions starting in [start, end) with the totals of the income and expenses linked to them."""
+    income = (
+        select(
+            IncomeRecord.work_session_id.label("sid"),
+            func.sum(IncomeRecord.amount).label("revenue"),
+            func.count().label("n"),
+        )
+        .where(IncomeRecord.user_id == user_id, IncomeRecord.work_session_id.is_not(None))
+        .group_by(IncomeRecord.work_session_id)
+        .subquery()
+    )
+    expense = (
+        select(ExpenseRecord.work_session_id.label("sid"), func.sum(ExpenseRecord.amount).label("expenses"))
+        .where(ExpenseRecord.user_id == user_id, ExpenseRecord.work_session_id.is_not(None))
+        .group_by(ExpenseRecord.work_session_id)
+        .subquery()
+    )
+    stmt = (
+        select(
+            WorkSession.started_at,
+            WorkSession.ended_at,
+            func.coalesce(income.c.revenue, 0),
+            func.coalesce(expense.c.expenses, 0),
+            func.coalesce(income.c.n, 0),
+        )
+        .outerjoin(income, income.c.sid == WorkSession.id)
+        .outerjoin(expense, expense.c.sid == WorkSession.id)
+        .where(WorkSession.user_id == user_id, WorkSession.started_at >= start, WorkSession.started_at < end)
+        .order_by(WorkSession.started_at, WorkSession.id)
+    )
+    return [SessionRow(s, e, Decimal(r), Decimal(x), int(n)) for s, e, r, x, n in await session.execute(stmt)]

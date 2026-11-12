@@ -20,6 +20,7 @@ from app.modules.profit.schemas import (
     Period,
     ProfitSummary,
     ProfitTrends,
+    WorkPatterns,
     WorkSessionCreate,
     WorkSessionOut,
     WorkSessionUpdate,
@@ -199,6 +200,14 @@ async def profit_trends(
     return await service.trends(
         session, user.id, granularity=granularity, date_from=date_from, date_to=date_to
     )
+
+
+@profit.get("/patterns", response_model=WorkPatterns)
+async def profit_patterns(user: CurrentUser, session: SessionDep) -> WorkPatterns:
+    """K-Means groups of the rider's work sessions in the last 180 days (start time, length,
+    weekday/weekend). `insufficient_data` below 30 sessions; `no_clear_pattern` when the grouping
+    is not clearly better than chance (see app/modules/profit/patterns.py)."""
+    return await service.work_patterns(session, user.id)
 
 
 for _sub in (sessions, income, expenses, profit):

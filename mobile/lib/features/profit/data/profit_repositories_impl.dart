@@ -8,6 +8,7 @@ import '../../../core/utils/date_json.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
 import '../domain/profit_summary.dart';
+import '../domain/work_patterns.dart';
 
 final incomeRepositoryProvider = Provider<IncomeRepository>(
   (ref) => ApiRecordRepository(
@@ -130,5 +131,11 @@ class ProfitRepositoryImpl implements ProfitRepository {
       },
     );
     return ProfitTrends.fromJson(response.data!);
+  });
+
+  @override
+  Future<WorkPatterns> patterns() => guardApi(() async {
+    final response = await _dio.get<Map<String, dynamic>>('/profit/patterns');
+    return WorkPatterns.fromJson(response.data!);
   });
 }

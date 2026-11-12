@@ -8,6 +8,7 @@ import 'package:rideros_ai/features/profit/domain/profit_period.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_repositories.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
+import 'package:rideros_ai/features/profit/domain/work_patterns.dart';
 
 Decimal d(String value) => Decimal.parse(value);
 
@@ -43,6 +44,45 @@ ProfitMetrics metrics({
   );
 }
 
+/// `GET /profit/patterns` result for tests (window: 180 days ending [testNow]).
+WorkPatterns workPatterns({
+  PatternStatus status = PatternStatus.insufficientData,
+  int sessions = 0,
+  List<PatternGroup> groups = const [],
+}) => WorkPatterns(
+  status: status,
+  windowDays: 180,
+  startDate: DateTime.utc(2026, 5, 15),
+  endDate: DateTime.utc(2026, 11, 10),
+  sessionCount: sessions,
+  minSessions: 30,
+  groups: groups,
+  currency: 'THB',
+);
+
+PatternGroup patternGroup({
+  ShiftTimeOfDay time = ShiftTimeOfDay.evening,
+  ShiftLength length = ShiftLength.short,
+  ShiftDayType days = ShiftDayType.weekday,
+  int startMinute = 18 * 60 + 30,
+  String hours = '3.1',
+  int count = 25,
+  double share = 0.676,
+  int paid = 25,
+  String? netPerHour = '80.25',
+}) => PatternGroup(
+  timeOfDay: time,
+  length: length,
+  dayType: days,
+  meanStartMinute: startMinute,
+  meanHours: d(hours),
+  sessionCount: count,
+  share: share,
+  profitSessionCount: paid,
+  revenuePerHour: netPerHour == null ? null : d(netPerHour) + d('20'),
+  netProfitPerHour: netPerHour == null ? null : d(netPerHour),
+);
+
 DateTime _periodEnd(DateTime start, ProfitPeriod period) => switch (period) {
   ProfitPeriod.day => start,
   ProfitPeriod.week => start.add(const Duration(days: 6)),
@@ -66,6 +106,8 @@ class FakeProfitRepository implements ProfitRepository {
   final Map<DateTime, ProfitMetrics> dailyMetrics = {};
   Object? summaryError;
   Object? trendsError;
+  WorkPatterns patternsResult = workPatterns();
+  Object? patternsError;
   Completer<void>? gate;
   final calls = <String>[];
 
@@ -144,6 +186,14 @@ class FakeProfitRepository implements ProfitRepository {
       currency: 'THB',
       points: points,
     );
+  }
+
+  @override
+  Future<WorkPatterns> patterns() async {
+    calls.add('patterns');
+    await gate?.future;
+    if (patternsError != null) throw patternsError!;
+    return patternsResult;
   }
 }
 

@@ -1,6 +1,7 @@
 import '../../../core/network/paged_result.dart';
 import 'profit_records.dart';
 import 'profit_summary.dart';
+import 'work_patterns.dart';
 
 /// CRUD of one TrueProfit record type (`/income`, `/expenses`, `/work-sessions`).
 /// Every method throws an `AppFailure` on error; another user's id is a 404.
@@ -33,4 +34,7 @@ abstract interface class ProfitRepository {
     DateTime? from,
     DateTime? to,
   });
+
+  /// K-Means groups of the work sessions of the last 180 days.
+  Future<WorkPatterns> patterns();
 }

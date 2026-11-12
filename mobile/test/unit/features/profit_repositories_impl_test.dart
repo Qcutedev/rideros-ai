@@ -9,6 +9,7 @@ import 'package:rideros_ai/core/storage/refresh_token_store.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
+import 'package:rideros_ai/features/profit/domain/work_patterns.dart';
 
 import '../../helpers/fake_http_adapter.dart';
 
@@ -209,6 +210,85 @@ void main() {
     expect(adapter.requests[2].queryParameters, {'period': 'day'});
     expect(summary.endDate, DateTime.utc(2026, 10, 31));
     expect(trends.points.single.startDate, DateTime.utc(2026, 10));
+  });
+
+  test('patterns parses groups, codes and nullable estimates', () async {
+    adapter.handler = (o) => json(200, {
+      'status': 'ok',
+      'window_days': 180,
+      'start_date': '2026-05-15',
+      'end_date': '2026-11-10',
+      'session_count': 37,
+      'min_sessions': 30,
+      'k': 2,
+      'silhouette': 0.71,
+      'null_silhouette': 0.42,
+      'stability': 1.0,
+      'groups': [
+        {
+          'time_of_day': 'evening',
+          'length': 'short',
+          'day_type': 'weekday',
+          'mean_start_minute': 1110,
+          'mean_hours': '3.2',
+          'weekend_share': 0.0,
+          'session_count': 25,
+          'share': 0.676,
+          'profit_session_count': 25,
+          'revenue_per_hour': '92.59',
+          'net_profit_per_hour': '74.07',
+        },
+        {
+          'time_of_day': 'morning',
+          'length': 'long',
+          'day_type': 'weekend',
+          'mean_start_minute': 540,
+          'mean_hours': '8.5',
+          'weekend_share': 1.0,
+          'session_count': 12,
+          'share': 0.324,
+          'profit_session_count': 0,
+          'revenue_per_hour': null,
+          'net_profit_per_hour': null,
+        },
+      ],
+      'timezone': 'Asia/Bangkok',
+      'currency': 'THB',
+    });
+    final patterns = await container.read(profitRepositoryProvider).patterns();
+    expect(adapter.requests.single.path, '/profit/patterns');
+    expect(patterns.status, PatternStatus.ok);
+    expect(patterns.sessionsMissing, 0);
+    final [evening, weekend] = patterns.groups;
+    expect(evening.timeOfDay, ShiftTimeOfDay.evening);
+    expect(evening.netProfitPerHour, Decimal.parse('74.07'));
+    expect(evening.meanStartMinute, 1110);
+    expect(weekend.dayType, ShiftDayType.weekend);
+    expect(weekend.length, ShiftLength.long);
+    expect(weekend.netProfitPerHour, isNull);
+    expect(weekend.meanHours, Decimal.parse('8.5'));
+  });
+
+  test('patterns: insufficient data counts the missing sessions', () async {
+    adapter.handler = (o) => json(200, {
+      'status': 'insufficient_data',
+      'window_days': 180,
+      'start_date': '2026-05-15',
+      'end_date': '2026-11-10',
+      'session_count': 12,
+      'min_sessions': 30,
+      'k': null,
+      'silhouette': null,
+      'null_silhouette': null,
+      'stability': null,
+      'groups': <Object>[],
+      'timezone': 'Asia/Bangkok',
+      'currency': 'THB',
+    });
+    final patterns = await container.read(profitRepositoryProvider).patterns();
+    expect(patterns.status, PatternStatus.insufficientData);
+    expect(patterns.sessionsMissing, 18);
+    expect(patterns.groups, isEmpty);
   });
 
   test('offline becomes a NetworkFailure', () async {

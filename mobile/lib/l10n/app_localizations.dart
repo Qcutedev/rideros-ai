@@ -742,6 +742,125 @@ abstract class AppLocalizations {
   /// **'ยังไม่มีชั่วโมงทำงาน จึงยังคำนวณค่าต่อชั่วโมงไม่ได้ (บันทึกช่วงทำงาน หรือกรอกชั่วโมงในรายได้)'**
   String get profitNoWorkingHours;
 
+  /// No description provided for @patternsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'รูปแบบการทำงาน'**
+  String get patternsTitle;
+
+  /// No description provided for @patternsInsufficient.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกช่วงทำงานอีก {missing} ครั้ง เพื่อดูรูปแบบการทำงานของคุณ'**
+  String patternsInsufficient(int missing);
+
+  /// No description provided for @patternsProgress.
+  ///
+  /// In th, this message translates to:
+  /// **'{have} / {need} ช่วงทำงานใน {days} วันล่าสุด'**
+  String patternsProgress(int have, int need, int days);
+
+  /// No description provided for @patternsNoClear.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่เห็นรูปแบบชัดเจนจาก {count} ช่วงทำงานใน {days} วันล่าสุด เวลาทำงานยังกระจายจนแบ่งกลุ่มได้ไม่ชัดกว่าการสุ่ม'**
+  String patternsNoClear(int count, int days);
+
+  /// No description provided for @patternsTimeMorning.
+  ///
+  /// In th, this message translates to:
+  /// **'เช้า'**
+  String get patternsTimeMorning;
+
+  /// No description provided for @patternsTimeMidday.
+  ///
+  /// In th, this message translates to:
+  /// **'กลางวัน'**
+  String get patternsTimeMidday;
+
+  /// No description provided for @patternsTimeEvening.
+  ///
+  /// In th, this message translates to:
+  /// **'เย็น'**
+  String get patternsTimeEvening;
+
+  /// No description provided for @patternsTimeNight.
+  ///
+  /// In th, this message translates to:
+  /// **'ดึก'**
+  String get patternsTimeNight;
+
+  /// No description provided for @patternsLengthShort.
+  ///
+  /// In th, this message translates to:
+  /// **'สั้น'**
+  String get patternsLengthShort;
+
+  /// No description provided for @patternsLengthMedium.
+  ///
+  /// In th, this message translates to:
+  /// **'กลาง'**
+  String get patternsLengthMedium;
+
+  /// No description provided for @patternsLengthLong.
+  ///
+  /// In th, this message translates to:
+  /// **'ยาว'**
+  String get patternsLengthLong;
+
+  /// No description provided for @patternsDayWeekday.
+  ///
+  /// In th, this message translates to:
+  /// **'วันธรรมดา'**
+  String get patternsDayWeekday;
+
+  /// No description provided for @patternsDayWeekend.
+  ///
+  /// In th, this message translates to:
+  /// **'สุดสัปดาห์'**
+  String get patternsDayWeekend;
+
+  /// No description provided for @patternsDayMixed.
+  ///
+  /// In th, this message translates to:
+  /// **'ทุกวัน'**
+  String get patternsDayMixed;
+
+  /// No description provided for @patternsGroupName.
+  ///
+  /// In th, this message translates to:
+  /// **'{time} · {length} ~{hours} ชม. · {days}'**
+  String patternsGroupName(
+    String time,
+    String length,
+    String hours,
+    String days,
+  );
+
+  /// No description provided for @patternsGroupDetail.
+  ///
+  /// In th, this message translates to:
+  /// **'เริ่มราว {start} · {count} ครั้ง ({percent}%)'**
+  String patternsGroupDetail(String start, int count, int percent);
+
+  /// No description provided for @patternsPerHourBasis.
+  ///
+  /// In th, this message translates to:
+  /// **'จาก {count} ช่วงที่ผูกรายได้'**
+  String patternsPerHourBasis(int count);
+
+  /// No description provided for @patternsNoLinkedIncome.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่มีรายได้ที่ผูกกับช่วงทำงานในกลุ่มนี้'**
+  String get patternsNoLinkedIncome;
+
+  /// No description provided for @patternsNote.
+  ///
+  /// In th, this message translates to:
+  /// **'จัดกลุ่มด้วย K-Means จากเวลาเริ่ม ความยาว และวันธรรมดา/สุดสัปดาห์ ของ {days} วันล่าสุด · กำไร/ชม. เป็นค่าประมาณจากรายได้และค่าใช้จ่ายที่ผูกกับช่วงทำงานเท่านั้น'**
+  String patternsNote(int days);
+
   /// No description provided for @recordsTitle.
   ///
   /// In th, this message translates to:

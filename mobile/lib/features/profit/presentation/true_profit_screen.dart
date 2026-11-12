@@ -12,9 +12,11 @@ import 'profit_labels.dart';
 import 'profit_providers.dart';
 import 'widgets/net_profit_chart.dart';
 import 'widgets/profit_metrics_view.dart';
+import 'widgets/work_patterns_card.dart';
 
 /// TrueProfit dashboard: actual revenue, expenses, net profit and hours for a day,
-/// week or month, with the net-profit trend leading up to it.
+/// week or month, with the net-profit trend leading up to it and the rider's
+/// work patterns (last 180 days, independent of the period).
 class TrueProfitScreen extends ConsumerWidget {
   const TrueProfitScreen({super.key});
 
@@ -167,6 +169,8 @@ class _Content extends ConsumerWidget {
               ? _EmptyPeriod(message: l10n.profitTrendEmpty)
               : NetProfitChart(trends: data.trends),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        const WorkPatternsCard(),
         const SizedBox(height: AppSpacing.lg),
         AppBanner(message: l10n.profitActualOnlyNote(summary.timezone)),
       ],

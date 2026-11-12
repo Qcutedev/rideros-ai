@@ -10,6 +10,7 @@ import '../domain/profit_period.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
 import '../domain/profit_summary.dart';
+import '../domain/work_patterns.dart';
 
 export '../../../core/presentation/paged_list.dart';
 
@@ -99,6 +100,13 @@ final trueProfitDataProvider = FutureProvider.autoDispose<TrueProfitData>((
     summary: results[0] as ProfitSummary,
     trends: results[1] as ProfitTrends,
   );
+});
+
+/// Work patterns of the last 180 days. Independent of the period on screen;
+/// reloads after every record change. A failure only affects its own card.
+final workPatternsProvider = FutureProvider.autoDispose<WorkPatterns>((ref) {
+  ref.watch(profitDataRevisionProvider);
+  return ref.watch(profitRepositoryProvider).patterns();
 });
 
 // ---- record lists (cursor pagination) ----

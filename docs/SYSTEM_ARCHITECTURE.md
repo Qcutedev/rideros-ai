@@ -195,7 +195,7 @@ sequenceDiagram
 | | `GET/POST /work-sessions`, `GET/PATCH/DELETE /work-sessions/{id}` | |
 | | `GET /profit/summary?period=day\|week\|month&date=YYYY-MM-DD` | Revenue, Expenses, Net, Hours, Rev/h, Net/h |
 | | `GET /profit/trends?granularity=day\|week\|month&from=&to=` | Time series |
-| | `GET /profit/patterns` | K-Means; คืน `insufficient_data` ถ้ามีข้อมูลไม่ถึงเกณฑ์ |
+| | `GET /profit/patterns` | K-Means (เวลาเริ่ม, ความยาว, วันธรรมดา/สุดสัปดาห์ · 180 วัน); คืน `insufficient_data` ถ้า < 30 ช่วง และ `no_clear_pattern` ถ้าไม่ผ่าน Silhouette ≥ 0.25 + Permutation test + Bootstrap stability |
 | Shift Simulator | `GET/POST /shift-scenarios`, `GET/PATCH/DELETE /shift-scenarios/{id}` | สร้างแล้วคำนวณ Estimate ทันที |
 | | `POST /shift-scenarios/compare` `{ids: [...]}` | 2–5 Scenarios |
 | | `POST /shift-scenarios/{id}/estimate` | คำนวณใหม่ด้วยข้อมูลล่าสุด |

@@ -378,6 +378,83 @@ class AppLocalizationsTh extends AppLocalizations {
       'ยังไม่มีชั่วโมงทำงาน จึงยังคำนวณค่าต่อชั่วโมงไม่ได้ (บันทึกช่วงทำงาน หรือกรอกชั่วโมงในรายได้)';
 
   @override
+  String get patternsTitle => 'รูปแบบการทำงาน';
+
+  @override
+  String patternsInsufficient(int missing) {
+    return 'บันทึกช่วงทำงานอีก $missing ครั้ง เพื่อดูรูปแบบการทำงานของคุณ';
+  }
+
+  @override
+  String patternsProgress(int have, int need, int days) {
+    return '$have / $need ช่วงทำงานใน $days วันล่าสุด';
+  }
+
+  @override
+  String patternsNoClear(int count, int days) {
+    return 'ยังไม่เห็นรูปแบบชัดเจนจาก $count ช่วงทำงานใน $days วันล่าสุด เวลาทำงานยังกระจายจนแบ่งกลุ่มได้ไม่ชัดกว่าการสุ่ม';
+  }
+
+  @override
+  String get patternsTimeMorning => 'เช้า';
+
+  @override
+  String get patternsTimeMidday => 'กลางวัน';
+
+  @override
+  String get patternsTimeEvening => 'เย็น';
+
+  @override
+  String get patternsTimeNight => 'ดึก';
+
+  @override
+  String get patternsLengthShort => 'สั้น';
+
+  @override
+  String get patternsLengthMedium => 'กลาง';
+
+  @override
+  String get patternsLengthLong => 'ยาว';
+
+  @override
+  String get patternsDayWeekday => 'วันธรรมดา';
+
+  @override
+  String get patternsDayWeekend => 'สุดสัปดาห์';
+
+  @override
+  String get patternsDayMixed => 'ทุกวัน';
+
+  @override
+  String patternsGroupName(
+    String time,
+    String length,
+    String hours,
+    String days,
+  ) {
+    return '$time · $length ~$hours ชม. · $days';
+  }
+
+  @override
+  String patternsGroupDetail(String start, int count, int percent) {
+    return 'เริ่มราว $start · $count ครั้ง ($percent%)';
+  }
+
+  @override
+  String patternsPerHourBasis(int count) {
+    return 'จาก $count ช่วงที่ผูกรายได้';
+  }
+
+  @override
+  String get patternsNoLinkedIncome =>
+      'ยังไม่มีรายได้ที่ผูกกับช่วงทำงานในกลุ่มนี้';
+
+  @override
+  String patternsNote(int days) {
+    return 'จัดกลุ่มด้วย K-Means จากเวลาเริ่ม ความยาว และวันธรรมดา/สุดสัปดาห์ ของ $days วันล่าสุด · กำไร/ชม. เป็นค่าประมาณจากรายได้และค่าใช้จ่ายที่ผูกกับช่วงทำงานเท่านั้น';
+  }
+
+  @override
   String get recordsTitle => 'รายการทั้งหมด';
 
   @override
