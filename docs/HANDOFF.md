@@ -322,10 +322,40 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · อัปเดต: `DATASET_ANALYSIS.md` (ตาราง CV ✅) · `DEVELOPMENT_ROADMAP.md` (Exit criteria Phase 5 ✅ 3 ข้อ, รออนุมัติ) · `cv_service/README.md` (Alley split)
   · ผลตรวจ: Backend **390 passed** · Mobile `flutter analyze` No issues + **481 passed** · cv_service **38 passed** + ruff สะอาด · gitleaks `dir` (440 ไฟล์) + `git` → no leaks found · ไฟล์ที่ Commit ได้ไม่มี `data/raw`/`data/interim`/`artifacts`/`*.pt`
 
+### 4.12 K-Means Work Patterns (TrueProfit "รูปแบบการทำงาน") — **เสร็จ 2026-11-12 · Commit `4622708` ตามที่ผู้ใช้สั่งหลังรับรายงาน · gitleaks `dir` (448 ไฟล์) + `git` → no leaks found**
+ผู้ใช้ตอบแผน 9 ข้อ (ใน §4.2 ด้านล่าง) ว่า "เอาตามที่นายคิดว่าดีที่สุด ทำแล้วโมเดลแม่นยำที่สุด" → ทำตาม 9 ข้อ + ปรับ 3 จุดจากผล Benchmark (ข้อ 4 เดิมใช้ Silhouette อย่างเดียว ไม่พอ)
+- K-Means ไม่มี Label → "แม่นยำ" วัดจาก Benchmark ข้อมูลสังเคราะห์ที่รู้กลุ่มจริง (`backend/scripts/evaluate_work_patterns.py` → `backend/reports/work_patterns_benchmark.json`, 6 สถานการณ์ × 30/60/150 ช่วง × 30 รอบ) **ไม่ใช่ความแม่นยำกับไรเดอร์จริง** (ไม่มีข้อมูลจริง)
+- วิธี (`backend/app/modules/profit/patterns.py`): Feature = ชั่วโมงเริ่ม sin/cos (scale ร่วมให้วงกลมรวมหนัก 1 Feature) + ความยาว (standardize) + สุดสัปดาห์ (น้ำหนัก 0.5) · k = 2–4, `n_init=10`, seed คงที่ · ทุกกลุ่ม ≥ 3 ช่วง · แสดงกลุ่มเมื่อผ่านครบ 3 ด่าน: (1) Silhouette ≥ 0.25 (2) **Permutation test**: ชนะ Silhouette ของข้อมูลสลับคอลัมน์อิสระทุกชุดจาก 39 ชุด (p ≤ 0.025) (3) **Bootstrap stability**: ARI เฉลี่ย 20 รอบ ≥ 0.6
+- การปรับจากแผนเดิม (ตัวเลขจาก Benchmark):
+  · Silhouette อย่างเดียว → ข้อมูลสุ่มก็ "เจอกลุ่ม" เพราะ Flag สุดสัปดาห์แบ่งเสมอ → เพิ่ม Permutation test
+  · น้ำหนักสุดสัปดาห์ 1.0 → เลือก k ถูก 35% (แตกกลุ่มตามวัน) · 0.5 → 95% · 0 → 97% แต่กลุ่มหลอก 8% และเสียข้อมูลวัน → เลือก 0.5
+  · Null 19 ชุด (p ≤ 0.05) → ข้อมูลสุ่ม n=30/60 หลุด 13% → 39 ชุด
+- ผล Benchmark สุดท้าย: กลุ่มหลอก (ข้อมูลสุ่ม/นิสัยเดียว) **1.7%** · ตรวจพบกลุ่มจริง **99.2%** · k ถูก **94.5%** · ARI กับกลุ่มจริง 0.96–1.0 (ยกเว้น "ดึกข้ามเที่ยงคืน + กลางวัน" n=30: k ถูก 63%, ARI 0.89; n=150: 100%, 0.99)
+- กำไร/ชม. ต่อกลุ่ม = (รายได้ − ค่าใช้จ่ายที่ผูก Session) ÷ ชม. (ไมโครวินาทีแบบ calculator) ของ Session ที่มีรายได้ผูกเท่านั้น · Decimal · ไม่มี → null/"—"
+- API: `GET /profit/patterns` (Schema `WorkPatterns`/`PatternGroup` · ป้ายเป็น Code ให้แอปแปลภาษา) · คำนวณใน threadpool + `lru_cache(256)` ตามชุด Session (ผลคงที่จาก seed) · Latency ใน Container ครั้งแรก 772 ms, ซ้ำ 13 ms
+- Mobile: `domain/work_patterns.dart`, `ProfitRepository.patterns()`, `workPatternsProvider` (รีโหลดตาม `profitDataRevisionProvider`, ไม่ขึ้นกับช่วงที่ดู), `widgets/work_patterns_card.dart` ใต้กราฟแนวโน้ม · 3 สถานะ: แถบความคืบหน้า / "ยังไม่เห็นรูปแบบชัดเจน" / รายการกลุ่ม + ป้าย `ค่าประมาณ` + จำนวนช่วงที่ใช้คิด · Error อยู่ในการ์ดเอง
+- E2E: Backend container rebuild → บัญชี Dev `patterns.check@example.com` (รหัส `patterns check 2026`, Seed ผ่าน API 37 ช่วง) → ok k=2 Silhouette 0.935 / null 0.752 / stability 1.0 · กำไร/ชม. 80.25 และ 128.24 ตรงกับคิดมือ · Emulator (profile APK) แสดงการ์ดตรง API · บัญชี `p3b.check` แสดงแถบ "1 / 30"
+- ผลตรวจ: Backend **421 passed** (เดิม 390 + ใหม่ 31: unit 27, API 4) · ruff check + format สะอาด · Mobile `flutter analyze` No issues + **490 passed** (เดิม 481)
+- Known: Latency ครั้งแรก ~0.6–1 s (CPU) · Cache อยู่ใน Process (หายเมื่อ Restart, ไม่แชร์ข้าม Worker) · ข้อมูลน้อย (30 ช่วง) กับนิสัยกะดึกข้ามเที่ยงคืน k อาจเกิน · ชื่อช่วงเวลา (เช้า/กลางวัน/เย็น/ดึก) ใช้ขอบตายตัว ค่าเฉลี่ยใกล้ขอบ (เช่น 10:59) อาจได้ชื่อข้างเคียง
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-12: Phase 5 อนุมัติแล้ว + Commit (ผู้ใช้สั่ง) → ถัดไป: K-Means Work Patterns (ผู้ใช้เลือกให้ทำ ยกเว้นจาก MVP Freeze)** · ห้าม Commit จนกว่าผู้ใช้สั่ง
+**2026-11-12: K-Means Work Patterns เสร็จ + Commit `4622708` (§4.12) → ถัดไป: เสนอแผน Phase 6 QA (W12)** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+- Phase 6 เริ่มด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยัน (แบบ Phase 4/5) · Exit criteria ใน Roadmap §Phase 6
+
+**(เดิม) 2026-11-12: Phase 5 อนุมัติแล้ว + Commit (ผู้ใช้สั่ง) → K-Means Work Patterns**
 - ผู้ใช้ตอบ Phase 5 Report: (1) อนุมัติ (2) K-Means Work Patterns = ทำ (3) Commit
-- เริ่ม K-Means ด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยันก่อนลงมือ → ทำ → รายงาน · หลังจากนั้น Phase 6 QA (W12) เริ่มด้วยการเสนอแผนเช่นกัน
+- **แผน K-Means 9 ข้อ — ผู้ใช้ตอบ 2026-11-12 "เอาตามที่นายคิดว่าดีที่สุด ทำแล้วโมเดลแม่นยำที่สุด"** (ผลและสิ่งที่ปรับ: §4.12)
+  · ขอบเขต: Backend `GET /profit/patterns` (SYSTEM_ARCHITECTURE §4) + การ์ด "รูปแบบการทำงาน" ในหน้า TrueProfit (`mobile/lib/features/profit/presentation/true_profit_screen.dart`) ไม่เพิ่มแท็บ
+  1. ข้อมูล: `work_sessions` ย้อนหลัง 180 วัน · ต้อง ≥ 30 ช่วง (Roadmap) · ไม่ถึง → `insufficient_data` + `{have, need}`
+  2. Feature จัดกลุ่ม = เวลาเท่านั้น: ชั่วโมงเริ่ม (sin/cos 24 ชม.), ความยาว (ชม.), วันธรรมดา/สุดสัปดาห์ · ไม่ใช้กำไร (รายได้หลายรายการไม่ผูก Session)
+  3. กำไร/ชม. ต่อกลุ่ม = (รายได้ − ค่าใช้จ่ายที่ผูกกับ Session ในกลุ่ม) ÷ ชม. ของ Session ที่มีรายได้ผูก · ป้าย `ค่าประมาณ` + บอกจำนวน Session ที่ใช้คิด · ไม่มี → "—"
+  4. k = 2–4 เลือกด้วย Silhouette · `StandardScaler` · `random_state` คงที่, `n_init=10` · Silhouette ดีสุด < 0.25 → "ยังไม่เห็นรูปแบบชัดเจน"
+  5. คำนวณตอนเรียก ไม่เก็บโมเดล ไม่ลง `model_versions` · ใช้ scikit-learn 1.9.1 ที่มีใน backend แล้ว
+  6. ชื่อกลุ่มจากกฎตายตัว (ไม่ใช้ AI แต่งคำ) เช่น "เย็น · สั้น ~3 ชม. · วันธรรมดา" · เช้า/กลางวัน/เย็น/ดึก ตามเวลาไทย · ข้ามเที่ยงคืนนับตามเวลาเริ่ม (DATABASE_DESIGN §3.7)
+  7. UI: การ์ดแสดงแต่ละกลุ่ม (ชื่อ, จำนวนช่วง + สัดส่วน, ชม.เฉลี่ย, กำไรสุทธิ/ชม.) · ข้อมูลไม่พอ → แถบความคืบหน้า "บันทึกช่วงทำงานอีก n ครั้ง"
+  8. Tests: Unit ข้อมูลสังเคราะห์ (2 กลุ่มชัด → เจอ 2; สุ่ม → ไม่ชัดเจน) · API `insufficient_data` + Cross-user · Mobile Widget tests การ์ด
+  9. ยกเว้น MVP Freeze เฉพาะงานนี้ตามที่ผู้ใช้สั่ง (บันทึกแล้วที่นี่)
+  · จบงาน → รายงาน (Completed / Files / Decisions / Tests / Known issues / Next) แล้วรอ · ต่อด้วยแผน Phase 6 QA
 
 **(เดิม) 2026-11-12: P5c ทำไปครึ่งทาง**
 1. ตรวจสถานะ: `git status` (สะอาด ยกเว้น CRLF noise ใน `mobile/lib/l10n/*.dart`) · `docker compose up -d db` · `cd cv_service; python -m uv sync; python -m uv run pytest` (**33 passed**) · ไฟล์ใน `cv_service/data/raw/` ยังอยู่ (5 zip)
@@ -428,7 +458,7 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 - (P5b) Marker ของเหตุต่างหมวดที่จุดเดียวกันซ้อนกันบนแผนที่ (ไม่มี Clustering) → กดได้แค่ตัวบนสุด ตัวอื่นเปิดจากแท็บ "ใกล้ฉัน"
 - (P5b) หลังมีคนรายงานเหตุเดิมเพิ่ม คำตอบ "คลี่คลายแล้ว" ที่ตอบไว้ก่อนหน้าไม่นับแล้ว (กฎ Backend: นับเฉพาะหลัง Report ล่าสุด) แต่หน้ารายละเอียดยังแสดง "คุณแจ้งว่าคลี่คลายแล้ว · X นาทีที่แล้ว" → ผู้ใช้ไม่รู้ว่าต้องตอบใหม่
 - (P5b) OSM tiles ไม่มีโหมดมืด แผนที่จึงสว่างใน Dark mode
-- (P5c) TrueProfit "รูปแบบการทำงาน" (K-Means, `GET /profit/patterns`) อยู่ในแผน/Architecture แต่ยังไม่ได้ทำ (รอผู้ใช้ตัดสินใจ, ติด MVP Freeze)
+- (K-Means, §4.12) Work Patterns: Latency ครั้งแรก ~0.6–1 s · Cache ใน Process · ข้อมูลน้อยกับกะดึกข้ามเที่ยงคืน k อาจเกิน · Benchmark เป็นข้อมูลสังเคราะห์ ไม่ใช่ความแม่นยำกับไรเดอร์จริง
 - (P5c) Image `rideros-cv` 1.58 GB (torch CPU) · หน้า Detail ไม่ refresh เองตอน `pending` → `done` (ต้องเปิดใหม่/ดึงรีเฟรช)
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
