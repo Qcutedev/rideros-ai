@@ -9,7 +9,8 @@ Leakage guards:
   * RDD2022 images are numbered frames from vehicle/motorbike runs, so neighbours look alike. Images are
     grouped in blocks of `RDD_GROUP` consecutive numbers and a whole block goes to one split.
   * Near-duplicates (64-bit dHash within 3 bits) are kept once; a photo seen under two labels is dropped.
-  * AlleyFloodNet keeps the train/val/test split its authors published.
+  * AlleyFloodNet keeps the train/test split its authors published. The Kaggle v1 zip has no val folder,
+    so val is carved out of its train images (deterministic per image, `alley_val`).
 Images are never extracted under their archive names: each kept image is re-encoded to
 data/interim/images/<id>.jpg (shorter side 256 px), and manifest.csv records where it came from.
 """
@@ -102,26 +103,49 @@ def _flood10k_items() -> Iterator[Item]:
 
 
 def _alley_label(parts: tuple[str, ...]) -> str | None:
-    for part in (p.lower().replace("_", "-").replace(" ", "-") for p in parts):
-        if part.startswith(("non-flood", "nonflood", "no-flood")):
-            return "other"
-        if part.startswith("flood"):
-            return "flooding"
+    """Label from the leaf folder only: Kaggle v1 also has `flood_train_/` above it, which says nothing."""
+    if not parts:
+        return None
+    leaf = re.sub(r"[^a-z]+", "-", parts[-1].lower()).strip("-")
+    if leaf in ("flood", "flooded", "flooding"):
+        return "flooding"
+    if leaf in (
+        "non-flood",
+        "non-flooded",
+        "non-flooding",
+        "nonflooded",
+        "nonflooding",
+        "no-flood",
+        "not-flooded",
+    ):
+        return "other"
     return None
 
 
 def _alley_split(parts: tuple[str, ...]) -> str | None:
-    for part in (p.lower() for p in parts):
-        if part in ("train", "training"):
-            return "train"
-        if part in ("val", "valid", "validation"):
-            return "val"
-        if part in ("test", "testing"):
-            return "test"
+    """Split from any folder name token, e.g. `flood_train_` -> train, `Validation` -> val."""
+    for part in parts:
+        for token in re.split(r"[^a-z]+", part.lower()):
+            if token in ("train", "training"):
+                return "train"
+            if token in ("val", "valid", "validation"):
+                return "val"
+            if token in ("test", "testing"):
+                return "test"
     return None
 
 
+def alley_val(member: str) -> bool:
+    """True for the train images moved to val when the zip publishes no val split.
+
+    Same share of train+val as the other sources (15 of 85) and the same hash on every run."""
+    share = SPLIT_SHARES["val"] / (SPLIT_SHARES["train"] + SPLIT_SHARES["val"])
+    u = int(hashlib.sha256(f"{SEED}:alley-val:{member}".encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
+    return u < share
+
+
 def _alley_items() -> Iterator[Item]:
+    items: list[Item] = []
     with zipfile.ZipFile(RAW / "alleyfloodnet.zip") as zf:
         for name in zf.namelist():
             path = PurePosixPath(name)
@@ -131,7 +155,14 @@ def _alley_items() -> Iterator[Item]:
             label, split = _alley_label(parts), _alley_split(parts)
             if label is None or split is None:
                 raise ValueError(f"unexpected AlleyFloodNet layout: {name}")
-            yield Item("alleyfloodnet", "alleyfloodnet.zip", name, label, f"alley/{name}", split=split)
+            items.append(
+                Item("alleyfloodnet", "alleyfloodnet.zip", name, label, f"alley/{name}", split=split)
+            )
+    if not any(i.split == "val" for i in items):
+        for item in items:
+            if item.split == "train" and alley_val(item.member):
+                item.split = "val"
+    yield from items
 
 
 # ---------------------------------------------------------------- helpers

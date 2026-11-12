@@ -88,10 +88,10 @@ gantt
 - [x] ตัวเลขใน App ตรงกับ DB (ตรวจด้วย SQL) — `mobile/test_driver/integration_test.dart` เทียบ 21 ค่ากับ `psql` (โปรไฟล์, ช่วง Pickup + ค่ากลาง, รายได้/ค่าใช้จ่าย/กำไร/ชั่วโมง/กำไรต่อชม. วันนี้ทั้ง Home และ TrueProfit, ค่าของ Scenario ทั้ง 2 ใน Compare, กำไรสูงสุด) → 21/21 ตรง แล้วลบบัญชีทดสอบผ่าน `DELETE /me` ไม่มีแถวเหลือ
 
 ### Phase 5 — RoadContext AI (W10–W11)
-**Exit criteria**
-- [ ] Report/Map/Nearby/Dedup ทำงานได้ และมี Test ของกฎ Dedup ทุกหมวด
-- [ ] CV: License ของ Dataset ยืนยันแล้ว, มี Metrics จริง (Accuracy/Precision/Recall/F1/Confusion Matrix หรือ mAP ถ้าทำ Detection) + Inference Latency
-- [ ] UI ไม่แสดงผล AI เป็น "ยืนยันแล้ว"
+**Exit criteria** (ตรวจ 2026-11-12 · **อนุมัติแล้ว 2026-11-12**)
+- [x] Report/Map/Nearby/Dedup ทำงานได้ และมี Test ของกฎ Dedup ทุกหมวด — P5a `04bd24c` (`backend/tests/api/test_road.py` parametrize ทั้ง 5 หมวดจาก `CATEGORIES`) + P5b `0ad4950`/`a113abf` ตรวจบน Emulator
+- [x] CV: License ของ Dataset ยืนยันแล้ว, มี Metrics จริง (Accuracy/Precision/Recall/F1/Confusion Matrix หรือ mAP ถ้าทำ Detection) + Inference Latency — `cv_service/data/SOURCES.md` (RDD2022 + AlleyFloodNet CC BY 4.0, Flood10k CC BY-NC 4.0, SHA-256 pin) · Test n = 1,380: Accuracy 0.8804, Macro-F1 0.8755 (Baseline 0.2717), Precision/Recall/F1 รายคลาส + Confusion Matrix ใน `cv_service/reports/1.0.0/` · Latency CPU 1 thread ใน Container `cv` median 16.5 ms / p95 22.8 ms (60 ภาพ)
+- [x] UI ไม่แสดงผล AI เป็น "ยืนยันแล้ว" — "AI แนะนำ: <หมวด> (xx%)" + `ค่าประมาณ` · Tests ใน `mobile/test/unit/features/road_test.dart` + `mobile/test/widget/road_screens_test.dart` · ตรวจบน Emulator 2026-11-12
 
 ### Phase 6 — QA (W12) · Phase 7 — Deploy & Portfolio (W13)
 - Security checklist (SYSTEM_ARCHITECTURE §5) ตรวจครบทุกข้อ

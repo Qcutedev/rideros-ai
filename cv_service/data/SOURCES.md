@@ -57,10 +57,15 @@ Changes made: images were re-encoded and resized for training.
 | Page | https://www.kaggle.com/datasets/seonyseony/alleyfloodnet (version 1, 67 MB) |
 | License | CC BY 4.0 ("Attribution 4.0 International", Kaggle dataset metadata) |
 | Paper | O. Lee, H. Joo, *AlleyFloodNet: A Ground-Level Image Dataset for Rapid Flood Detection in Economically and Flood-Vulnerable Areas*, Electronics 14(10), 2082 (2025), DOI `10.3390/electronics14102082` (the paper is also CC BY 4.0) |
-| Content | 1,110 ground-level photos: flooding and non-flooding alleys and low-lying streets. The published split is train 468/380, val 79/90, test 133/129 (flooding/non-flooding) |
+| Content | Ground-level photos of flooding and non-flooding alleys and low-lying streets. The paper's split is train 468/380, val 79/90, test 133/129 (flooding/non-flooding). The Kaggle v1 zip has **1,110** of them: `flood_train_/` 468/380 and `flood_test_/` 133/129 (`flooded`/`non_flooded`). The val images are not in it |
 | How to get it | Kaggle requires signing in, so the zip is downloaded by hand and passed to `python -m training download --alley <zip>` |
 
-The published train/val/test split is kept as it is.
+The published train and test split is kept as it is. Because the zip has no val folder, about 15/85 of the
+train images move to val (`build.alley_val`, a fixed hash of each image's path), the same share as the other sources.
+
+| File (local name) | Bytes | SHA-256 |
+|---|---|---|
+| `alleyfloodnet.zip` (Kaggle downloads it as `archive.zip`, 2026-11-12) | 67,114,993 | `4378b0abe3f6e04937501675cbf608f243ef46298f38ee9f69c0c0520f5cb0d1` |
 
 **Provenance note:** the paper says the images were "collected from diverse regions worldwide". It does not
 say who took each photo. The CC BY 4.0 grant comes from the dataset publisher. Rights in individual

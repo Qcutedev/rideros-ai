@@ -358,13 +358,13 @@ Module 1 ใช้แค่ไฟล์ `all_waybill_info`
 - `courier_wave_info` ของ Meituan มีจำนวน Order ต่อ Wave ของ Courier สามารถใช้เป็น Prior ของ "Orders per Active Hour ตามช่วงเวลา" ได้ แต่ **ไม่มีข้อมูลรายได้** และเป็นข้อมูลจีน จึงไม่แนะนำใน MVP
 - Demo Data: มีเฉพาะใน Demo Account, Flag `is_demo=true` และแสดงป้าย "DEMO DATA" ใน UI
 
-### RoadContext AI (สำรวจเบื้องต้น — ตรวจสอบเต็มรูปแบบใน Phase 5)
+### RoadContext AI (ตรวจ License เต็มรูปแบบแล้ว 2026-11-12, Phase 5 P5c · รายละเอียด + SHA-256 ใน `cv_service/data/SOURCES.md`)
 
-| Dataset | งาน | License (จากการค้นหา) | สถานะ |
+| Dataset | งาน | License (ตรวจจากแหล่งทางการ) | สถานะ |
 |---|---|---|---|
-| RDD2022 (Road Damage Detection, 47,420 ภาพ, 6 ประเทศ ไม่มีไทย) | Detection: รอยแตกตามยาว/ขวาง/หนังจระเข้, หลุมบ่อ | CC BY-SA 4.0 (arXiv, Dataset Ninja) แต่ Mirror บน Roboflow ระบุ CC BY 4.0 | ⚠️ ต้องยืนยันจากแหล่งทางการ |
-| AlleyFloodNet | Classification น้ำท่วมระดับพื้นดิน | Preprint เป็น CC BY 4.0 (License ของ Dataset ต้องตรวจแยก) | ⚠️ ตรวจ |
-| Flood10k (Mendeley) | Binary flood/normal 10,419 ภาพ | ไม่พบ License ในผลค้นหา | ⚠️ ตรวจ |
+| RDD2022 (Road Damage Detection, 47,420 ภาพ, 6 ประเทศ ไม่มีไทย) | Detection: รอยแตกตามยาว/ขวาง/หนังจระเข้, หลุมบ่อ → ใช้เป็น Classification `road_damage` / `other` (China_MotorBike, Czech, India, United_States) | **CC BY 4.0** (figshare record 21431547 v1, field `license` ของ API) | ✅ ใช้ |
+| AlleyFloodNet (Kaggle v1, 1,110 ภาพ) | Classification น้ำท่วมระดับพื้นดิน → `flooding` / `other` | **CC BY 4.0** (Metadata ของ Kaggle dataset) · ภาพบางส่วนผู้เผยแพร่ไม่ได้ถ่ายเอง | ✅ ใช้ |
+| Flood10k (Mendeley) | Binary flood/normal 10,419 ภาพ → ใช้เฉพาะ `flooded` | **CC BY-NC 4.0** (หน้า Mendeley + README) · ภาพมาจาก Twitter/Google | ✅ ใช้ (ไม่ใช่เชิงพาณิชย์ → โมเดลเป็น Non-commercial) |
 | FloodNet | ภาพจากโดรน (UAV) | — | ❌ มุมมองไม่ตรงกับภาพที่ Rider ถ่าย |
 | Road Closure / Obstacle | — | ไม่พบ Dataset เฉพาะที่เหมาะสม | ใช้หมวดหมู่ที่ผู้ใช้เลือก + กฎ (Rule-based) |
 
@@ -372,6 +372,7 @@ Module 1 ใช้แค่ไฟล์ `all_waybill_info`
 - Ultralytics YOLO (Library + Weights) เป็น **AGPL-3.0** ถ้าให้บริการผ่าน Network ต้องเปิด Source ทั้งระบบภายใต้ AGPL หรือซื้อ Enterprise License
 - **D6 อนุมัติแล้ว:** ใช้ torchvision (BSD-3) เช่น MobileNetV3/EfficientNet สำหรับ Classification
 - Phase 5 ต้องตรวจ License **แยกกัน 3 ส่วน**: (1) Library torchvision, (2) Pretrained Weights แต่ละตัว (เช่น ImageNet weights อาจมีเงื่อนไขต่างจาก Library), (3) Dependencies ทั้งหมดใน Image ของ CV Service
+  → **ตรวจครบแล้ว 2026-11-12:** (1) torchvision BSD-3-Clause ✅ (2) MobileNetV3-Large `IMAGENET1K_V2` ไม่มี License ของตัวเอง เงื่อนไข ImageNet = ไม่ใช่เชิงพาณิชย์/การศึกษา ✅ สำหรับโปรเจกต์นี้ (3) Package ใน Image `cv` ทุกตัวเป็น MIT/BSD/Apache-2.0/PSF ไม่มี Copyleft ✅ · ผลโมเดล: `cv_service/reports/1.0.0/model_card.md`
 
 แหล่งอ้างอิงที่ใช้สำรวจ:
 - [TSL-Meituan Data Challenge](https://connect.informs.org/tsl/tslresources/datachallenge)

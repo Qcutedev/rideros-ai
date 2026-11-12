@@ -12,6 +12,7 @@ from training.build import (
     NearDuplicateIndex,
     _alley_label,
     _alley_split,
+    alley_val,
     cap_class,
     dhash,
     fair_quotas,
@@ -116,11 +117,23 @@ def test_cap_class_shares_the_cap_across_sources():
         (("AlleyFloodNet", "Validation", "non-flooding"), "other", "val"),
         (("test", "Non_Flooding"), "other", "test"),
         (("test", "readme"), None, "test"),
+        # Kaggle v1 layout: the label is the leaf folder, the split hides in "flood_train_".
+        (("AlleyFloodNet", "flood_train_", "flooded"), "flooding", "train"),
+        (("AlleyFloodNet", "flood_train_", "non_flooded"), "other", "train"),
+        (("AlleyFloodNet", "flood_test_", "non_flooded"), "other", "test"),
+        (("AlleyFloodNet", "flood_test_"), None, "test"),
     ],
 )
 def test_alley_folder_names(parts, label, split):
     assert _alley_label(parts) == label
     assert _alley_split(parts) == split
+
+
+def test_alley_val_is_stable_and_about_15_of_85():
+    members = [f"AlleyFloodNet/flood_train_/flooded/{i}.jpg" for i in range(4000)]
+    picked = [m for m in members if alley_val(m)]
+    assert picked == [m for m in members if alley_val(m)]
+    assert 0.15 < len(picked) / len(members) < 0.21
 
 
 def test_metrics_helpers():

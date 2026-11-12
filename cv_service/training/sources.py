@@ -44,7 +44,10 @@ PINS: dict[str, Pin] = {
     "Flood10k.zip": Pin(
         "Flood10k.zip", "304474a533c8b78a7fe9bd1caa03f15ae0465decd8ad89d8bd3ac8b920aee706", 747_365_154
     ),
-    "alleyfloodnet.zip": Pin("alleyfloodnet.zip", None),
+    # Kaggle v1 zip ("archive.zip"), downloaded by hand on 2026-11-12 and reviewed (flood_train_/flood_test_).
+    "alleyfloodnet.zip": Pin(
+        "alleyfloodnet.zip", "4378b0abe3f6e04937501675cbf608f243ef46298f38ee9f69c0c0520f5cb0d1", 67_114_993
+    ),
     # Country zips cut out of the figshare zip on 2026-11-12; CRC-32 matched its central directory.
     "RDD2022_China_MotorBike.zip": Pin(
         "RDD2022_China_MotorBike.zip",

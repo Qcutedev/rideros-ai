@@ -43,7 +43,8 @@ python -m uv run python -m training evaluate
 ```
 
 - Every raw file is pinned by SHA-256 in `training/sources.py`. A missing or changed pin stops `download`.
-- Splits: AlleyFloodNet keeps its published split. For RDD2022, blocks of 25 consecutive frame numbers
+- Splits: AlleyFloodNet keeps its published train/test split. Its Kaggle zip has no val folder, so about
+  15/85 of its train images go to val by a fixed hash of each path (`build.alley_val`). For RDD2022, blocks of 25 consecutive frame numbers
   go to one split together, because neighbouring frames look alike. Flood10k is split per image after
   near-duplicates (dHash within 3 bits) are removed.
 - The epoch kept is the one with the best validation macro-F1. The test split is read once, in `evaluate`.
