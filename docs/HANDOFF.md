@@ -338,9 +338,37 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - ผลตรวจ: Backend **421 passed** (เดิม 390 + ใหม่ 31: unit 27, API 4) · ruff check + format สะอาด · Mobile `flutter analyze` No issues + **490 passed** (เดิม 481)
 - Known: Latency ครั้งแรก ~0.6–1 s (CPU) · Cache อยู่ใน Process (หายเมื่อ Restart, ไม่แชร์ข้าม Worker) · ข้อมูลน้อย (30 ช่วง) กับนิสัยกะดึกข้ามเที่ยงคืน k อาจเกิน · ชื่อช่วงเวลา (เช้า/กลางวัน/เย็น/ดึก) ใช้ขอบตายตัว ค่าเฉลี่ยใกล้ขอบ (เช่น 10:59) อาจได้ชื่อข้างเคียง
 
+### 4.13 Phase 6 QA (W12) — **แผน + การตัดสินใจ 10 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-14 ("เอาเลย")**
+ลำดับ: P6a Security Audit → P6b Performance + แก้ Bug → P6c Regression Suite + Docs + Phase 6 Report · รายงานหลังจบแต่ละช่วง · ห้าม Commit จนกว่าผู้ใช้สั่ง
+1. ผลสแกน: แก้ High/Critical ทุกข้อ · ระดับต่ำกว่าจดเป็น Accepted risk พร้อมเหตุผล
+2. รายการรหัสผ่านพบบ่อย 87 คำ → SecLists `10k-most-common.txt` (MIT) Commit ใน Repo
+3. `X-Forwarded-For` ของ Rate limiter → Phase 7 (ยังไม่มี Reverse proxy) · บันทึกใน Audit
+4. Performance: สคริปต์ `httpx` async ใน `backend/perf/` (ไม่ใช้ Locust) · 200 req/Endpoint ที่ Concurrency 1 และ 10 · User ที่ Seed ไว้ · Retry 429
+5. เป้า p95 (Docker ในเครื่อง): CRUD/Summary < 300 ms · Pickup prediction < 500 ms · `/profit/patterns` (Cache) < 500 ms, ครั้งแรกรายงานแยก · ไม่ผ่าน → แก้ Index/Query
+6. Known issues ที่แก้ใน P6b: Detail ไม่ Refresh `pending`→`done` (Poll) · "คลี่คลายแล้ว" ที่หมดอายุ · Marker clustering + แผนที่โหมดมืด → Phase 7 (เปลี่ยน Tile provider)
+7. CI: `scripts/regression.ps1` ในเครื่องเท่านั้น · GitHub Actions → Phase 7 ตอนสร้าง Repo
+8. Coverage gate = ค่าปัจจุบัน − 2%
+9. Docs: แก้ `SYSTEM_ARCHITECTURE.md` §5 ให้ตรงของจริง · ใหม่ `SECURITY_AUDIT.md`, `PERFORMANCE.md`, `TESTING.md` · README → Phase 7
+10. Exit criteria: §5 ผ่านทุกข้อหรือเป็น Accepted risk · ไม่มี High/Critical ค้าง · p95 วัดจริงผ่านเป้า · Regression script เขียว · Docs อัปเดต
+- พบตอนวางแผน: Release build Android ยังเซ็นด้วย debug key → Phase 7 (Release APK)
+- **P6a Security Audit — เสร็จ 2026-11-14 · Commit `e8e7c24` ตามที่ผู้ใช้สั่งหลังรับรายงาน · gitleaks `dir` (451 ไฟล์) + `git` → no leaks found** · รายละเอียดทั้งหมด: `docs/SECURITY_AUDIT.md`
+  · สแกน: pip-audit (backend/ml/cv) 0 · osv-scanner `pubspec.lock` 0 · ruff `S` 15 จุด = False positive/Offline · gitleaks History no leaks · trivy Image: Critical 3 → 0, High ที่มีแพตช์ 57 → 0, เหลือ High 47 ที่ Debian ยังไม่มีแพตช์ (Accepted R-6)
+  · แก้ F-1: `app/core/body_limit.py` จำกัด Body ตอนรับข้อมูล (JSON 256 KiB `MAX_JSON_BODY_BYTES`, Multipart 5 MB + 64 KiB) เพราะ FastAPI อ่าน Form ก่อน Auth · F-2: Base image `python:3.14.10-slim-trixie` + `apt-get upgrade` + ลบ pip ระบบ (backend + cv) · F-3: Deny-list รหัสผ่าน 84 → 2,114 (SecLists 10k ที่ยาว ≥ 8 ตัวอักษร ได้แค่ 2,087 รายการ)
+  · Test ใหม่ `backend/tests/api/test_security_audit.py` (55): Inventory 56 Endpoints (Public 8 / ต้อง Login 48) + 401 ทุกตัว · Body limit 5 ตัว (Fail เมื่อถอด Middleware) · Log ไม่มี Password/Token/พิกัด
+  · แก้ `SYSTEM_ARCHITECTURE.md` §5 ให้ตรงโค้ด (`limits` ไม่ใช่ slowapi, ไม่ใช้ Pydantic Strict mode, gitleaks ยังไม่อยู่ใน CI)
+  · ผลตรวจ: Backend **476 passed** (เดิม 421) · ruff check/format สะอาด · Coverage `app/modules`+`app/core` 98% · `docker compose build` + up → backend healthy, `/ready` model ok, cv ok, Body 300 KB → 413
+  · Gotcha: อย่ารัน pytest ของ backend 2 ชุดพร้อมกัน (ใช้ Test DB เดียวกันและ DROP ทิ้งตอนเริ่ม)
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-12: K-Means Work Patterns เสร็จ + Commit `4622708` (§4.12) → ถัดไป: เสนอแผน Phase 6 QA (W12)** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
-- Phase 6 เริ่มด้วยการเสนอแผน + การตัดสินใจให้ผู้ใช้ยืนยัน (แบบ Phase 4/5) · Exit criteria ใน Roadmap §Phase 6
+**2026-11-14: P6a เสร็จ + Commit `e8e7c24` (§4.13) → Session ใหม่เริ่ม P6b** (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+- P6b ตามการตัดสินใจ §4.13 ข้อ 4–6:
+  1. `backend/perf/` สคริปต์ `httpx` async: Seed User ผ่าน API (Retry 429 · Rate limit 60/นาที/User → ใช้หลาย User หรือรัน Stack ด้วย `RATE_LIMIT_ENABLED=false` แล้วระบุในรายงาน) · 200 req/Endpoint ที่ Concurrency 1 และ 10 · p50/p95/p99 → `docs/PERFORMANCE.md` (ระบุเครื่อง, Docker, จำนวนข้อมูล)
+  2. เป้า p95: CRUD/Summary < 300 ms · Pickup prediction < 500 ms · `/profit/patterns` (Cache) < 500 ms + ครั้งแรกแยก · ไม่ผ่าน → แก้ Index/Query แล้ววัดซ้ำ
+  3. Mobile cold start: Profile build + `adb shell am start -W` (TotalTime) หลายรอบ
+  4. แก้ Bug: (a) หน้า Detail ของรายงาน Poll จนกว่า `pending` → `done`/`failed` (b) "คุณแจ้งว่าคลี่คลายแล้ว" ต้องไม่แสดงเมื่อคำตอบเก่ากว่า Report ล่าสุด (กฎ Backend) · มี Test ทั้งคู่ + ตรวจบน Emulator
+  5. รายงาน P6b แล้วรอ → P6c (`scripts/regression.ps1`, Coverage gate, `TESTING.md`, Phase 6 Report)
+
+**(เดิม) 2026-11-12: K-Means Work Patterns เสร็จ + Commit `4622708` (§4.12) → ถัดไป: เสนอแผน Phase 6 QA (W12)**
 
 **(เดิม) 2026-11-12: Phase 5 อนุมัติแล้ว + Commit (ผู้ใช้สั่ง) → K-Means Work Patterns**
 - ผู้ใช้ตอบ Phase 5 Report: (1) อนุมัติ (2) K-Means Work Patterns = ทำ (3) Commit
