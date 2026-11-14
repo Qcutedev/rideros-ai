@@ -304,8 +304,9 @@ RiderOS AI/
 │   │       ├── shifts/
 │   │       ├── road/
 │   │       └── profile/        # รวม Settings
-│   └── test/                   # widget/, unit/, integration_test/
-└── .github/workflows/          # backend-ci.yml, ml-ci.yml, mobile-ci.yml
+│   └── test/                   # widget/, unit/ (E2E อยู่ที่ mobile/integration_test/ + test_driver/)
+├── scripts/regression.ps1      # Regression ทุกชุดในเครื่อง + Coverage gate (Phase 6 · docs/TESTING.md)
+└── .github/workflows/          # (Phase 7 ยังไม่มี) backend-ci.yml, ml-ci.yml, mobile-ci.yml
 ```
 
 **หมายเหตุเรื่อง Path:** โฟลเดอร์โปรเจกต์มีเว้นวรรค (`RiderOS AI`) ทุกสคริปต์จึงต้อง Quote Path ส่วนชื่อ Flutter project และ Python package ใช้ `rideros_ai`/`rideros_ml` (ไม่มีเว้นวรรค)

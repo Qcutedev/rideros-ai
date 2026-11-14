@@ -1,6 +1,6 @@
 # DEVELOPMENT_ROADMAP.md — RiderOS AI (Phase 0)
 
-> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09** · **Phase 4 อนุมัติแล้ว 2026-11-12 (MVP Freeze)**
+> สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09** · **Phase 4 อนุมัติแล้ว 2026-11-12 (MVP Freeze)** · **Phase 6 อนุมัติแล้ว 2026-11-14**
 > ระยะเวลา: 13 สัปดาห์ (≈ 3 เดือน) เริ่ม **จันทร์ 2026-11-09** ถ้าอนุมัติ Phase 0 ภายในสัปดาห์นี้
 > MVP (Module 1–3) เสร็จสิ้นปลายสัปดาห์ที่ 9 · RoadContext เป็น Extension
 > ทุก Phase จบด้วย **Phase Report** และ **รอการอนุมัติ** ก่อนเริ่ม Phase ถัดไป
@@ -93,8 +93,16 @@ gantt
 - [x] CV: License ของ Dataset ยืนยันแล้ว, มี Metrics จริง (Accuracy/Precision/Recall/F1/Confusion Matrix หรือ mAP ถ้าทำ Detection) + Inference Latency — `cv_service/data/SOURCES.md` (RDD2022 + AlleyFloodNet CC BY 4.0, Flood10k CC BY-NC 4.0, SHA-256 pin) · Test n = 1,380: Accuracy 0.8804, Macro-F1 0.8755 (Baseline 0.2717), Precision/Recall/F1 รายคลาส + Confusion Matrix ใน `cv_service/reports/1.0.0/` · Latency CPU 1 thread ใน Container `cv` median 16.5 ms / p95 22.8 ms (60 ภาพ)
 - [x] UI ไม่แสดงผล AI เป็น "ยืนยันแล้ว" — "AI แนะนำ: <หมวด> (xx%)" + `ค่าประมาณ` · Tests ใน `mobile/test/unit/features/road_test.dart` + `mobile/test/widget/road_screens_test.dart` · ตรวจบน Emulator 2026-11-12
 
-### Phase 6 — QA (W12) · Phase 7 — Deploy & Portfolio (W13)
-- Security checklist (SYSTEM_ARCHITECTURE §5) ตรวจครบทุกข้อ
+### Phase 6 — QA (W12)
+**Exit criteria** (การตัดสินใจ HANDOFF §4.13 ข้อ 10 · ตรวจ 2026-11-14 · **อนุมัติแล้ว 2026-11-14**)
+- [x] Security checklist (SYSTEM_ARCHITECTURE §5) ผ่านทุกข้อหรือเป็น Accepted risk — 11/11 ผ่าน · `docs/SECURITY_AUDIT.md`
+- [x] ไม่มี High/Critical ค้าง — Dependency 0 · Docker image Critical 0, High ที่มีแพตช์ 0 · High 47 ที่ Debian ยังไม่มีแพตช์ = Accepted risk R-6
+- [x] p95 วัดจริงผ่านเป้า — 24 Endpoint × c=1/c=10 × 200 req, Error 0 · `docs/PERFORMANCE.md`
+- [x] Regression script เขียว — `scripts/regression.ps1` 14/14 ขั้น · `docs/TESTING.md`
+- [x] Docs อัปเดต — `SECURITY_AUDIT.md`, `PERFORMANCE.md`, `TESTING.md` ใหม่ · SYSTEM_ARCHITECTURE §5 + โครงสร้าง Repo
+
+### Phase 7 — Deploy & Portfolio (W13)
+- ~~Security checklist (SYSTEM_ARCHITECTURE §5) ตรวจครบทุกข้อ~~ → ทำแล้วใน Phase 6 (ตรวจซ้ำบน Server จริง: `X-Forwarded-For`, Rate limiter หลาย Worker)
 - APK Release (signing key **ไม่อยู่ใน Repo**)
 - Backend ใช้งานบน URL จริง + Restore Test
 - README ครบ 17 หัวข้อ
