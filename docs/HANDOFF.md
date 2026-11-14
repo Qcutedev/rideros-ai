@@ -376,8 +376,22 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · Docs: ใหม่ `docs/TESTING.md` · Roadmap: Exit criteria Phase 6 + แยกหัวข้อ Phase 7 · SYSTEM_ARCHITECTURE โครงสร้าง Repo (`scripts/`, `.github/workflows/` = Phase 7)
   · Known: CV pytest มี Warning 1 ตัวจาก Library (`fastapi.testclient` ใช้ `httpx` ที่ Starlette ประกาศ Deprecated) ไม่ใช่โค้ดเรา
 
+### 4.14 Trend: Moving Average + Linear Trend (TrueProfit) — **เสร็จ 2026-11-14 · Commit `b666e40` ตามที่ผู้ใช้สั่ง · gitleaks `dir` (461 ไฟล์) + `git` → no leaks found · ผู้ใช้ให้ตัดสินใจเอง ("แก้และคิดเอาเองละกัน") → ยกเว้น MVP Freeze เฉพาะงานนี้**
+ที่มา: `PROJECT_PLAN.md` §3 เขียน "Trend (Moving Average / Linear Trend)" ไว้ แต่ที่ทำมีแค่ยอดรวมต่อช่วง (พบหลังอนุมัติ Phase 6 ตอนผู้ใช้ถามว่า AI ครบหรือยัง)
+- ทิศทางที่ตัดสินใจ (ผู้ใช้มอบให้): ทำ Trend นี้ · **ไม่ทำ** Shift ML (ไม่มีข้อมูลรายกะ แหล่งไทยที่ผู้ใช้ส่งมาเป็นค่าสรุปทั้งหมด), Object Detection (P4 Optional), ค่าเริ่มต้นจากข้อมูลสาธารณะ (ยังไม่รู้ License) → จดเป็นข้อจำกัดใน README ตอน Phase 7 · ข้อมูลจำลองใช้ได้แค่ทดสอบระบบ/Demo ที่ติดป้าย ห้ามรายงานเป็นความแม่นยำจริง
+- Backend `app/modules/profit/trend_analysis.py` (Pure) + `GET /profit/trends` เพิ่ม Field (ไม่ทำให้ Client เดิมพัง): ต่อจุด `net_profit_moving_average`, `net_profit_trend` · `analysis` {`status`, `moving_average_window`, `active_buckets`, `min_active_buckets`, `direction`, `slope_per_bucket`, `p_value`}
+  · Span = Bucket แรกถึงสุดท้ายที่มีรายการ (Bucket ว่างข้างในนับ 0 · ก่อนเริ่มใช้แอปและหลังรายการล่าสุดไม่นับ) · MA ย้อนหลัง วัน 7 / สัปดาห์ 4 / เดือน 3 เฉพาะที่หน้าต่างอยู่ใน Span ทั้งหมด
+  · OLS (`scipy.stats.linregress`) ต้องมี ≥ 4 Bucket ที่มีรายการ ไม่งั้น `insufficient_data` · `up`/`down` เฉพาะ p < 0.05 ไม่งั้น `flat` และไม่ส่งเส้น (เส้นเอียงที่ไม่มีนัยสำคัญอ่านเหมือนแนวโน้มจริง) · Test: ซีรีส์สุ่มไม่มีแนวโน้ม 400 ชุด → ขึ้น/ลงผิด < 9%
+  · `scipy>=1.18` เป็น Dependency ตรง (ติดมากับ scikit-learn อยู่แล้ว)
+- Mobile: `NetProfitChart` วาด MA (เส้นทึบ) + Trend (เส้นประ) ทับแท่งด้วย `LineChart` ใน `Stack` (เว้นครึ่งแท่งให้ตรงกลางแท่ง) · `TrendSummary` (Legend + ประโยค ขาขึ้น/ขาลง ฿x ต่อ{ช่วง} / ยังไม่เห็นแนวโน้มชัด / ต้องมีอย่างน้อย n + Badge `ค่าประมาณ` + "ไม่ใช่การพยากรณ์") · Server เก่าที่ไม่มี `analysis` → แสดงแท่งอย่างเดียว
+- ตรวจ: API กับ Dev DB (`patterns.check` → flat, p 0.16–0.82) · Emulator Profile build: flat (MA อย่างเดียว) + บัญชีชั่วคราว `trend.check@example.com` รายได้เพิ่ม ~150/สัปดาห์ → "แนวโน้มขาขึ้น ฿147.06 ต่อสัปดาห์" เส้นตรงกลางแท่ง · Dark mode อ่านได้ · ลบบัญชีด้วย `DELETE /me` แล้ว (0 แถว)
+- Tests: Backend unit `tests/unit/test_trend_analysis.py` (13) + API 2 ตัวใน `test_profit_reports.py` · Mobile model 1 + widget 5 (`true_profit_screen_test.dart` group "trend analysis")
+- ผลตรวจ: `scripts/regression.ps1` **PASSED 14/14** · Backend **493 passed** (เดิม 478), Coverage 98.21% · ML 134 · CV 38 · Mobile analyze No issues, **501 passed** (เดิม 495), Coverage 96.74% (6,645/6,869)
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-14: Phase 6 อนุมัติแล้ว + Commit `3986b03` (ผู้ใช้สั่ง · §4.13) → ถัดไป: Phase 7 Deploy & Portfolio (W13) เริ่มด้วยการเสนอแผน + การตัดสินใจ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-14: Trend MA + Linear เสร็จ + Commit `b666e40` (§4.14) → ถัดไป: เสนอแผน + การตัดสินใจ Phase 7 ให้ผู้ใช้ยืนยันก่อนลงมือ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+
+**(เดิม) 2026-11-14: Phase 6 อนุมัติแล้ว + Commit `3986b03` (ผู้ใช้สั่ง · §4.13) → ถัดไป: Phase 7 Deploy & Portfolio (W13) เริ่มด้วยการเสนอแผน + การตัดสินใจ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 - ตรวจซ้ำทั้งหมด: `.\scripts\regression.ps1` (ต้องได้ REGRESSION PASSED 14 step(s))
 - Phase 7: เริ่มด้วยการเสนอแผน + การตัดสินใจ (Release APK + Signing key นอก Repo, Deploy Backend + Restore test, GitHub Repo Private (D2) + Actions จาก `scripts/regression.ps1`, README 17 หัวข้อ, Resume bullets จากตัวเลขจริง, งานที่ยกมา: `X-Forwarded-For`, Rate limiter หลาย Worker, Marker clustering + Tile โหมดมืด)
 
