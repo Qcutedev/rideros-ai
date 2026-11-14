@@ -1,9 +1,11 @@
+import threading
 import uuid
 from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
 
+from app.core import security
 from app.core.config import Settings
 from app.core.errors import UnauthorizedError
 from app.core.security import (
@@ -11,9 +13,11 @@ from app.core.security import (
     decode_access_token,
     generate_opaque_token,
     hash_password,
+    hash_password_async,
     hash_token,
     password_problem,
     verify_password,
+    verify_password_async,
 )
 
 SECRET = "unit-test-signing-key-0123456789-abcdefghijkl"
@@ -35,6 +39,27 @@ def test_password_hash_is_argon2id_and_verifies() -> None:
 
 def test_verify_password_without_hash_is_false() -> None:
     assert verify_password("anything at all", None) is False
+
+
+async def test_async_password_helpers_run_off_the_event_loop_thread(monkeypatch: pytest.MonkeyPatch) -> None:
+    threads: list[int] = []
+    real = security._password_hash
+
+    class Recording:
+        def hash(self, password: str) -> str:
+            threads.append(threading.get_ident())
+            return real.hash(password)
+
+        def verify(self, password: str, hashed: str) -> bool:
+            threads.append(threading.get_ident())
+            return real.verify(password, hashed)
+
+    monkeypatch.setattr(security, "_password_hash", Recording())
+    hashed = await hash_password_async("a long enough password")
+    assert await verify_password_async("a long enough password", hashed)
+    assert not await verify_password_async("anything at all", None)
+    assert len(threads) == 3
+    assert threading.get_ident() not in threads
 
 
 @pytest.mark.parametrize(

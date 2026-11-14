@@ -3285,6 +3285,12 @@ abstract class AppLocalizations {
   /// **'คุณแจ้งว่าคลี่คลายแล้ว · {ago}'**
   String roadConfirmMineCleared(String ago);
 
+  /// The server counts 'gone' only after the latest report.
+  ///
+  /// In th, this message translates to:
+  /// **'คุณแจ้งว่าคลี่คลายแล้ว · {ago} แต่มีรายงานใหม่หลังจากนั้น คำตอบเดิมจึงไม่นับ ถ้าคลี่คลายแล้วจริง กด \"คลี่คลายแล้ว\" อีกครั้ง'**
+  String roadConfirmMineClearedStale(String ago);
+
   /// No description provided for @roadConfirmHelp.
   ///
   /// In th, this message translates to:

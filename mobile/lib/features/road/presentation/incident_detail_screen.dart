@@ -27,7 +27,8 @@ class IncidentDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.roadDetailTitle)),
       body: AsyncValueView(
-        value: detail,
+        // Keep the detail (and its scroll position) while an answer reloads it.
+        value: detail.keepingData,
         onRetry: () => ref.invalidate(incidentDetailProvider(id)),
         loading: const Padding(
           padding: AppSpacing.screen,
@@ -173,6 +174,12 @@ class _Confirmation extends ConsumerWidget {
     final submit = ref.watch(provider);
     final busy = submit.isLoading;
     final mine = detail.myConfirmation;
+    // The server counts "gone" only when it is newer than the latest report
+    // (or "still there"); an older one no longer counts and must be sent again.
+    final staleCleared =
+        mine != null &&
+        !mine.stillPresent &&
+        !mine.createdAt.isAfter(incident.lastReportedAt);
 
     Future<void> answer(bool stillPresent) async {
       final messenger = ScaffoldMessenger.of(context);
@@ -197,17 +204,26 @@ class _Confirmation extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (mine != null) ...[
-            Text(
-              mine.stillPresent
-                  ? l10n.roadConfirmMineStill(
-                      agoLabel(l10n, mine.createdAt, now),
-                    )
-                  : l10n.roadConfirmMineCleared(
-                      agoLabel(l10n, mine.createdAt, now),
-                    ),
-              key: const Key('detail.mine'),
-              style: theme.textTheme.bodyMedium,
-            ),
+            if (staleCleared)
+              AppBanner(
+                key: const Key('detail.mineStale'),
+                message: l10n.roadConfirmMineClearedStale(
+                  agoLabel(l10n, mine.createdAt, now),
+                ),
+                tone: BannerTone.warning,
+              )
+            else
+              Text(
+                mine.stillPresent
+                    ? l10n.roadConfirmMineStill(
+                        agoLabel(l10n, mine.createdAt, now),
+                      )
+                    : l10n.roadConfirmMineCleared(
+                        agoLabel(l10n, mine.createdAt, now),
+                      ),
+                key: const Key('detail.mine'),
+                style: theme.textTheme.bodyMedium,
+              ),
             const SizedBox(height: AppSpacing.md),
           ],
           Row(
@@ -227,7 +243,7 @@ class _Confirmation extends ConsumerWidget {
                   key: const Key('detail.gone'),
                   label: l10n.roadConfirmCleared,
                   icon: Icons.check_circle_outline_rounded,
-                  selected: mine?.stillPresent == false,
+                  selected: mine?.stillPresent == false && !staleCleared,
                   onPressed: busy ? null : () => answer(false),
                 ),
               ),

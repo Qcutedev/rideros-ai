@@ -1,8 +1,13 @@
+import asyncio
+import threading
+import time
+
 import httpx
 import pytest
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import security
 from app.modules.users.models import User
 from tests.helpers import PASSWORD, bearer, login, register
 
@@ -145,3 +150,35 @@ async def test_token_of_deactivated_user_is_rejected(client: httpx.AsyncClient, 
     resp = await client.get("/me", headers=bearer(pair["access_token"]))
     assert resp.status_code == 401
     assert resp.json()["error"]["code"] == "invalid_token"
+
+
+# ---- Argon2 off the event loop (P6b) ----
+
+
+async def test_login_does_not_block_other_requests(
+    client: httpx.AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Argon2 runs in the threadpool: a slow password check must not stall a concurrent request."""
+    await register(client, "slowhash@example.com")
+    real = security._password_hash
+    entered = threading.Event()
+
+    class SlowHash:
+        def verify(self, password: str, hashed: str) -> bool:
+            entered.set()
+            time.sleep(0.6)  # blocking, like Argon2's CPU work
+            return real.verify(password, hashed)
+
+    monkeypatch.setattr(security, "_password_hash", SlowHash())
+    started = time.perf_counter()
+    login_task = asyncio.create_task(
+        client.post("/auth/login", json={"email": "slowhash@example.com", "password": PASSWORD})
+    )
+    while not entered.is_set():  # on the event loop thread this loop only resumes after the sleep
+        await asyncio.sleep(0.005)
+    health = await client.get("/health")
+    elapsed = time.perf_counter() - started
+    assert health.status_code == 200
+    assert not login_task.done()
+    assert elapsed < 0.45
+    assert (await login_task).status_code == 200

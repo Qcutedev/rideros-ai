@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.errors import AppError, ForbiddenError
-from app.core.security import verify_password
+from app.core.security import verify_password_async
 from app.core.timezones import get_zone, is_valid_timezone
 from app.modules.road import service as road_service
 from app.modules.users import repository as users
@@ -38,7 +38,7 @@ async def delete_me(session: AsyncSession, settings: Settings, user: User, passw
     Road reports cascade with the user; the shared incidents they belonged to get their counters
     recomputed (and are removed when no report is left), and the report photos are deleted.
     """
-    if not verify_password(password, user.password_hash):
+    if not await verify_password_async(password, user.password_hash):
         raise ForbiddenError("Password is incorrect", code="invalid_password")
     user_id = user.id
     cleanup = await road_service.prepare_user_deletion(session, user_id)

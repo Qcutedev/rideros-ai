@@ -50,6 +50,7 @@ Map<String, Object?> ownReportJson({
   String? aiLabel,
   String? aiConfidence,
   String incidentStatus = 'unverified',
+  Duration createdAgo = const Duration(hours: 1),
 }) => {
   'id': id,
   'incident_id': incidentId,
@@ -60,7 +61,7 @@ Map<String, Object?> ownReportJson({
   'ai_status': aiStatus,
   'ai_label': aiLabel,
   'ai_confidence': aiConfidence,
-  'created_at': isoAgo(const Duration(hours: 1)),
+  'created_at': isoAgo(createdAgo),
   'incident_status': incidentStatus,
 };
 
@@ -99,6 +100,7 @@ OwnReport ownReport({
   String? aiLabel,
   String? aiConfidence,
   String? description = 'น้ำสูงครึ่งล้อ',
+  Duration createdAgo = const Duration(hours: 1),
 }) => OwnReport.fromJson(
   ownReportJson(
     id: id,
@@ -108,6 +110,7 @@ OwnReport ownReport({
     aiLabel: aiLabel,
     aiConfidence: aiConfidence,
     description: description,
+    createdAgo: createdAgo,
   ),
 );
 
@@ -133,6 +136,7 @@ class FakeRoadRepository implements RoadRepository {
   Object? imageError;
   Completer<void>? createGate;
   Completer<void>? confirmGate;
+  Completer<void>? detailGate;
   final calls = <String>[];
   NewReport? lastReport;
   RoadBounds? lastBounds;
@@ -208,6 +212,7 @@ class FakeRoadRepository implements RoadRepository {
   @override
   Future<IncidentDetail> incident(String id) async {
     calls.add('detail:$id');
+    await detailGate?.future;
     if (detailError != null) throw detailError!;
     return _detail(id);
   }

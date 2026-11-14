@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/paged_result.dart';
 import '../../../core/presentation/paged_list.dart';
 import '../../../core/presentation/submit_notifier.dart';
+import '../../../core/utils/clock.dart';
 import '../data/device_services.dart';
 import '../data/road_repository_impl.dart';
 import '../domain/road_models.dart';
@@ -40,11 +42,51 @@ final nearbyIncidentsProvider = FutureProvider.autoDispose
       return ref.watch(roadRepositoryProvider).nearby(point);
     });
 
-final incidentDetailProvider = FutureProvider.autoDispose
-    .family<IncidentDetail, String>((ref, id) {
+/// How often an open detail asks again while the rider's photo is still being
+/// classified (`ai_status` `pending`).
+const aiPollInterval = Duration(seconds: 3);
+
+/// Polling stops this long after the report was sent; pull to refresh after
+/// that. (The server reads a classification still pending after 10 minutes as
+/// failed.)
+const aiPollWindow = Duration(minutes: 2);
+
+/// The incident detail. While the rider's own photo is `pending`, it asks the
+/// server again every [aiPollInterval] until the suggestion is `done` or
+/// `failed`, so the screen updates without a pull to refresh. A failed poll
+/// keeps the last answer on screen and tries again.
+final incidentDetailProvider = StreamProvider.autoDispose
+    .family<IncidentDetail, String>((ref, id) async* {
       ref.watch(roadDataRevisionProvider);
-      return ref.watch(roadRepositoryProvider).incident(id);
+      final repo = ref.watch(roadRepositoryProvider);
+      final now = ref.watch(clockProvider);
+      var detail = await repo.incident(id);
+      yield detail;
+      while (ref.mounted && _classifying(detail, now())) {
+        await _delay(ref, aiPollInterval);
+        try {
+          detail = await repo.incident(id);
+        } on Object {
+          continue;
+        }
+        yield detail;
+      }
     });
+
+bool _classifying(IncidentDetail detail, DateTime now) {
+  final report = detail.myReport;
+  return report != null &&
+      report.aiStatus == AiStatus.pending &&
+      now.difference(report.createdAt) < aiPollWindow;
+}
+
+/// A wait that is cancelled with the provider (no timer left behind).
+Future<void> _delay(Ref ref, Duration duration) {
+  final done = Completer<void>();
+  final timer = Timer(duration, done.complete);
+  ref.onDispose(timer.cancel);
+  return done.future;
+}
 
 /// Photos never change, so they are kept while the app runs.
 final reportImageProvider = FutureProvider.family<Uint8List, String>(

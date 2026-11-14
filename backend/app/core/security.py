@@ -15,6 +15,7 @@ from pathlib import Path
 import jwt
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings
 from app.core.errors import UnauthorizedError
@@ -37,6 +38,16 @@ def verify_password(password: str, password_hash: str | None) -> bool:
         _password_hash.verify(password, _DUMMY_HASH)
         return False
     return _password_hash.verify(password, password_hash)
+
+
+# Argon2 takes ~70 ms of CPU and releases the GIL. Request handlers use these, so a login does not stall
+# every other request on the event loop (P6b, docs/PERFORMANCE.md).
+async def hash_password_async(password: str) -> str:
+    return await run_in_threadpool(hash_password, password)
+
+
+async def verify_password_async(password: str, password_hash: str | None) -> bool:
+    return await run_in_threadpool(verify_password, password, password_hash)
 
 
 @lru_cache

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rideros_ai/app/routes.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
+import 'package:rideros_ai/core/widgets/status_views.dart';
 import 'package:rideros_ai/features/dashboard/presentation/home_screen.dart';
 import 'package:rideros_ai/features/road/data/device_services.dart';
 import 'package:rideros_ai/features/road/domain/road_models.dart';
@@ -14,6 +15,7 @@ import 'package:rideros_ai/features/road/presentation/incident_detail_screen.dar
 import 'package:rideros_ai/features/road/presentation/location_picker_screen.dart';
 import 'package:rideros_ai/features/road/presentation/my_reports_screen.dart';
 import 'package:rideros_ai/features/road/presentation/report_form_screen.dart';
+import 'package:rideros_ai/features/road/presentation/road_providers.dart';
 import 'package:rideros_ai/features/road/presentation/road_screen.dart';
 
 import '../helpers/fakes.dart';
@@ -493,6 +495,30 @@ void main() {
       expect(road.repo.calls.where((c) => c == 'detail:i-1'), hasLength(2));
     });
 
+    testWidgets('reload after an answer keeps the detail on screen', (
+      tester,
+    ) async {
+      await open(tester);
+      await scrollIntoView(tester, find.byKey(const Key('detail.gone')));
+      final before = tester.getTopLeft(find.byKey(const Key('detail.gone')));
+      road.repo.detailGate = Completer<void>();
+      await tester.tap(find.byKey(const Key('detail.gone')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(road.repo.calls.where((c) => c == 'detail:i-1'), hasLength(2));
+      expect(find.byType(SummarySkeleton), findsNothing);
+      expect(
+        tester.getTopLeft(find.byKey(const Key('detail.gone'))).dy,
+        before.dy,
+      );
+      road.repo.detailGate!.complete();
+      await tester.pumpAndSettle();
+      expect(
+        find.text(t.roadConfirmMineCleared(t.roadAgoJustNow)),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('"gone" on a closed incident: says why', (tester) async {
       road.repo.confirmError = const ApiFailure(
         statusCode: 409,
@@ -521,7 +547,10 @@ void main() {
       tester,
     ) async {
       road.repo.details['i-1'] = IncidentDetail(
-        incident: testIncident(),
+        // "Gone" 30 minutes ago counts: the last report is older.
+        incident: Incident.fromJson(
+          incidentJson(lastAgo: const Duration(hours: 1)),
+        ),
         myReport: ownReport(
           image: true,
           aiStatus: 'done',
@@ -548,6 +577,120 @@ void main() {
       );
       expect(find.text(t.badgeEstimate), findsOneWidget);
       expectNeverVerified();
+    });
+
+    testWidgets('"gone" older than the latest report: asks to answer again', (
+      tester,
+    ) async {
+      road.repo.details['i-1'] = IncidentDetail(
+        incident: testIncident(), // last report 5 minutes ago
+        myConfirmation: MyConfirmation(
+          stillPresent: false,
+          createdAt: testNowUtc(const Duration(minutes: 30)),
+        ),
+      );
+      await open(tester);
+      expect(
+        find.text(t.roadConfirmMineClearedStale(t.roadAgoMinutes(30))),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('detail.mine')), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('detail.gone')),
+          matching: find.byType(FilledButton),
+        ),
+        findsNothing,
+      );
+
+      await scrollAndTap(tester, 'detail.gone');
+      expect(road.repo.lastConfirm, (id: 'i-1', stillPresent: false));
+      expect(find.byKey(const Key('detail.mineStale')), findsNothing);
+      expect(
+        find.text(t.roadConfirmMineCleared(t.roadAgoJustNow)),
+        findsOneWidget,
+      );
+    });
+
+    group('photo suggestion pending', () {
+      IncidentDetail withReport(
+        String aiStatus, {
+        Duration createdAgo = const Duration(seconds: 20),
+      }) => IncidentDetail(
+        incident: testIncident(),
+        myReport: ownReport(
+          image: true,
+          aiStatus: aiStatus,
+          aiLabel: aiStatus == 'done' ? 'flooding' : null,
+          aiConfidence: aiStatus == 'done' ? '0.9100' : null,
+          createdAgo: createdAgo,
+        ),
+      );
+
+      int detailCalls() =>
+          road.repo.calls.where((c) => c == 'detail:i-1').length;
+
+      testWidgets('asks again until the suggestion arrives, then stops', (
+        tester,
+      ) async {
+        road.repo.details['i-1'] = withReport('pending');
+        await open(tester);
+        await scrollIntoView(tester, find.byKey(const Key('detail.ai')));
+        expect(find.text(t.roadAiPending), findsOneWidget);
+        expect(detailCalls(), 1);
+
+        await tester.pump(aiPollInterval);
+        await tester.pumpAndSettle();
+        expect(detailCalls(), 2);
+        expect(find.text(t.roadAiPending), findsOneWidget);
+
+        road.repo.details['i-1'] = withReport('done');
+        await tester.pump(aiPollInterval);
+        await tester.pumpAndSettle();
+        expect(detailCalls(), 3);
+        expect(
+          find.text(t.roadAiSuggestion(t.roadCategoryFlooding, 91)),
+          findsOneWidget,
+        );
+        expect(find.byType(SummarySkeleton), findsNothing);
+
+        await tester.pump(aiPollInterval * 5);
+        expect(detailCalls(), 3);
+      });
+
+      testWidgets('a failed poll keeps the screen and tries again', (
+        tester,
+      ) async {
+        road.repo.details['i-1'] = withReport('pending');
+        await open(tester);
+        road.repo.detailError = const NetworkFailure();
+        await tester.pump(aiPollInterval);
+        await tester.pumpAndSettle();
+        expect(detailCalls(), 2);
+        expect(find.text(t.commonRetry), findsNothing);
+        expect(find.byKey(const Key('detail.category')), findsOneWidget);
+
+        road.repo
+          ..detailError = null
+          ..details['i-1'] = withReport('failed');
+        await tester.pump(aiPollInterval);
+        await tester.pumpAndSettle();
+        expect(detailCalls(), 3);
+        expect(find.text(t.roadAiPending), findsNothing);
+        expect(find.byKey(const Key('detail.ai')), findsNothing);
+      });
+
+      testWidgets('no polling once the window after the report has passed', (
+        tester,
+      ) async {
+        road.repo.details['i-1'] = withReport(
+          'pending',
+          createdAgo: aiPollWindow + const Duration(seconds: 1),
+        );
+        await open(tester);
+        await tester.pump(aiPollInterval * 3);
+        expect(detailCalls(), 1);
+      });
     });
 
     testWidgets('photo error: retry', (tester) async {

@@ -1,0 +1,8 @@
+# Performance runs only (docs/PERFORMANCE.md). Turns the per-user rate limit off so one seeded rider can
+# send 200 requests per endpoint; everything else is the normal local stack.
+#   docker compose -f docker-compose.yml -f backend/perf/compose.perf.yml up -d backend
+# Afterwards restart without this file: docker compose up -d backend
+services:
+  backend:
+    environment:
+      RATE_LIMIT_ENABLED: "false"

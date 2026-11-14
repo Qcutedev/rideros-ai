@@ -12,10 +12,10 @@ from app.core.errors import AppError, ConflictError, ServiceUnavailableError, Un
 from app.core.security import (
     create_access_token,
     generate_opaque_token,
-    hash_password,
+    hash_password_async,
     hash_token,
     password_problem,
-    verify_password,
+    verify_password_async,
 )
 from app.modules.auth import repository as tokens
 from app.modules.auth.schemas import TokenPair
@@ -40,7 +40,7 @@ async def register(session: AsyncSession, *, email: str, password: str, display_
         raise ConflictError("An account with this e-mail already exists", code="email_taken")
     try:
         user = await users.add(
-            session, email=email, password_hash=hash_password(password), display_name=display_name
+            session, email=email, password_hash=await hash_password_async(password), display_name=display_name
         )
         await session.commit()
     except IntegrityError as exc:  # concurrent register with the same e-mail
@@ -68,8 +68,8 @@ async def _issue_pair(
 
 async def login(session: AsyncSession, *, email: str, password: str, settings: Settings) -> TokenPair:
     user = await users.get_by_email(session, email)
-    # verify_password(…, None) still runs Argon2 so unknown e-mails take the same time.
-    valid = verify_password(password, user.password_hash if user else None)
+    # verify_password_async(…, None) still runs Argon2 so unknown e-mails take the same time.
+    valid = await verify_password_async(password, user.password_hash if user else None)
     if not valid or user is None or not user.is_active:
         raise UnauthorizedError("E-mail or password is incorrect", code="invalid_credentials")
     pair = await _issue_pair(session, user.id, uuid.uuid4(), settings, _now())
@@ -161,7 +161,7 @@ async def reset_password(session: AsyncSession, *, token: str, new_password: str
     if problem := password_problem(new_password, user.email):
         raise WeakPasswordError(problem, details=[{"loc": ["body", "new_password"], "msg": problem}])
 
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     row.used_at = now
     await tokens.revoke_all_for_user(session, user.id, now)  # sign out every device
     await session.commit()

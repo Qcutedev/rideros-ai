@@ -629,6 +629,8 @@
   "@roadConfirmMineStill": {"placeholders": {"ago": {"type": "String"}}},
   "roadConfirmMineCleared": "คุณแจ้งว่าคลี่คลายแล้ว · {ago}",
   "@roadConfirmMineCleared": {"placeholders": {"ago": {"type": "String"}}},
+  "roadConfirmMineClearedStale": "คุณแจ้งว่าคลี่คลายแล้ว · {ago} แต่มีรายงานใหม่หลังจากนั้น คำตอบเดิมจึงไม่นับ ถ้าคลี่คลายแล้วจริง กด \"คลี่คลายแล้ว\" อีกครั้ง",
+  "@roadConfirmMineClearedStale": {"description": "The server counts 'gone' only after the latest report.", "placeholders": {"ago": {"type": "String"}}},
   "roadConfirmHelp": "คำตอบใหม่แทนคำตอบเดิมของคุณ เหตุจะปิดเมื่อมีไรเดอร์หลายคนแจ้งว่าคลี่คลาย",
   "roadConfirmSaved": "บันทึกคำตอบแล้ว",
   "roadClosedMessage": "เหตุนี้ปิดแล้ว ({status}) จึงแจ้งเพิ่มไม่ได้",

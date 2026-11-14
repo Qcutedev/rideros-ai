@@ -1857,6 +1857,11 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String roadConfirmMineClearedStale(String ago) {
+    return 'คุณแจ้งว่าคลี่คลายแล้ว · $ago แต่มีรายงานใหม่หลังจากนั้น คำตอบเดิมจึงไม่นับ ถ้าคลี่คลายแล้วจริง กด \"คลี่คลายแล้ว\" อีกครั้ง';
+  }
+
+  @override
   String get roadConfirmHelp =>
       'คำตอบใหม่แทนคำตอบเดิมของคุณ เหตุจะปิดเมื่อมีไรเดอร์หลายคนแจ้งว่าคลี่คลาย';
 
