@@ -358,9 +358,26 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · แก้ `SYSTEM_ARCHITECTURE.md` §5 ให้ตรงโค้ด (`limits` ไม่ใช่ slowapi, ไม่ใช้ Pydantic Strict mode, gitleaks ยังไม่อยู่ใน CI)
   · ผลตรวจ: Backend **476 passed** (เดิม 421) · ruff check/format สะอาด · Coverage `app/modules`+`app/core` 98% · `docker compose build` + up → backend healthy, `/ready` model ok, cv ok, Body 300 KB → 413
   · Gotcha: อย่ารัน pytest ของ backend 2 ชุดพร้อมกัน (ใช้ Test DB เดียวกันและ DROP ทิ้งตอนเริ่ม)
+- **P6b Performance + แก้ Bug — เสร็จ 2026-11-14 · Commit `dd7f127` ตามที่ผู้ใช้สั่งหลังรับรายงาน · gitleaks `dir` (456 ไฟล์) + `git` → no leaks found** · รายละเอียดทั้งหมด: `docs/PERFORMANCE.md`
+  · สคริปต์ `backend/perf/run.py` (`python -m perf.run`) + `backend/perf/compose.perf.yml` (ตั้งแค่ `RATE_LIMIT_ENABLED=false`) · Seed ไรเดอร์ชั่วคราวผ่าน API (132 ช่วงทำงาน/รายได้, 72 ค่าใช้จ่าย, 30 Pickup log, 3 Scenario, 5 รายงานถนน) แล้วลบด้วย `DELETE /me` · ผลดิบ `backend/reports/perf_p6b.json`
+  · ผล (24 Endpoint × c=1/c=10 × 200 req = 9,600 req, Error 0): CRUD/Summary p95 สูงสุด 149.0 ms (< 300) · Pickup prediction c=10 p95 358.9 ms (< 500; ติด CPU ของ `ColumnTransformer` 11 ms/แถว + GIL, ~36 req/s) · `/profit/patterns` Cache c=10 110.5 ms · ครั้งแรก 621–660 ms (แยก) · ผ่านเป้าทั้งหมด จึงไม่แก้ Index/Query
+  · แก้ F-P1: Argon2 hash/verify รันบน Event loop (Login บล็อกทุก Request ~70 ms) → `hash_password_async`/`verify_password_async` (`run_in_threadpool`) ใน Register/Login/Reset/`DELETE /me` · Test 2 ตัว (Fail เมื่อถอดการแก้)
+  · Mobile cold start (Profile build, Emulator API 37, 10 รอบ): median 1,565 ms
+  · แก้ Bug (a): หน้ารายละเอียดเหตุ `incidentDetailProvider` เป็น `StreamProvider` ถามซ้ำทุก 3 s (`aiPollInterval`) ขณะรูปของเรายัง `pending` ไม่เกิน 2 นาทีหลังรายงาน (`aiPollWindow`) · ถามพลาด → คงหน้าเดิมแล้วลองใหม่ · Timer ยกเลิกเมื่อออกจากหน้า
+  · แก้ Bug (b): "คุณแจ้งว่าคลี่คลายแล้ว" ที่เก่ากว่า `last_reported_at` → Banner เตือน `roadConfirmMineClearedStale` + ปุ่มคลี่คลายไม่เป็นสถานะเลือก (กฎเดียวกับ Backend `created_at > last_reported_at`)
+  · พบระหว่างตรวจบน Emulator + แก้: หลังตอบ ยังอยู่/คลี่คลาย หน้ารายละเอียดเด้งกลับบนสุด (Revision bump → Skeleton) → ใช้ `detail.keepingData` (แบบหน้า Shift) · Test ใหม่ Fail เมื่อถอดการแก้
+  · ตรวจบน Emulator (บัญชี `patterns.check@example.com`): `docker compose pause cv` + `CV_TIMEOUT_SECONDS=120` (override ชั่วคราวใน scratchpad) → ส่งรายงานพร้อมรูปผ่าน API → หน้า Detail แสดง "AI กำลังดูรูปนี้" → `unpause` → เปลี่ยนเป็น "AI แนะนำ: อื่นๆ (99%)" เองภายใน ~8 s ไม่ต้องดึงรีเฟรช · ตอบคลี่คลาย → บัญชีที่ 2 (สร้างแล้วลบทิ้ง) รายงานซ้ำ → ดึงรีเฟรช → Banner ขึ้น, คลี่คลาย 0 คน → ตอบใหม่ → นับ 1 คน, ตำแหน่งเลื่อนไม่หาย · ข้อมูลทดสอบเหตุ `a3e6a123-…` ยังอยู่ใน Dev DB
+  · ผลตรวจ: Backend **478 passed** · ruff check/format สะอาด · Coverage `app/modules`+`app/core` 98% · Mobile `flutter analyze` No issues · `dart format` สะอาด · `flutter test` **495 passed** (เดิม 490) · Coverage `lib/` (ไม่รวม generated/l10n) 96.7% (6,524/6,748)
+  · Gotcha: `CV_TIMEOUT_SECONDS` สูงสุด 120 (เกินแล้ว Backend ไม่ Start) · Build Profile ครั้งแรกของ Session Fail แบบไม่มี Error ให้เห็น รันซ้ำผ่าน
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-14: P6a เสร็จ + Commit `e8e7c24` (§4.13) → Session ใหม่เริ่ม P6b** (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-14: P6b เสร็จ + Commit `dd7f127` (§4.13) → Session ใหม่เริ่ม P6c** (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+- ตรวจสถานะ: `git status` สะอาด · `docker compose up -d` (`/ready` model ok) · Backend **478 passed** · Mobile **495 passed**, Coverage `lib/` 96.7% (→ Gate = 94.7% ตามข้อ 8) · Backend Coverage 98% (→ Gate 96%)
+- P6c ตาม §4.13 ข้อ 7–10: `scripts/regression.ps1` (Backend pytest + ruff, ML/CV pytest, Flutter analyze/format/test + Coverage gate = ค่าปัจจุบัน − 2%) · `docs/TESTING.md` · Phase 6 Report เทียบ Exit criteria ข้อ 10 แล้วรออนุมัติ · ห้ามเริ่ม Phase 7
+- วัด Perf ซ้ำ: คำสั่งใน `docs/PERFORMANCE.md` §2.3 (อย่าลืม `docker compose up -d backend` หลังวัดเพื่อเปิด Rate limit กลับ)
+
+**(เดิม) 2026-11-14: P6a เสร็จ + Commit `e8e7c24`**
+P6a เสร็จ (§4.13) → Session ใหม่เริ่ม P6b (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 - P6b ตามการตัดสินใจ §4.13 ข้อ 4–6:
   1. `backend/perf/` สคริปต์ `httpx` async: Seed User ผ่าน API (Retry 429 · Rate limit 60/นาที/User → ใช้หลาย User หรือรัน Stack ด้วย `RATE_LIMIT_ENABLED=false` แล้วระบุในรายงาน) · 200 req/Endpoint ที่ Concurrency 1 และ 10 · p50/p95/p99 → `docs/PERFORMANCE.md` (ระบุเครื่อง, Docker, จำนวนข้อมูล)
   2. เป้า p95: CRUD/Summary < 300 ms · Pickup prediction < 500 ms · `/profit/patterns` (Cache) < 500 ms + ครั้งแรกแยก · ไม่ผ่าน → แก้ Index/Query แล้ววัดซ้ำ
@@ -484,10 +501,12 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 - ~~(P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…"~~ · ~~(P3c-c) SnackBar "ลบแล้ว" ทับแถบเลือก Scenario~~ → แก้แล้วใน P4b (§4.9)
 - (P3b) หลังแก้ 2 จุด (ป้ายจำนวนรายการ, ระยะขอบกราฟ) ยังไม่ได้ Screenshot ซ้ำบน Emulator (Tests ผ่าน)
 - (P5b) Marker ของเหตุต่างหมวดที่จุดเดียวกันซ้อนกันบนแผนที่ (ไม่มี Clustering) → กดได้แค่ตัวบนสุด ตัวอื่นเปิดจากแท็บ "ใกล้ฉัน"
-- (P5b) หลังมีคนรายงานเหตุเดิมเพิ่ม คำตอบ "คลี่คลายแล้ว" ที่ตอบไว้ก่อนหน้าไม่นับแล้ว (กฎ Backend: นับเฉพาะหลัง Report ล่าสุด) แต่หน้ารายละเอียดยังแสดง "คุณแจ้งว่าคลี่คลายแล้ว · X นาทีที่แล้ว" → ผู้ใช้ไม่รู้ว่าต้องตอบใหม่
+- ~~(P5b) คำตอบ "คลี่คลายแล้ว" ที่เก่ากว่า Report ล่าสุดยังแสดงเหมือนนับอยู่~~ → แก้แล้วใน P6b (§4.13)
 - (P5b) OSM tiles ไม่มีโหมดมืด แผนที่จึงสว่างใน Dark mode
 - (K-Means, §4.12) Work Patterns: Latency ครั้งแรก ~0.6–1 s · Cache ใน Process · ข้อมูลน้อยกับกะดึกข้ามเที่ยงคืน k อาจเกิน · Benchmark เป็นข้อมูลสังเคราะห์ ไม่ใช่ความแม่นยำกับไรเดอร์จริง
-- (P5c) Image `rideros-cv` 1.58 GB (torch CPU) · หน้า Detail ไม่ refresh เองตอน `pending` → `done` (ต้องเปิดใหม่/ดึงรีเฟรช)
+- (P5c) Image `rideros-cv` 1.58 GB (torch CPU) · ~~หน้า Detail ไม่ refresh เองตอน `pending` → `done`~~ → แก้แล้วใน P6b (Poll ทุก 3 s ไม่เกิน 2 นาที)
+- (P6b) Pickup prediction ติด CPU ของ Process เดียว (~36 req/s, c=10 p95 359 ms) · uvicorn 1 worker · ทางแก้ตอน Deploy: หลาย Worker + Rate limiter บน Redis (`docs/PERFORMANCE.md` §3.3)
+- (P6b) ตัวเลข Perf/Cold start วัดบน Docker Desktop + Emulator ในเครื่องเดียว ไม่ใช่ Server/มือถือจริง
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
 - ร้านที่ไม่มีใน Train: MAE 7.24, Coverage 65.1% (215 orders) → Backend แสดงคำเตือนตาม `data_availability` แล้ว (P2c) และ `/pickup/model` ระบุใน `limitations`
