@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # RiderOS AI backend. Python must match ml/ (AD-5: same version for training and serving).
 # Build context: repository root (see docker-compose.yml); ignore rules in Dockerfile.dockerignore.
-FROM python:3.14.6-slim-trixie AS builder
+FROM python:3.14.10-slim-trixie AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /bin/uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -14,10 +14,13 @@ WORKDIR /app
 COPY backend/pyproject.toml backend/uv.lock backend/README.md ./
 RUN uv sync --locked --no-dev --no-install-project --no-editable
 
-FROM python:3.14.6-slim-trixie AS runtime
+FROM python:3.14.10-slim-trixie AS runtime
 # libgomp1: OpenMP runtime used by xgboost and scikit-learn.
 # /data/road_images: RoadContext photos; a new named volume takes this owner, so `app` can write.
-RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/* \
+# upgrade: Debian security fixes newer than the base image (docs/SECURITY_AUDIT.md). The system pip
+# is removed because the app runs from /opt/venv and pip's vendored packages carry known CVEs.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/* && python -m pip uninstall -y pip \
     && useradd --system --uid 10001 --no-create-home app \
     && mkdir -p /data/road_images && chown app:app /data/road_images
 ENV PATH=/opt/venv/bin:$PATH \

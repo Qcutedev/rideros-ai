@@ -215,19 +215,19 @@ sequenceDiagram
 
 ---
 
-## 5. Security Architecture (สรุป — รายละเอียดใน Phase 6)
+## 5. Security Architecture (ตรวจแล้วใน Phase 6 — หลักฐานและความเสี่ยงที่ยอมรับ: `SECURITY_AUDIT.md`)
 
 | ด้าน | การออกแบบ |
 |---|---|
-| Password | Argon2id (`pwdlib`/`argon2-cffi`), Min 8 ตัวอักษร + ตรวจกับรายการรหัสผ่านที่พบบ่อย |
+| Password | Argon2id (`pwdlib`/`argon2-cffi`), 8–128 ตัวอักษร + ตรวจกับรายการรหัสผ่านที่พบบ่อย (2,114 รายการ: SecLists 10k ที่ยาว ≥ 8 + รายการเดิม) + ห้ามซ้ำกับชื่อ E-mail |
 | Tokens | Access JWT 15 นาที (HS256, Secret จาก ENV, ตรวจ `exp`/`iat`/`sub`/`type`); Refresh เป็น Opaque random 256-bit เก็บแค่ Hash, Rotation + Reuse Detection |
 | Authorization | ทุก Query ของข้อมูลผู้ใช้ Filter ด้วย `user_id = current_user.id` ใน Repository Layer; Role `rider`/`admin`; มี Test Cross-user Access ทุก Endpoint |
 | SQL Injection | ใช้ SQLAlchemy ORM/Bound Parameters เท่านั้น ห้ามต่อ String เป็น SQL |
-| Validation | Pydantic Strict Types + Range Constraints; Validation ระดับ Domain ใน Service |
-| Rate limiting | slowapi: login 5/นาที/IP, register 3/นาที/IP, ค่าทั่วไป 60/นาที/User |
+| Validation | Pydantic `extra="forbid"` + Range/Length Constraints (ไม่ใช้ Strict mode: แปลงชนิดได้ เช่น `"500"` → Decimal); Validation ระดับ Domain ใน Service; Body ≤ 256 KiB (Multipart ≤ 5 MB + 64 KiB) ตรวจตอนรับข้อมูล |
+| Rate limiting | `limits` (Moving window, In-memory ต่อ Process): login 5/นาที ต่อ IP และต่อ E-mail, register 3/นาที/IP, forgot-password 3/นาที ต่อ IP และต่อ E-mail, reset 3/นาที/IP, รายงานเหตุ 10/นาที/User, ค่าทั่วไป 60/นาที/User · `X-Forwarded-For` ตั้งใน Phase 7 |
 | CORS | Mobile App ไม่ต้องใช้ CORS; อนุญาตเฉพาะ Origin ที่กำหนดใน ENV (ค่าเริ่มต้นคือว่าง) |
-| File upload | ตรวจ Magic Bytes (JPEG/PNG/WebP), ≤ 5 MB, Re-encode ภาพ (ลบ EXIF รวมถึงพิกัด GPS), ตั้งชื่อไฟล์ใหม่เป็น UUID, ห้าม Serve จาก Path ที่ผู้ใช้ควบคุม |
-| Secrets | `.env` (gitignored) + `.env.example`; Production ใช้ Secret ของ Platform; มี `gitleaks` ใน CI |
+| File upload | ตรวจ Magic Bytes (JPEG/PNG/WebP), ≤ 5 MB และ ≤ 40 MP, Re-encode ภาพ (ลบ EXIF รวมถึงพิกัด GPS), ตั้งชื่อไฟล์ใหม่เป็น UUID, ห้าม Serve จาก Path ที่ผู้ใช้ควบคุม |
+| Secrets | `.env` (gitignored) + `.env.example`; Production ใช้ Secret ของ Platform; gitleaks ตรวจก่อน Commit (ใส่ใน CI ตอน Phase 7) |
 | Privacy | Reporter ของ Incident ไม่ถูกเปิดเผยใน Public API; มี `DELETE /me`; Log ไม่บันทึก Token, Password หรือพิกัดละเอียด |
 | Forgot Password (D5) | **Development เท่านั้น:** Reset Link แสดงใน Development Log; เก็บแค่ SHA-256 ของ Token; อายุ 30 นาที; ใช้ได้ครั้งเดียว (`used_at`); Token เดิมถูกยกเลิกเมื่อขอใหม่; ถ้า `ENV=production` และไม่มี Email Provider ระบบจะปิด Endpoint และ **ห้าม** Log Link (มี Test ยืนยัน) |
 

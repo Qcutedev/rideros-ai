@@ -2,7 +2,7 @@
 # RiderOS AI photo classifier (POST /classify). CPU-only torch from the PyTorch CPU index (uv.lock),
 # so the image carries no CUDA libraries. The model is mounted read-only from cv_service/artifacts.
 # Build context: cv_service/ (allow-list in .dockerignore: no datasets, no weights in the image).
-FROM python:3.14.6-slim-trixie AS builder
+FROM python:3.14.10-slim-trixie AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /bin/uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -12,8 +12,12 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --locked --no-dev --no-group train --no-install-project
 
-FROM python:3.14.6-slim-trixie AS runtime
-RUN useradd --system --uid 10001 --no-create-home app
+FROM python:3.14.10-slim-trixie AS runtime
+# upgrade: Debian security fixes newer than the base image (docs/SECURITY_AUDIT.md). The system pip
+# is removed because the app runs from /opt/venv and pip's vendored packages carry known CVEs.
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+    && python -m pip uninstall -y pip \
+    && useradd --system --uid 10001 --no-create-home app
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \

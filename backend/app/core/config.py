@@ -16,6 +16,8 @@ from app.modules.road.rules import Category, RoadRule, default_road_rules
 Environment = Literal["development", "test", "production"]
 
 _PLACEHOLDER_MARKERS = ("change-me", "changeme", "example", "placeholder", "secret")
+# Form fields + boundaries on top of the photo itself in a multipart report upload.
+MULTIPART_OVERHEAD_BYTES = 64 * 1024
 
 
 class Settings(BaseSettings):
@@ -69,6 +71,9 @@ class Settings(BaseSettings):
     rate_limit_register: str = "3/minute"  # per IP
     rate_limit_password_reset: str = "3/minute"  # per IP, and per e-mail for forgot-password
     rate_limit_road_report: str = "10/minute"  # per user: new road reports and confirmations
+
+    # Request body caps (app/core/body_limit.py): JSON / other bodies; multipart = photo limit + overhead.
+    max_json_body_bytes: int = Field(default=256 * 1024, ge=1024, le=10 * 1024 * 1024)
 
     cors_origins: list[str] = Field(default_factory=list)
     docs_enabled: bool | None = None  # None -> enabled everywhere except production

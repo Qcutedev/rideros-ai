@@ -7,7 +7,8 @@ import structlog
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import Settings, get_settings
+from app.core.body_limit import BodySizeLimitMiddleware
+from app.core.config import MULTIPART_OVERHEAD_BYTES, Settings, get_settings
 from app.core.errors import register_error_handlers
 from app.core.logging import RequestContextMiddleware, configure_logging
 from app.core.rate_limit import RateLimiter, default_limit
@@ -83,6 +84,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
             allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
         )
+    app.add_middleware(
+        BodySizeLimitMiddleware,
+        json_max_bytes=settings.max_json_body_bytes,
+        multipart_max_bytes=settings.road_image_max_bytes + MULTIPART_OVERHEAD_BYTES,
+    )
     app.add_middleware(RequestContextMiddleware)
 
     app.include_router(health_router, prefix=API_PREFIX)

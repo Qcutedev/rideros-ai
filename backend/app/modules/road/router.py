@@ -7,6 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, Query, Request, Uplo
 from fastapi.responses import FileResponse
 from pydantic import StringConstraints
 
+from app.core.config import MULTIPART_OVERHEAD_BYTES
 from app.core.deps import CurrentUser, SessionDep, SettingsDep
 from app.core.pagination import DEFAULT_PAGE_SIZE, CursorQuery, LimitQuery, Page
 from app.core.rate_limit import get_limiter
@@ -27,7 +28,7 @@ from app.modules.road.schemas import (
 router = APIRouter(prefix="/road", tags=["road"])
 
 _NOT_FOUND = {404: {"description": "Not found"}}
-_MULTIPART_OVERHEAD = 64 * 1024  # form fields + boundaries on top of the photo itself
+
 
 Description = Annotated[str, StringConstraints(strip_whitespace=True, max_length=DESCRIPTION_MAX_LENGTH)]
 
@@ -62,7 +63,7 @@ async def create_report(
     """Report an incident at a location. Nearby reports of the same category join one incident."""
     max_bytes = settings.road_image_max_bytes
     declared = request.headers.get("content-length")
-    if declared and declared.isdigit() and int(declared) > max_bytes + _MULTIPART_OVERHEAD:
+    if declared and declared.isdigit() and int(declared) > max_bytes + MULTIPART_OVERHEAD_BYTES:
         raise ImageTooLargeError(f"The photo must be at most {max_bytes // (1024 * 1024)} MB")
     _limit_reports(request, settings, user)
     data: bytes | None = None
