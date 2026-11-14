@@ -30,6 +30,8 @@ dependencies = [
     "numpy==2.5.4",
     "joblib==1.6.0",
     "pillow>=12.0",
+    # Trend significance test (profit/trend_analysis.py); already installed with scikit-learn.
+    "scipy>=1.18",
     "python-multipart>=0.0.20",
     # Calls the photo classifier (cv_service) from a background task.
     "httpx>=0.28",

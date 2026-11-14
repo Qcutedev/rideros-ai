@@ -12,6 +12,7 @@ import 'profit_labels.dart';
 import 'profit_providers.dart';
 import 'widgets/net_profit_chart.dart';
 import 'widgets/profit_metrics_view.dart';
+import 'widgets/trend_summary.dart';
 import 'widgets/work_patterns_card.dart';
 
 /// TrueProfit dashboard: actual revenue, expenses, net profit and hours for a day,
@@ -167,7 +168,13 @@ class _Content extends ConsumerWidget {
           ),
           child: data.trends.isEmpty
               ? _EmptyPeriod(message: l10n.profitTrendEmpty)
-              : NetProfitChart(trends: data.trends),
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    NetProfitChart(trends: data.trends),
+                    TrendSummary(trends: data.trends),
+                  ],
+                ),
         ),
         const SizedBox(height: AppSpacing.lg),
         const WorkPatternsCard(),

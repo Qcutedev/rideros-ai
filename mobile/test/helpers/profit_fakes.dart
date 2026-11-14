@@ -102,6 +102,12 @@ class FakeProfitRepository implements ProfitRepository {
   final Map<(ProfitPeriod, DateTime), ProfitMetrics> summaryMetrics = {};
   final Map<ProfitPeriod, List<ProfitMetrics>> trendMetrics = {};
 
+  /// `analysis` of trends requests without `from`; per-point moving average / trend line values
+  /// line up with [trendMetrics] (missing entries are `null`).
+  TrendAnalysis? trendAnalysis;
+  List<Decimal?> trendAverages = [];
+  List<Decimal?> trendLine = [];
+
   /// Daily points of a trends request with `from` (date-only keys).
   final Map<DateTime, ProfitMetrics> dailyMetrics = {};
   Object? summaryError;
@@ -170,13 +176,15 @@ class FakeProfitRepository implements ProfitRepository {
     final values = trendMetrics[granularity] ?? [metrics(), metrics()];
     var start = periodStart(to ?? today, granularity);
     final points = <TrendPoint>[];
-    for (final value in values.reversed) {
+    for (var i = values.length - 1; i >= 0; i--) {
       points.insert(
         0,
         TrendPoint(
           startDate: start,
           endDate: _periodEnd(start, granularity),
-          metrics: value,
+          metrics: values[i],
+          movingAverage: i < trendAverages.length ? trendAverages[i] : null,
+          trend: i < trendLine.length ? trendLine[i] : null,
         ),
       );
       start = periodStart(start.subtract(const Duration(days: 1)), granularity);
@@ -185,6 +193,7 @@ class FakeProfitRepository implements ProfitRepository {
       granularity: granularity,
       currency: 'THB',
       points: points,
+      analysis: trendAnalysis,
     );
   }
 

@@ -168,6 +168,30 @@ class ProfitSummary(ProfitMetrics):
 class TrendPoint(ProfitMetrics):
     start_date: date
     end_date: date = Field(description="Inclusive")
+    net_profit_moving_average: Decimal | None = Field(
+        description="Trailing mean of net_profit over analysis.moving_average_window buckets; "
+        "null outside the span with records or before the window is full"
+    )
+    net_profit_trend: Decimal | None = Field(
+        description="Fitted linear-trend value; null unless analysis.direction is up or down"
+    )
+
+
+TrendDirection = Literal["up", "down", "flat"]
+
+
+class TrendAnalysisOut(BaseModel):
+    """Estimate from the rider's own records, not a forecast. See app/modules/profit/trend_analysis.py."""
+
+    status: Literal["ok", "insufficient_data"]
+    moving_average_window: int = Field(description="Buckets: day 7, week 4, month 3")
+    active_buckets: int = Field(description="Buckets that hold at least one record")
+    min_active_buckets: int
+    direction: TrendDirection | None = Field(
+        description="up/down only when the slope is significant (p < 0.05); flat otherwise; null without data"
+    )
+    slope_per_bucket: Decimal | None = Field(description="Net profit change per bucket (least squares)")
+    p_value: float | None
 
 
 class ProfitTrends(BaseModel):
@@ -177,6 +201,7 @@ class ProfitTrends(BaseModel):
     timezone: str
     currency: str
     points: list[TrendPoint]
+    analysis: TrendAnalysisOut
 
 
 # ---- work patterns (K-Means) ----

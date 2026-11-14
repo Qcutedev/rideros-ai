@@ -94,6 +94,113 @@ void main() {
     expect(find.text(t.profitActualOnlyNote('Asia/Bangkok')), findsOneWidget);
   });
 
+  group('trend analysis', () {
+    void fiveDays() => profit.profit.trendMetrics[ProfitPeriod.week] = [
+      for (var i = 0; i < 5; i++)
+        metrics(revenue: '${500 + 100 * i}.00', incomeCount: 1),
+    ];
+
+    Future<void> openWeek(WidgetTester tester) async {
+      await pumpProfit(tester);
+      await tester.tap(find.text(t.periodWeek));
+      await tester.pumpAndSettle();
+    }
+
+    String sentence(WidgetTester tester) =>
+        tester.widget<Text>(find.byKey(const Key('trendSentence'))).data!;
+
+    testWidgets('a significant rise: sentence, line legend, estimate badge', (
+      tester,
+    ) async {
+      fiveDays();
+      profit.profit
+        ..trendAnalysis = TrendAnalysis(
+          status: TrendStatus.ok,
+          window: 4,
+          activeBuckets: 5,
+          minActiveBuckets: 4,
+          direction: TrendDirection.up,
+          slopePerBucket: d('100.00'),
+        )
+        ..trendAverages = [null, null, null, d('650.00'), d('750.00')]
+        ..trendLine = [for (var i = 0; i < 5; i++) d('${500 + 100 * i}.00')];
+      await openWeek(tester);
+      expect(sentence(tester), t.profitTrendUp('฿100.00', t.periodWeek));
+      expect(
+        find.text(t.profitTrendLegendAverage(4, t.periodWeek)),
+        findsOneWidget,
+      );
+      expect(find.text(t.profitTrendLegendLine), findsOneWidget);
+      expect(find.text(t.profitTrendBasis(5, t.periodWeek)), findsOneWidget);
+      expect(find.text(t.badgeEstimate), findsOneWidget);
+      expect(find.byType(LineChart), findsOneWidget);
+    });
+
+    testWidgets('a fall reads as a decrease of the absolute slope', (
+      tester,
+    ) async {
+      fiveDays();
+      profit.profit.trendAnalysis = TrendAnalysis(
+        status: TrendStatus.ok,
+        window: 4,
+        activeBuckets: 5,
+        minActiveBuckets: 4,
+        direction: TrendDirection.down,
+        slopePerBucket: d('-42.50'),
+      );
+      await openWeek(tester);
+      expect(sentence(tester), t.profitTrendDown('฿42.50', t.periodWeek));
+    });
+
+    testWidgets('no clear trend: no line, no direction claimed', (
+      tester,
+    ) async {
+      fiveDays();
+      profit.profit
+        ..trendAnalysis = TrendAnalysis(
+          status: TrendStatus.ok,
+          window: 4,
+          activeBuckets: 5,
+          minActiveBuckets: 4,
+          direction: TrendDirection.flat,
+          slopePerBucket: d('3.10'),
+        )
+        ..trendAverages = [null, null, null, d('650.00'), d('750.00')];
+      await openWeek(tester);
+      expect(sentence(tester), t.profitTrendFlat);
+      expect(find.text(t.profitTrendLegendLine), findsNothing);
+      expect(
+        find.text(t.profitTrendLegendAverage(4, t.periodWeek)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('too few buckets: how many more are needed, no lines', (
+      tester,
+    ) async {
+      fiveDays();
+      profit.profit.trendAnalysis = const TrendAnalysis(
+        status: TrendStatus.insufficientData,
+        window: 4,
+        activeBuckets: 2,
+        minActiveBuckets: 4,
+      );
+      await openWeek(tester);
+      expect(sentence(tester), t.profitTrendNeedMore(4, 2, t.periodWeek));
+      expect(find.byType(LineChart), findsNothing);
+      expect(find.text(t.badgeEstimate), findsNothing);
+    });
+
+    testWidgets('an older server without analysis shows bars only', (
+      tester,
+    ) async {
+      fiveDays();
+      await openWeek(tester);
+      expect(find.byType(BarChart), findsOneWidget);
+      expect(find.byKey(const Key('trendSentence')), findsNothing);
+    });
+  });
+
   testWidgets('previous and next walk through days', (tester) async {
     await pumpProfit(tester);
     await tapKey(tester, 'profit.previous');

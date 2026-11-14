@@ -335,6 +335,40 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get profitTrendLegendNet => 'กำไรสุทธิ';
+
+  @override
+  String profitTrendLegendAverage(int count, String unit) {
+    return 'ค่าเฉลี่ย $count $unit';
+  }
+
+  @override
+  String get profitTrendLegendLine => 'เส้นแนวโน้ม';
+
+  @override
+  String profitTrendUp(String amount, String unit) {
+    return 'แนวโน้มขาขึ้น: กำไรสุทธิเพิ่มขึ้นเฉลี่ย $amount ต่อ$unit';
+  }
+
+  @override
+  String profitTrendDown(String amount, String unit) {
+    return 'แนวโน้มขาลง: กำไรสุทธิลดลงเฉลี่ย $amount ต่อ$unit';
+  }
+
+  @override
+  String get profitTrendFlat => 'ยังไม่เห็นแนวโน้มขึ้นหรือลงที่ชัดเจน';
+
+  @override
+  String profitTrendBasis(int count, String unit) {
+    return 'คิดจาก $count $unitที่มีข้อมูล · ทดสอบทางสถิติแล้ว ไม่ใช่การพยากรณ์';
+  }
+
+  @override
+  String profitTrendNeedMore(int need, int have, String unit) {
+    return 'ต้องมีข้อมูลอย่างน้อย $need $unitจึงจะดูแนวโน้มได้ (ตอนนี้มี $have)';
+  }
+
+  @override
   String profitActualOnlyNote(String zone) {
     return 'ตัวเลขทั้งหมดคำนวณโดยเซิร์ฟเวอร์จากรายการที่คุณบันทึกจริงเท่านั้น (ไม่รวมค่าประมาณจาก Shift Simulator) · สัปดาห์เริ่มวันจันทร์ · เขตเวลา $zone';
   }

@@ -14,6 +14,7 @@ from app.core.timezones import local_dates_to_utc_range, today_in
 from app.modules.profit import calculator as calc
 from app.modules.profit import patterns as pat
 from app.modules.profit import repository as repo
+from app.modules.profit import trend_analysis as trend
 from app.modules.profit.models import (
     WORK_SESSION_OVERLAP_CONSTRAINT,
     ExpenseRecord,
@@ -30,6 +31,7 @@ from app.modules.profit.schemas import (
     PatternGroup,
     ProfitSummary,
     ProfitTrends,
+    TrendAnalysisOut,
     TrendPoint,
     WorkPatterns,
     WorkSessionCreate,
@@ -394,9 +396,21 @@ async def trends(
     per_bucket: dict[date, calc.Totals] = {b0: calc.Totals() for b0, _ in buckets}
     for day, t in (await daily_totals(session, user_id, first, last, locale)).items():
         per_bucket[calc.bucket_start(day, granularity)].add(t)
+    metrics = [calc.compute_metrics(per_bucket[b0]) for b0, _ in buckets]
+    analysis = trend.analyse(
+        [m.net_profit for m in metrics],
+        [m.income_count + m.expense_count + m.work_session_count > 0 for m in metrics],
+        granularity,
+    )
     points = [
-        TrendPoint(start_date=b0, end_date=b1, **asdict(calc.compute_metrics(per_bucket[b0])))
-        for b0, b1 in buckets
+        TrendPoint(
+            start_date=b0,
+            end_date=b1,
+            net_profit_moving_average=analysis.moving_average[i],
+            net_profit_trend=analysis.trend_line[i],
+            **asdict(m),
+        )
+        for i, ((b0, b1), m) in enumerate(zip(buckets, metrics, strict=True))
     ]
     return ProfitTrends(
         granularity=granularity,
@@ -405,6 +419,15 @@ async def trends(
         timezone=locale.timezone,
         currency=locale.currency,
         points=points,
+        analysis=TrendAnalysisOut(
+            status=analysis.status,
+            moving_average_window=analysis.moving_average_window,
+            active_buckets=analysis.active_buckets,
+            min_active_buckets=analysis.min_active_buckets,
+            direction=analysis.direction,
+            slope_per_bucket=analysis.slope_per_bucket,
+            p_value=analysis.p_value,
+        ),
     )
 
 

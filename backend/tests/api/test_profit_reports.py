@@ -210,6 +210,58 @@ async def test_trend_errors(client: httpx.AsyncClient, h: dict, query: str, stat
     assert resp.status_code == status and resp.json()["error"]["code"] == code
 
 
+async def test_trend_analysis_needs_four_buckets_with_records(client: httpx.AsyncClient, h: dict) -> None:
+    body = (
+        await client.get("/profit/trends?granularity=day&from=2026-11-08&to=2026-11-11", headers=h)
+    ).json()
+    assert body["analysis"] == {
+        "status": "insufficient_data",
+        "moving_average_window": 7,
+        "active_buckets": 3,
+        "min_active_buckets": 4,
+        "direction": None,
+        "slope_per_bucket": None,
+        "p_value": None,
+    }
+    assert all(
+        p["net_profit_moving_average"] is None and p["net_profit_trend"] is None for p in body["points"]
+    )
+
+
+async def test_trend_analysis_finds_a_weekly_rise(client: httpx.AsyncClient) -> None:
+    """Six weeks of income rising 100 a week: up, slope 100, a line on every week, MA from week 4."""
+    headers = await auth_headers(client, "trend.up@example.com")
+    for week in range(6):
+        day = datetime(2026, 9, 7).date() + timedelta(weeks=week)  # Mondays
+        resp = await client.post(
+            "/income", json={"occurred_on": str(day), "amount": str(500 + 100 * week)}, headers=headers
+        )
+        assert resp.status_code == 201
+    body = (
+        await client.get("/profit/trends?granularity=week&from=2026-08-31&to=2026-10-18", headers=headers)
+    ).json()
+    assert body["analysis"]["status"] == "ok" and body["analysis"]["direction"] == "up"
+    assert body["analysis"]["slope_per_bucket"] == "100.00" and body["analysis"]["active_buckets"] == 6
+    points = body["points"]  # week of 08-31 (empty) + the six weeks
+    assert points[0]["net_profit_trend"] is None and points[0]["net_profit_moving_average"] is None
+    assert [p["net_profit_trend"] for p in points[1:]] == [
+        "500.00",
+        "600.00",
+        "700.00",
+        "800.00",
+        "900.00",
+        "1000.00",
+    ]
+    assert [p["net_profit_moving_average"] for p in points[1:]] == [
+        None,
+        None,
+        None,
+        "650.00",
+        "750.00",
+        "850.00",
+    ]
+
+
 async def test_trend_max_range_is_allowed(client: httpx.AsyncClient, h: dict) -> None:
     first = datetime(2026, 1, 1).date()
     last = first + timedelta(days=365)  # 366 points

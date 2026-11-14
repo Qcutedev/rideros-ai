@@ -163,6 +163,58 @@ void main() {
     );
   });
 
+  test('ProfitTrends parses the trend analysis and per-point lines', () {
+    Map<String, dynamic> point(String date, String? average, String? line) => {
+      'start_date': date,
+      'end_date': date,
+      ...metricsJson(),
+      'income_count': 1,
+      'expense_count': 0,
+      'work_session_count': 0,
+      'net_profit_moving_average': average,
+      'net_profit_trend': line,
+    };
+    final trends = ProfitTrends.fromJson({
+      'granularity': 'week',
+      'currency': 'THB',
+      'points': [
+        point('2026-11-02', null, null),
+        point('2026-11-09', '650.00', '700.00'),
+      ],
+      'analysis': {
+        'status': 'ok',
+        'moving_average_window': 4,
+        'active_buckets': 6,
+        'min_active_buckets': 4,
+        'direction': 'up',
+        'slope_per_bucket': '100.00',
+        'p_value': 0.0001,
+      },
+    });
+    expect(trends.points.first.movingAverage, isNull);
+    expect(trends.points.last.movingAverage, Decimal.parse('650'));
+    expect(trends.points.last.trend, Decimal.parse('700'));
+    final analysis = trends.analysis!;
+    expect(analysis.status, TrendStatus.ok);
+    expect(analysis.direction, TrendDirection.up);
+    expect(analysis.window, 4);
+    expect(analysis.activeBuckets, 6);
+    expect(analysis.slopePerBucket, Decimal.parse('100'));
+
+    final insufficient = TrendAnalysis.fromJson({
+      'status': 'insufficient_data',
+      'moving_average_window': 7,
+      'active_buckets': 1,
+      'min_active_buckets': 4,
+      'direction': null,
+      'slope_per_bucket': null,
+      'p_value': null,
+    });
+    expect(insufficient.status, TrendStatus.insufficientData);
+    expect(insufficient.direction, isNull);
+    expect(insufficient.slopePerBucket, isNull);
+  });
+
   group('periodStart mirrors the backend buckets', () {
     final tue = DateTime(2026, 11, 10, 14);
     test(

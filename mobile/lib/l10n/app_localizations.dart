@@ -670,6 +670,54 @@ abstract class AppLocalizations {
   /// **'กราฟแท่งกำไรสุทธิ {count} ช่วง'**
   String profitTrendSemantics(int count);
 
+  /// No description provided for @profitTrendLegendNet.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรสุทธิ'**
+  String get profitTrendLegendNet;
+
+  /// No description provided for @profitTrendLegendAverage.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าเฉลี่ย {count} {unit}'**
+  String profitTrendLegendAverage(int count, String unit);
+
+  /// No description provided for @profitTrendLegendLine.
+  ///
+  /// In th, this message translates to:
+  /// **'เส้นแนวโน้ม'**
+  String get profitTrendLegendLine;
+
+  /// No description provided for @profitTrendUp.
+  ///
+  /// In th, this message translates to:
+  /// **'แนวโน้มขาขึ้น: กำไรสุทธิเพิ่มขึ้นเฉลี่ย {amount} ต่อ{unit}'**
+  String profitTrendUp(String amount, String unit);
+
+  /// No description provided for @profitTrendDown.
+  ///
+  /// In th, this message translates to:
+  /// **'แนวโน้มขาลง: กำไรสุทธิลดลงเฉลี่ย {amount} ต่อ{unit}'**
+  String profitTrendDown(String amount, String unit);
+
+  /// No description provided for @profitTrendFlat.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่เห็นแนวโน้มขึ้นหรือลงที่ชัดเจน'**
+  String get profitTrendFlat;
+
+  /// No description provided for @profitTrendBasis.
+  ///
+  /// In th, this message translates to:
+  /// **'คิดจาก {count} {unit}ที่มีข้อมูล · ทดสอบทางสถิติแล้ว ไม่ใช่การพยากรณ์'**
+  String profitTrendBasis(int count, String unit);
+
+  /// No description provided for @profitTrendNeedMore.
+  ///
+  /// In th, this message translates to:
+  /// **'ต้องมีข้อมูลอย่างน้อย {need} {unit}จึงจะดูแนวโน้มได้ (ตอนนี้มี {have})'**
+  String profitTrendNeedMore(int need, int have, String unit);
+
   /// No description provided for @profitActualOnlyNote.
   ///
   /// In th, this message translates to:

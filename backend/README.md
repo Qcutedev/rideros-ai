@@ -110,7 +110,7 @@ Errors always use `{"error": {"code", "message", "details"}}`. Every response ca
 | `GET/POST /income`, `GET/PATCH/DELETE /income/{id}` | Optional `work_session_id` (own sessions only, else 400 `invalid_work_session`) |
 | `GET/POST /expenses`, `GET/PATCH/DELETE /expenses/{id}` | `category`: fuel, maintenance, depreciation, other |
 | `GET /profit/summary?period=day\|week\|month&date=` | One period containing `date` (default: today in the rider's zone) |
-| `GET /profit/trends?granularity=day\|week\|month&from=&to=` | One point per bucket, empty ones included; at most 366 points (400 `range_too_large`) |
+| `GET /profit/trends?granularity=day\|week\|month&from=&to=` | One point per bucket, empty ones included; at most 366 points (400 `range_too_large`). Each point has `net_profit_moving_average` (trailing mean: 7 days / 4 weeks / 3 months) and `net_profit_trend` (least-squares line, only when the slope is significant at p < 0.05); `analysis` holds `status` (`insufficient_data` below 4 buckets with records), `direction` (`up`/`down`/`flat`), `slope_per_bucket`, `p_value` |
 | `GET /profit/patterns` | K-Means work patterns of the last 180 days: `status` `ok` / `insufficient_data` (< 30 sessions) / `no_clear_pattern`; groups with time-of-day, length and day-type codes plus an estimated net profit/hour from linked records (method: `app/modules/profit/patterns.py`, benchmark: `scripts/evaluate_work_patterns.py` → `reports/work_patterns_benchmark.json`) |
 
 - Lists: `?limit=` (default 50, max 100) and `?cursor=` → `{"items": [...], "next_cursor": "..." | null}`, newest
