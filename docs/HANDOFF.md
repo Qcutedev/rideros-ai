@@ -338,7 +338,7 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - ผลตรวจ: Backend **421 passed** (เดิม 390 + ใหม่ 31: unit 27, API 4) · ruff check + format สะอาด · Mobile `flutter analyze` No issues + **490 passed** (เดิม 481)
 - Known: Latency ครั้งแรก ~0.6–1 s (CPU) · Cache อยู่ใน Process (หายเมื่อ Restart, ไม่แชร์ข้าม Worker) · ข้อมูลน้อย (30 ช่วง) กับนิสัยกะดึกข้ามเที่ยงคืน k อาจเกิน · ชื่อช่วงเวลา (เช้า/กลางวัน/เย็น/ดึก) ใช้ขอบตายตัว ค่าเฉลี่ยใกล้ขอบ (เช่น 10:59) อาจได้ชื่อข้างเคียง
 
-### 4.13 Phase 6 QA (W12) — **แผน + การตัดสินใจ 10 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-14 ("เอาเลย")**
+### 4.13 Phase 6 QA (W12) — **อนุมัติแล้ว 2026-11-14** (แผน + การตัดสินใจ 10 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-14 "เอาเลย")
 ลำดับ: P6a Security Audit → P6b Performance + แก้ Bug → P6c Regression Suite + Docs + Phase 6 Report · รายงานหลังจบแต่ละช่วง · ห้าม Commit จนกว่าผู้ใช้สั่ง
 1. ผลสแกน: แก้ High/Critical ทุกข้อ · ระดับต่ำกว่าจดเป็น Accepted risk พร้อมเหตุผล
 2. รายการรหัสผ่านพบบ่อย 87 คำ → SecLists `10k-most-common.txt` (MIT) Commit ใน Repo
@@ -369,9 +369,19 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · ตรวจบน Emulator (บัญชี `patterns.check@example.com`): `docker compose pause cv` + `CV_TIMEOUT_SECONDS=120` (override ชั่วคราวใน scratchpad) → ส่งรายงานพร้อมรูปผ่าน API → หน้า Detail แสดง "AI กำลังดูรูปนี้" → `unpause` → เปลี่ยนเป็น "AI แนะนำ: อื่นๆ (99%)" เองภายใน ~8 s ไม่ต้องดึงรีเฟรช · ตอบคลี่คลาย → บัญชีที่ 2 (สร้างแล้วลบทิ้ง) รายงานซ้ำ → ดึงรีเฟรช → Banner ขึ้น, คลี่คลาย 0 คน → ตอบใหม่ → นับ 1 คน, ตำแหน่งเลื่อนไม่หาย · ข้อมูลทดสอบเหตุ `a3e6a123-…` ยังอยู่ใน Dev DB
   · ผลตรวจ: Backend **478 passed** · ruff check/format สะอาด · Coverage `app/modules`+`app/core` 98% · Mobile `flutter analyze` No issues · `dart format` สะอาด · `flutter test` **495 passed** (เดิม 490) · Coverage `lib/` (ไม่รวม generated/l10n) 96.7% (6,524/6,748)
   · Gotcha: `CV_TIMEOUT_SECONDS` สูงสุด 120 (เกินแล้ว Backend ไม่ Start) · Build Profile ครั้งแรกของ Session Fail แบบไม่มี Error ให้เห็น รันซ้ำผ่าน
+- **P6c Regression + Docs — เสร็จ 2026-11-14 · Phase 6 อนุมัติแล้ว 2026-11-14 · Commit `3986b03` ตามที่ผู้ใช้สั่ง · gitleaks `dir` (458 ไฟล์) + `git` (37 Commits) → no leaks found** · รายละเอียด: `docs/TESTING.md`
+  · `scripts/regression.ps1`: Backend (ruff check/format + pytest `--cov=app/modules --cov=app/core --cov-fail-under=96`) · ML + CV (ruff + pytest) · Mobile (analyze, `dart format` ของ lib/test/integration_test/test_driver, `flutter test --coverage` + Gate 94.7% ของ `lib/` ไม่รวม `*.g.dart`/`*.freezed.dart`/`lib/l10n/`) · `-E2E` เพิ่ม flutter drive · `-Skip`, `-FailFast` · Python รันด้วย `uv run --locked` · ทุกขั้นรันต่อแม้ Fail แล้วสรุปเป็นตาราง, Exit 1 ถ้ามี Fail
+  · แก้ระหว่างทำ 2 จุด: (1) Shell เปิด `ml/.venv` ค้าง → `python` ไม่มี uv → สคริปต์เอา venv ออกจาก PATH ระหว่างรัน (คืนค่าตอนจบ) แล้วหา uv: `uv` → `python -m uv` → `py -3 -m uv` (2) PS 5.1 แปลง stderr ของ docker เป็น Error → ตัดสินจาก Exit code อย่างเดียว, Output ออก `Write-Host` (เก็บ Log ด้วย `*>` ได้)
+  · ผล: **REGRESSION PASSED 14/14** (~4.5 นาที) · Backend 478 passed, Coverage 98.17% · ML 134 · CV 38 · Mobile 495, Coverage 96.68% · ทดสอบ Gate กลับด้าน (`-MobileCoverageGate 99`) → FAIL + Exit 1
+  · Docs: ใหม่ `docs/TESTING.md` · Roadmap: Exit criteria Phase 6 + แยกหัวข้อ Phase 7 · SYSTEM_ARCHITECTURE โครงสร้าง Repo (`scripts/`, `.github/workflows/` = Phase 7)
+  · Known: CV pytest มี Warning 1 ตัวจาก Library (`fastapi.testclient` ใช้ `httpx` ที่ Starlette ประกาศ Deprecated) ไม่ใช่โค้ดเรา
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-14: P6b เสร็จ + Commit `dd7f127` (§4.13) → Session ใหม่เริ่ม P6c** (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-14: Phase 6 อนุมัติแล้ว + Commit `3986b03` (ผู้ใช้สั่ง · §4.13) → ถัดไป: Phase 7 Deploy & Portfolio (W13) เริ่มด้วยการเสนอแผน + การตัดสินใจ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+- ตรวจซ้ำทั้งหมด: `.\scripts\regression.ps1` (ต้องได้ REGRESSION PASSED 14 step(s))
+- Phase 7: เริ่มด้วยการเสนอแผน + การตัดสินใจ (Release APK + Signing key นอก Repo, Deploy Backend + Restore test, GitHub Repo Private (D2) + Actions จาก `scripts/regression.ps1`, README 17 หัวข้อ, Resume bullets จากตัวเลขจริง, งานที่ยกมา: `X-Forwarded-For`, Rate limiter หลาย Worker, Marker clustering + Tile โหมดมืด)
+
+**(เดิม) 2026-11-14: P6b เสร็จ + Commit `dd7f127` (§4.13) → Session ใหม่เริ่ม P6c** (ผู้ใช้สั่ง) · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 - ตรวจสถานะ: `git status` สะอาด · `docker compose up -d` (`/ready` model ok) · Backend **478 passed** · Mobile **495 passed**, Coverage `lib/` 96.7% (→ Gate = 94.7% ตามข้อ 8) · Backend Coverage 98% (→ Gate 96%)
 - P6c ตาม §4.13 ข้อ 7–10: `scripts/regression.ps1` (Backend pytest + ruff, ML/CV pytest, Flutter analyze/format/test + Coverage gate = ค่าปัจจุบัน − 2%) · `docs/TESTING.md` · Phase 6 Report เทียบ Exit criteria ข้อ 10 แล้วรออนุมัติ · ห้ามเริ่ม Phase 7
 - วัด Perf ซ้ำ: คำสั่งใน `docs/PERFORMANCE.md` §2.3 (อย่าลืม `docker compose up -d backend` หลังวัดเพื่อเปิด Rate limit กลับ)
