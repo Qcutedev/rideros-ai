@@ -409,11 +409,76 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · เปลี่ยนจากแผน 3 จุด: (1) `postgis/postgis` มีแค่ amd64 → Build เองจาก `postgres:18.7-trixie` + PGDG (PGDG มีแค่ PostGIS 3.7.0, Dev ยัง 3.6.4; ต้องลง `postgresql-18` คู่กันไม่งั้น `undefined symbol: heap_datum_check`) (2) ข้อ 7: CARTO hosted basemaps เป็นของ Enterprise เท่านั้นแล้ว → โหมดมืดใช้ `darkModeTileBuilder` กลับสี OSM บนเครื่อง (3) ข้อ 8: `flutter_map_marker_cluster` 8.2.2 ต้องการ `latlong2 ^0.9.1` (เราใช้ 0.10.1) → เขียน Cluster เอง `widgets/incident_clusters.dart` (Greedy ระยะ 48 px · แตะ → ซูมพอดีกลุ่ม · จุดเดียวกัน ≤ 25 m หรือซูมสุดแล้ว → Bottom sheet รายการ)
   · Release signing: `android/app/build.gradle.kts` อ่าน `android/key.properties` (gitignored) · Keystore `%USERPROFILE%\.rideros\rideros-upload.jks` สร้างแล้ว · ไม่มีไฟล์ → Release ไม่เซ็น · APK arm64 ทดสอบ Build + `apksigner` ผ่าน (URL ชั่วคราว `api.example.invalid`)
   · ผลตรวจ: Backend **500 passed** (เดิม 493) ruff สะอาด · Mobile analyze No issues, **507 passed** (เดิม 501) · Local prod stack: smoke 15/15, XFF ปลอมไม่มีผล, 2 Worker นับร่วม, backup/restore_test PASSED (+ ทดสอบกลับด้าน FAILED ถูกต้อง), Disaster drill ผ่าน · arm64 (QEMU) backend/cv/db ใช้งานได้
-  · **ยังไม่ได้ (ยกไป Session หน้า):** `scripts/regression.ps1` เต็มรอบหลังแก้ (ถูกหยุดเพราะ RAM เครื่องต่ำ ตอนขั้น backend ruff; ผู้ใช้สั่ง Commit ก่อน โดยอิงผล Test แยกส่วนที่ผ่านแล้ว) · ยังไม่ได้ดู Cluster/แผนที่มืดบน Emulator
+  · **Regression เต็มรอบหลัง Commit (2026-11-15, HEAD `36378fa`):** `REGRESSION PASSED: 14 step(s)` · Backend **500 passed** Coverage 98.17% (Gate 96) · ML **134 passed** · CV **38 passed** (1 `StarletteDeprecationWarning` จาก `fastapi.testclient`) · Mobile analyze No issues, **507 passed**, Coverage `lib/` 96.8% (6723/6945, Gate 94.7)
+  · **ตรวจบน Emulator แล้ว (2026-11-15, debug APK x64, บัญชี `p3b.check@example.com`):** Seed เหตุทดสอบ 7 รายการผ่าน API (คำอธิบาย "P7a cluster check" · จุดเดียวกัน 2 + ใกล้ 2 + ไกล 3; ยังเปิดอยู่ใน Dev DB หมดอายุเอง) → ซูมเมือง: Cluster "4" + Marker เดี่ยว · แตะ Cluster → ซูมพอดีกลุ่ม แตกเป็น Cluster "2" + 2 Marker · แตะ Cluster จุดเดียวกัน → Bottom sheet "2 เหตุที่จุดนี้" → แตะแถว → หน้ารายละเอียด · `cmd uimode night yes` → Tile OSM กลับสีมืด, Marker/Cluster/FAB อ่านออก, Attribution แสดง · ข้อสังเกต (ไม่แก้): ป้าย "5 เหตุในบริเวณนี้" นับจาก bbox ที่โหลด (มีขอบเผื่อ) จึงอาจมากกว่า Marker ที่เห็นบนจอ
   · Docs: ใหม่ `DEPLOYMENT.md` · แก้ `SECURITY_AUDIT.md` (R-3, R-7, R-8 แก้แล้ว), `SYSTEM_ARCHITECTURE.md` (Rate limiting), `TESTING.md` (valkey, Test ใหม่)
 
+- **P7b พักไว้ (2026-11-15)** ตามที่ผู้ใช้สั่ง: สมัคร Oracle ไม่ผ่าน → ทำ P7c ก่อน (รายละเอียด §4.2)
+- **P7c GitHub + CI + README — การตัดสินใจที่ผู้ใช้เลือก (2026-11-15):** (1) Repo `rideros-ai` บัญชี GitHub ของผู้ใช้ **Public** ตั้งแต่ Push แรก (เปลี่ยนจากแผนข้อ 11 ที่ให้เริ่ม Private) → ต้องตรวจครบก่อน Push: gitleaks History + ไฟล์ใหญ่/Dataset/Artifacts + ข้อมูลส่วนตัว (2) โค้ด **MIT** + หมายเหตุว่า Model/Dataset เป็น Non-commercial (Meituan, Flood10k CC BY-NC; ImageNet weights) และไม่อยู่ใน Repo (3) README หลักภาษา**อังกฤษ** (docs/ ภาษาไทยคงเดิม) (4) GitHub Release APK **เลื่อนไป P7b** (ไม่มี Server จริง APK ใช้ไม่ได้) → README ใช้ Screenshots + วิธีรันในเครื่อง
+  · CI `.github/workflows/ci.yml`: backend (PostGIS + Valkey service, ruff + pytest Gate 96) · ml + cv_service (ruff + pytest, ไม่มี Dataset → Test ที่ต้องใช้ข้ามเอง) · mobile (Flutter 3.47.0 analyze + format + test + Gate 94.7) · gitleaks History · ไม่มี E2E (ต้องใช้ Emulator → `regression.ps1 -E2E`)
+  · ตรวจในเครื่องแบบเดียวกับ CI: Backend ตัด `test_real_artifact.py` → 498 passed, Coverage 98.17% · Clone ใหม่ (ไม่มี Dataset/Artifacts): ML 117 passed + 17 skipped, CV 38 passed
+  · ไฟล์ใหม่ (ยังไม่ Commit): `.github/workflows/ci.yml` · `README.md` (อังกฤษ 16 หัวข้อ + สารบัญ; Overview อยู่หัวไฟล์ · ตัวเลขทุกตัวมีที่มา) · `LICENSE` (MIT, ผู้ถือลิขสิทธิ์ "Qcutedev" + หมายเหตุ Data/Model ไม่อยู่ใต้ MIT) · `docs/PORTFOLIO.md` (Resume bullets EN/TH + ที่มาตัวเลข) · `docs/screenshots/` 6 ภาพ (กว้าง 480 px รวม ~780 KB: home, profit, pickup_predict, shift_compare, road_map.jpg, login)
+  · Screenshots: บัญชี Demo `demo.screens@example.com` (รหัส `demo screens 2026`) Seed ผ่าน API ด้วยสคริปต์ชั่วคราวใน Scratchpad (ไม่อยู่ใน Repo; ใช้ `perf.run.Api`) → 92 กะ 120 วัน, ร้าน "Demo Kitchen", 3 Scenario, 7 เหตุถนน "Demo report" · README ระบุว่าเป็นบัญชี Demo ข้อมูล Seed · ถ่ายจาก Emulator (Status bar demo mode) · ยังอยู่ใน Dev DB
+  · ตรวจ History ก่อน Public: Pack 1.24 MiB, Blob ใหญ่สุด 174 KB (HANDOFF), ไม่มี csv/parquet/zip/jpg/pt/joblib/jks/pem · **พบข้อมูลส่วนตัว 2 จุด:** อีเมลผู้ Commit จริงในทั้ง 43 Commits และ Path ชื่อผู้ใช้ Windows ใน HANDOFF (History) → ผู้ใช้เลือกเขียน History ใหม่ → แก้แล้ว (§4.16)
+
+### 4.16 เขียน Git History ใหม่ก่อนเปิด Public (2026-11-16, ผู้ใช้เลือก)
+เหตุผล: Repo จะเป็น Public ตั้งแต่ Push แรก แต่ทั้ง 43 Commits มีอีเมลส่วนตัวของผู้ใช้ และ HANDOFF ทุกเวอร์ชันมี Path ที่มีชื่อผู้ใช้ Windows
+- วิธี: `git filter-branch` (ยังไม่มี Remote) · อีเมลผู้เขียน/ผู้ Commit → `213143510+Qcutedev@users.noreply.github.com` · ใน `docs/HANDOFF.md` แทน Path Python ของผู้ใช้ด้วย `%LOCALAPPDATA%\Python` (แทนแบบ byte ผ่าน Python เพราะ backslash ใน sed ถูกยุบ)
+- ตรวจแล้ว: ทุก Commit ต่างจากเดิมแค่บรรทัดนั้นใน HANDOFF · ชื่อผู้เขียน วันที่ ข้อความ Commit เหมือนเดิม · ไม่เหลือชื่อผู้ใช้ Windows/อีเมลเดิมใน History · Tag `mvp-freeze` สร้างใหม่บน `4e03d2f` (ข้อความ + วันที่เดิม, Tagger noreply)
+- `.gitleaksignore` อ้าง Fingerprint ที่มี Commit hash → แก้ `56526ee…` เป็น `2432b21…` (Token ปลอมใน Flutter test 3 จุดเดิม) · gitleaks `git` หลังแก้ → no leaks found
+- สำรองก่อนแก้: `.git/history-before-rewrite-2026-11-16.bundle` (ไม่ถูก Push · กู้ได้ด้วย `git clone <bundle>`) · `git config user.email` ของ Repo นี้ตั้งเป็น noreply แล้ว
+- **Hash ในเอกสารนี้ก่อนหัวข้อนี้เป็น Hash เดิม** → เทียบตามตาราง (รวม `git_commit` `528477e-dirty` ใน metadata/Model card ของ CV → ใหม่ `70a8ee9`)
+
+| เดิม | ใหม่ | Commit |
+|---|---|---|
+| `a7fe027` | `4b6d5b3` | feat(ml): Phase 0-1 docs and pickup order-to-pickup ML pipeline |
+| `5d7be02` | `dc8b2c9` | feat(backend): Phase 2 FastAPI backend, database and model serving |
+| `98c6d70` | `de818ad` | docs: record Phase 2 commit in HANDOFF |
+| `56526ee` | `2432b21` | feat(mobile): Phase 3 P3a-P3b Flutter app with Rider Green UI |
+| `831d408` | `45ff3ee` | docs: record Phase 3 P3a-P3b commit in HANDOFF |
+| `549c27b` | `bab232c` | feat(mobile): Phase 3 P3c-a Profile, rider profile form and account delete |
+| `2993f50` | `a27251e` | docs: record Phase 3 P3c-a Profile commit in HANDOFF |
+| `f76d050` | `641660d` | feat(mobile): Phase 3 P3c-b Pickup Intelligence screens |
+| `70cf671` | `a04bfb4` | docs: record Phase 3 P3c-b Pickup commit in HANDOFF |
+| `aed472f` | `ac006aa` | feat(mobile): Phase 3 P3c-c Shift Simulator screens |
+| `2961f9a` | `e49aa16` | docs: record Phase 3 P3c-c Shift commit in HANDOFF |
+| `e9c9434` | `5fd0bcc` | docs: record Phase 3 approval and Phase 4 start in HANDOFF |
+| `cdb78ba` | `14b9467` | feat(mobile): animated brand intro and RiderOS launcher icon |
+| `fa0ed11` | `f3f5b52` | docs: record brand intro and launcher icon commit in HANDOFF |
+| `4a364e1` | `14204e6` | feat(mobile): ride intro instead of logo reveal, no splash icon |
+| `3e5679d` | `f095fb3` | docs: record ride intro commit in HANDOFF |
+| `cc2a8b9` | `5628b57` | feat(mobile): Phase 4 E2E journey, reset deep link, snackbar placement |
+| `a1571ef` | `4e03d2f` | docs: record Phase 4 approval and MVP freeze in HANDOFF |
+| `7da3bde` | `61b8a9a` | feat(mobile): brand emblem logo on auth screens, centred page header |
+| `496ec75` | `633c06a` | docs: record brand logo commit in HANDOFF |
+| `04bd24c` | `d8d7a84` | feat(backend): Phase 5 P5a RoadContext reports, map queries and dedup rules |
+| `48565ce` | `11818db` | docs: record Phase 5 plan, decisions and P5a in HANDOFF |
+| `0ad4950` | `1b2d9e8` | feat(mobile): Phase 5 P5b RoadContext map, nearby list, reports and incident detail |
+| `b53aeb2` | `26d056a` | docs: record Phase 5 P5b mobile RoadContext in HANDOFF |
+| `a113abf` | `c182e4f` | fix(mobile): P5b road snackbar and repeated location prompt |
+| `29580cb` | `f26588c` | docs: record P5b emulator check and fixes in HANDOFF |
+| `bd6bf0a` | `298a4b7` | docs: note P5b fix commit in HANDOFF |
+| `3f46018` | `01f9cfc` | feat(cv): Phase 5 P5c cv_service pipeline and background photo classify |
+| `528477e` | `70a8ee9` | docs: record P5c progress and next steps in HANDOFF |
+| `6ca5769` | `4967999` | feat(cv): Phase 5 P5c trained road classifier, metrics and model card |
+| `4cf1e1c` | `24365a0` | docs: record P5c results and Phase 5 approval in HANDOFF |
+| `4622708` | `be135b0` | feat(profit): K-Means work patterns endpoint and TrueProfit card |
+| `c15d8a6` | `97baf8f` | docs: record K-Means work patterns results in HANDOFF |
+| `e8e7c24` | `f425b06` | feat(security): Phase 6 P6a security audit fixes |
+| `8641bcc` | `2a5f445` | docs: record P6a security audit and P6b plan in HANDOFF |
+| `dd7f127` | `b472229` | feat(perf): Phase 6 P6b performance baseline and bug fixes |
+| `0f58d36` | `46e8e5f` | docs: record P6b results and commit in HANDOFF |
+| `3986b03` | `7f58022` | feat(qa): Phase 6 P6c regression script and testing docs |
+| `e402508` | `eb65f0d` | docs: record Phase 6 approval and P6c results in HANDOFF |
+| `b666e40` | `36ee62c` | feat(profit): moving average and linear trend of net profit |
+| `632d9ee` | `48f0172` | docs: record trend analysis results and commit in HANDOFF |
+| `e196411` | `334583f` | feat(deploy): Phase 7 P7a production stack, shared rate limiter, map clusters |
+| `36378fa` | `f16a2cf` | docs: record P7a approval and commit in HANDOFF |
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-15: P7a อนุมัติ + Commit `e196411` (§4.15) → Session หน้าทำงานค้างตามลำดับ:** (1) ปิดโปรแกรมกิน RAM แล้วรัน `.\scripts\regression.ps1` แบบ Foreground ให้ได้ `REGRESSION PASSED 14 step(s)` แล้วบันทึกผลใน §4.15 (2) ดู Cluster + แผนที่มืดบน Emulator (3) P7b: รอผู้ใช้สมัคร Oracle Cloud + สร้าง VM ตาม `docs/DEPLOYMENT.md` §2 ข้อ 1–2 แล้วส่ง Public IP + SSH user → ผมทำ §2 ข้อ 3–5 ผ่าน SSH → Deploy, smoke test URL จริง, restore_test, ตรวจ IP จริงผ่าน XFF, Release APK ด้วย `API_BASE_URL` จริง, เติม `DEPLOYMENT.md` §8.2 (4) P7c · ย้ำผู้ใช้สำรอง Keystore + `key.properties` ไว้นอกเครื่อง · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-15: P7c งานในเครื่องเสร็จ (CI, README, LICENSE, PORTFOLIO, Screenshots · §4.15) ยังไม่ Commit → รอผู้ใช้:** (1) ~~ข้อมูลส่วนตัวใน History~~ **เขียน History ใหม่แล้ว 2026-11-16 (§4.16; Hash เปลี่ยนทั้งหมด)** (2) สั่ง Commit (3) แล้วจึงสร้าง Repo `rideros-ai` Public ด้วย `gh` → Push (รวม Tag `mvp-freeze`) → ดู CI จนเขียว แก้ถ้าแดง → Phase 7 Report (P7b ค้าง) · ก่อน Commit: gitleaks ตาม §4.5
+
+**2026-11-15: P7a อนุมัติ + Commit `e196411` (§4.15) → Session หน้าทำงานค้างตามลำดับ:** (1) ~~Regression เต็มรอบ~~ **ผ่านแล้ว 2026-11-15 (§4.15)** (2) ~~ดู Cluster + แผนที่มืดบน Emulator~~ **ผ่านแล้ว 2026-11-15 (§4.15)** (3) **P7b พักไว้ก่อนตามที่ผู้ใช้สั่ง (2026-11-15)**: สมัคร Oracle ไม่ผ่าน (Oracle ไม่รับวิธีชำระเงินที่ผู้ใช้มี) · ทางเลือกที่ไม่ต้องใช้บัตร เผื่อกลับมาทำ: Hugging Face Spaces + Neon (ต้องปรับ Deploy) หรือรันในเครื่อง + `adb reverse` · ผู้ใช้ทำโปรเจกต์ไว้ใส่ Resume/GitHub → ทำ P7c ก่อน · (เดิม) P7b: รอผู้ใช้สมัคร Oracle Cloud + สร้าง VM ตาม `docs/DEPLOYMENT.md` §2 ข้อ 1–2 แล้วส่ง Public IP + SSH user → ผมทำ §2 ข้อ 3–5 ผ่าน SSH → Deploy, smoke test URL จริง, restore_test, ตรวจ IP จริงผ่าน XFF, Release APK ด้วย `API_BASE_URL` จริง, เติม `DEPLOYMENT.md` §8.2 (4) P7c · ย้ำผู้ใช้สำรอง Keystore + `key.properties` ไว้นอกเครื่อง · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 
 **(เดิม) 2026-11-14: Trend MA + Linear เสร็จ + Commit `b666e40` (§4.14) → ถัดไป: เสนอแผน + การตัดสินใจ Phase 7 ให้ผู้ใช้ยืนยันก่อนลงมือ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 

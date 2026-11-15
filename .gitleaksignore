@@ -1,5 +1,5 @@
-# Fake password-reset tokens in Flutter tests (not secrets), committed in 56526ee.
+# Fake password-reset tokens in Flutter tests (not secrets), committed in 2432b21 (56526ee before the 2026-11-16 history rewrite).
 # The current files mark these lines with `gitleaks:allow`.
-56526eec6b4a5455315b82d0197610e2b55fb314:mobile/test/unit/features/reset_token_test.dart:generic-api-key:5
-56526eec6b4a5455315b82d0197610e2b55fb314:mobile/test/widget/password_reset_screens_test.dart:generic-api-key:10
-56526eec6b4a5455315b82d0197610e2b55fb314:mobile/test/widget/navigation_test.dart:generic-api-key:119
+2432b21ace31d99dc765f2ad01300493a4782e20:mobile/test/unit/features/reset_token_test.dart:generic-api-key:5
+2432b21ace31d99dc765f2ad01300493a4782e20:mobile/test/widget/password_reset_screens_test.dart:generic-api-key:10
+2432b21ace31d99dc765f2ad01300493a4782e20:mobile/test/widget/navigation_test.dart:generic-api-key:119
