@@ -388,8 +388,34 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - Tests: Backend unit `tests/unit/test_trend_analysis.py` (13) + API 2 ตัวใน `test_profit_reports.py` · Mobile model 1 + widget 5 (`true_profit_screen_test.dart` group "trend analysis")
 - ผลตรวจ: `scripts/regression.ps1` **PASSED 14/14** · Backend **493 passed** (เดิม 478), Coverage 98.21% · ML 134 · CV 38 · Mobile analyze No issues, **501 passed** (เดิม 495), Coverage 96.74% (6,645/6,869)
 
+### 4.15 Phase 7 Deploy & Portfolio (W13) — **แผน + การตัดสินใจ 12 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-15 ("เอาตามที่แนะนำเลย")**
+ลำดับ: P7a เตรียม Production ในเครื่อง → P7b Deploy จริง + Restore test + Release APK → P7c GitHub + CI + README + Resume + Phase 7 Report · รายงานหลังจบแต่ละช่วง · ห้าม Commit จนกว่าผู้ใช้สั่ง
+1. Hosting: Oracle Cloud Always Free (ARM A1 4 OCPU/24 GB) · สำรอง VPS ~€4–5/เดือน (Hetzner) · ผู้ใช้สมัครบัญชีเอง · ตรวจ Build arm64 (torch, xgboost, PostGIS) ด้วย `docker buildx --platform linux/arm64` ใน P7a ก่อน
+2. Domain/HTTPS: `api.<IP>.sslip.io` + Caddy (Let's Encrypt อัตโนมัติ) · เปลี่ยนเป็นโดเมนของผู้ใช้ได้ภายหลัง
+3. Deploy: `git clone` บน Server ด้วย Deploy key (read-only) แล้ว Build บน Server · ไม่ใช้ Registry · Model artifacts ส่งด้วย `scp` เท่านั้น (ไม่อยู่ใน Repo/Image/Registry ตาม D4)
+4. Backend 2 uvicorn workers + Rate limiter บน Redis
+5. `X-Forwarded-For` เชื่อเฉพาะที่มาจาก Caddy
+6. Forgot Password ใน Production ปิด (D5, `email_provider="none"`) · ตรวจว่าแอปแสดงข้อความเหมาะสม · README แจ้ง
+7. Tiles: สว่าง = OSM (+ User-Agent ของแอป + Attribution ตาม Tile policy, R9) · มืด = CARTO `dark_all` · ตรวจเงื่อนไขการใช้ก่อน
+8. Marker clustering: `flutter_map_marker_cluster` ถ้า License + เวอร์ชันเข้ากับ flutter_map ได้ ไม่งั้นเขียนเอง
+9. Backup: `pg_dump` รายวันผ่าน cron เก็บ 7 ชุด + tar รูป RoadContext · Restore test 1 รอบ บันทึกใน `docs/DEPLOYMENT.md`
+10. APK: keystore ที่ `%USERPROFILE%\.rideros\` + `key.properties` (gitignored) · ผู้ใช้ Backup keystore เอง · arm64 APK เดียว แจกผ่าน GitHub Release
+11. GitHub: Repo Private ด้วย `gh` (ถามก่อนสร้าง) · Actions: Backend pytest + ruff, ML/CV tests ที่ไม่ต้องใช้ Dataset, Flutter analyze + test · เปิด Public หลังตรวจ (gitleaks ทั้ง History, Dataset, Artifacts, License) และผู้ใช้สั่งเท่านั้น
+12. README 17 หัวข้อ: Overview, Features, Screenshots, Architecture, Tech stack, AI/ML models + metrics, Datasets & licenses + Meituan acknowledgement, Project structure, Getting started, Configuration, Testing, API docs, Deployment, Security, Performance, Limitations (Shift ML, Object Detection, Domain shift, Non-commercial), License & credits · Resume bullets ใช้เฉพาะตัวเลขที่วัดจริง · Non-commercial (Meituan + Flood10k CC BY-NC): ไม่มีโฆษณา/ส่วนเก็บเงิน
+
+- **P7a เตรียม Production — เสร็จ + ผู้ใช้อนุมัติ + Commit `e196411` (2026-11-15)** · gitleaks `dir` (473 ไฟล์) + `git` (41 commits) → no leaks found · รายละเอียด + Runbook: `docs/DEPLOYMENT.md`
+  · Backend: `rate_limit.py` เป็น async `limits.aio` · `RATE_LIMIT_STORAGE_URL` (`memory://` / `redis://` ผ่าน redis-py) · Store ล่ม → 503 `rate_limit_unavailable` (Fail closed) + `/ready` มี `rate_limit` · Production + `WEB_CONCURRENCY` > 1 + `memory://` → ไม่ Start · Dependency ใหม่ `redis>=6.4` (MIT) · Dev compose เพิ่ม `valkey` (Test ใช้ DB 15) · `regression.ps1` สั่ง `up db valkey`
+  · `deploy/`: `compose.prod.yml` (Caddy IP คงที่ 172.30.0.10 → `FORWARDED_ALLOW_IPS`, network `internal` ไม่มีทางออก) · `Caddyfile` (HSTS, เฉพาะ `/api/v1/*`, Body 6 MB) · `db/Dockerfile` · `prod.env.example` · `backup.sh` · `restore_test.sh` · `restore.sh --yes` · `smoke_test.py` (stdlib, 15 checks, ลบบัญชีทดสอบเอง)
+  · เปลี่ยนจากแผน 3 จุด: (1) `postgis/postgis` มีแค่ amd64 → Build เองจาก `postgres:18.7-trixie` + PGDG (PGDG มีแค่ PostGIS 3.7.0, Dev ยัง 3.6.4; ต้องลง `postgresql-18` คู่กันไม่งั้น `undefined symbol: heap_datum_check`) (2) ข้อ 7: CARTO hosted basemaps เป็นของ Enterprise เท่านั้นแล้ว → โหมดมืดใช้ `darkModeTileBuilder` กลับสี OSM บนเครื่อง (3) ข้อ 8: `flutter_map_marker_cluster` 8.2.2 ต้องการ `latlong2 ^0.9.1` (เราใช้ 0.10.1) → เขียน Cluster เอง `widgets/incident_clusters.dart` (Greedy ระยะ 48 px · แตะ → ซูมพอดีกลุ่ม · จุดเดียวกัน ≤ 25 m หรือซูมสุดแล้ว → Bottom sheet รายการ)
+  · Release signing: `android/app/build.gradle.kts` อ่าน `android/key.properties` (gitignored) · Keystore `%USERPROFILE%\.rideros\rideros-upload.jks` สร้างแล้ว · ไม่มีไฟล์ → Release ไม่เซ็น · APK arm64 ทดสอบ Build + `apksigner` ผ่าน (URL ชั่วคราว `api.example.invalid`)
+  · ผลตรวจ: Backend **500 passed** (เดิม 493) ruff สะอาด · Mobile analyze No issues, **507 passed** (เดิม 501) · Local prod stack: smoke 15/15, XFF ปลอมไม่มีผล, 2 Worker นับร่วม, backup/restore_test PASSED (+ ทดสอบกลับด้าน FAILED ถูกต้อง), Disaster drill ผ่าน · arm64 (QEMU) backend/cv/db ใช้งานได้
+  · **ยังไม่ได้ (ยกไป Session หน้า):** `scripts/regression.ps1` เต็มรอบหลังแก้ (ถูกหยุดเพราะ RAM เครื่องต่ำ ตอนขั้น backend ruff; ผู้ใช้สั่ง Commit ก่อน โดยอิงผล Test แยกส่วนที่ผ่านแล้ว) · ยังไม่ได้ดู Cluster/แผนที่มืดบน Emulator
+  · Docs: ใหม่ `DEPLOYMENT.md` · แก้ `SECURITY_AUDIT.md` (R-3, R-7, R-8 แก้แล้ว), `SYSTEM_ARCHITECTURE.md` (Rate limiting), `TESTING.md` (valkey, Test ใหม่)
+
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-14: Trend MA + Linear เสร็จ + Commit `b666e40` (§4.14) → ถัดไป: เสนอแผน + การตัดสินใจ Phase 7 ให้ผู้ใช้ยืนยันก่อนลงมือ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-15: P7a อนุมัติ + Commit `e196411` (§4.15) → Session หน้าทำงานค้างตามลำดับ:** (1) ปิดโปรแกรมกิน RAM แล้วรัน `.\scripts\regression.ps1` แบบ Foreground ให้ได้ `REGRESSION PASSED 14 step(s)` แล้วบันทึกผลใน §4.15 (2) ดู Cluster + แผนที่มืดบน Emulator (3) P7b: รอผู้ใช้สมัคร Oracle Cloud + สร้าง VM ตาม `docs/DEPLOYMENT.md` §2 ข้อ 1–2 แล้วส่ง Public IP + SSH user → ผมทำ §2 ข้อ 3–5 ผ่าน SSH → Deploy, smoke test URL จริง, restore_test, ตรวจ IP จริงผ่าน XFF, Release APK ด้วย `API_BASE_URL` จริง, เติม `DEPLOYMENT.md` §8.2 (4) P7c · ย้ำผู้ใช้สำรอง Keystore + `key.properties` ไว้นอกเครื่อง · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+
+**(เดิม) 2026-11-14: Trend MA + Linear เสร็จ + Commit `b666e40` (§4.14) → ถัดไป: เสนอแผน + การตัดสินใจ Phase 7 ให้ผู้ใช้ยืนยันก่อนลงมือ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 
 **(เดิม) 2026-11-14: Phase 6 อนุมัติแล้ว + Commit `3986b03` (ผู้ใช้สั่ง · §4.13) → ถัดไป: Phase 7 Deploy & Portfolio (W13) เริ่มด้วยการเสนอแผน + การตัดสินใจ** · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 - ตรวจซ้ำทั้งหมด: `.\scripts\regression.ps1` (ต้องได้ REGRESSION PASSED 14 step(s))
@@ -524,18 +550,18 @@ python -m uv run ruff check . ; python -m uv run ruff format --check .
 
 - ~~(P3b) SnackBar "บันทึกแล้ว" ลอยทับปุ่ม "+ เพิ่ม…"~~ · ~~(P3c-c) SnackBar "ลบแล้ว" ทับแถบเลือก Scenario~~ → แก้แล้วใน P4b (§4.9)
 - (P3b) หลังแก้ 2 จุด (ป้ายจำนวนรายการ, ระยะขอบกราฟ) ยังไม่ได้ Screenshot ซ้ำบน Emulator (Tests ผ่าน)
-- (P5b) Marker ของเหตุต่างหมวดที่จุดเดียวกันซ้อนกันบนแผนที่ (ไม่มี Clustering) → กดได้แค่ตัวบนสุด ตัวอื่นเปิดจากแท็บ "ใกล้ฉัน"
+- ~~(P5b) Marker ของเหตุต่างหมวดที่จุดเดียวกันซ้อนกันบนแผนที่ (ไม่มี Clustering)~~ → แก้แล้วใน P7a (§4.15): Cluster + รายการเมื่ออยู่จุดเดียวกัน
 - ~~(P5b) คำตอบ "คลี่คลายแล้ว" ที่เก่ากว่า Report ล่าสุดยังแสดงเหมือนนับอยู่~~ → แก้แล้วใน P6b (§4.13)
-- (P5b) OSM tiles ไม่มีโหมดมืด แผนที่จึงสว่างใน Dark mode
+- ~~(P5b) OSM tiles ไม่มีโหมดมืด~~ → P7a: กลับสีบนเครื่อง (`darkModeTileBuilder`) เพราะ CARTO ไม่ฟรีแล้ว · สีถนน/ป้ายเป็นแบบกลับสี ไม่ใช่ Style มืดที่ออกแบบมา
 - (K-Means, §4.12) Work Patterns: Latency ครั้งแรก ~0.6–1 s · Cache ใน Process · ข้อมูลน้อยกับกะดึกข้ามเที่ยงคืน k อาจเกิน · Benchmark เป็นข้อมูลสังเคราะห์ ไม่ใช่ความแม่นยำกับไรเดอร์จริง
 - (P5c) Image `rideros-cv` 1.58 GB (torch CPU) · ~~หน้า Detail ไม่ refresh เองตอน `pending` → `done`~~ → แก้แล้วใน P6b (Poll ทุก 3 s ไม่เกิน 2 นาที)
-- (P6b) Pickup prediction ติด CPU ของ Process เดียว (~36 req/s, c=10 p95 359 ms) · uvicorn 1 worker · ทางแก้ตอน Deploy: หลาย Worker + Rate limiter บน Redis (`docs/PERFORMANCE.md` §3.3)
+- (P6b) Pickup prediction ติด CPU ของ Process เดียว (~36 req/s, c=10 p95 359 ms) · P7a: Production 2 Worker + Rate limiter บน Valkey แล้ว (ยังไม่ได้วัด Perf ซ้ำบน Server)
 - (P6b) ตัวเลข Perf/Cold start วัดบน Docker Desktop + Emulator ในเครื่องเดียว ไม่ใช่ Server/มือถือจริง
 
 - Artifact 1.0.0 มี `git_commit: "no-commit"` (Train ก่อน Commit แรก) — Train ใหม่ได้ถ้าต้องการผูกกับ Commit (ผลจะเหมือนเดิมเพราะ seed=42)
 - ร้านที่ไม่มีใน Train: MAE 7.24, Coverage 65.1% (215 orders) → Backend แสดงคำเตือนตาม `data_availability` แล้ว (P2c) และ `/pickup/model` ระบุใน `limitations`
 - Backend image 1.03 GB (scikit-learn + xgboost + pandas) — ลดได้ภายหลังด้วย Multi-stage/ตัด pyarrow
-- Rate limiter อยู่ใน Memory ต่อ Process → หลาย Worker/หลาย Instance จะนับแยกกัน (ใช้ Redis ตอน Deploy ถ้าจำเป็น) · ยังไม่เชื่อ `X-Forwarded-For`
+- ~~Rate limiter อยู่ใน Memory ต่อ Process · ยังไม่เชื่อ `X-Forwarded-For`~~ → แก้แล้วใน P7a (Valkey + Trusted proxy = Caddy)
 - Test run ไป Upsert/Activate แถว `model_versions` ใน Test DB (ไม่กระทบ Dev DB)
 - Shift `historical` ใช้ค่าเฉลี่ยทั้งวันของ Session (ไม่แยกช่วงเวลาของวัน)
 - ~~Lint เดิมใน `ml/src/`: E501 100 จุด + F401 1 จุด~~ → แก้แล้ว 2026-11-09: `ruff format` + ลบ import `numpy` ที่ไม่ได้ใช้; E501 ที่เหลือ 45 จุดเป็นข้อความ Report/Model card จึงใส่ `per-file-ignores` ใน `ml/pyproject.toml`; `ml/tests` 134 passed หลังแก้
