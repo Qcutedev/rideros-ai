@@ -3003,6 +3003,18 @@ abstract class AppLocalizations {
   /// **'{n} เหตุในบริเวณนี้'**
   String roadMapIncidentCount(int n);
 
+  /// No description provided for @roadClusterLabel.
+  ///
+  /// In th, this message translates to:
+  /// **'{n} เหตุอยู่ใกล้กัน แตะเพื่อดู'**
+  String roadClusterLabel(int n);
+
+  /// No description provided for @roadClusterSheetTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'{n} เหตุที่จุดนี้'**
+  String roadClusterSheetTitle(int n);
+
   /// No description provided for @roadNearbyEmptyTitle.
   ///
   /// In th, this message translates to:

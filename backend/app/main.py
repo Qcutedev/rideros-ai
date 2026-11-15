@@ -56,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if app.state.model
             else None,
             rate_limit_enabled=settings.rate_limit_enabled,
+            rate_limit_storage=settings.rate_limit_storage_url.split("://", 1)[0],
         )
         try:
             yield
@@ -74,7 +75,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if settings.show_docs else None,
     )
     app.state.settings = settings
-    app.state.rate_limiter = RateLimiter(settings.rate_limit_enabled)
+    app.state.rate_limiter = RateLimiter(settings.rate_limit_enabled, settings.rate_limit_storage_url)
 
     register_error_handlers(app)
     if settings.cors_origins:

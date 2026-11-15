@@ -1702,6 +1702,16 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String roadClusterLabel(int n) {
+    return '$n เหตุอยู่ใกล้กัน แตะเพื่อดู';
+  }
+
+  @override
+  String roadClusterSheetTitle(int n) {
+    return '$n เหตุที่จุดนี้';
+  }
+
+  @override
   String get roadNearbyEmptyTitle => 'ไม่มีเหตุใกล้คุณ';
 
   @override

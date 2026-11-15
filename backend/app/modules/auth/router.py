@@ -38,7 +38,7 @@ async def login(
     body: LoginRequest, request: Request, session: SessionDep, settings: SettingsDep
 ) -> TokenPair:
     # Also per e-mail, so a password-guessing run spread over many IPs is still slowed down.
-    get_limiter(request).hit(settings.rate_limit_login, "login_email", body.email)
+    await get_limiter(request).hit(settings.rate_limit_login, "login_email", body.email)
     return await service.login(session, email=body.email, password=body.password, settings=settings)
 
 
@@ -62,7 +62,7 @@ async def logout(body: LogoutRequest, session: SessionDep) -> Response:
 async def forgot_password(
     body: ForgotPasswordRequest, request: Request, session: SessionDep, settings: SettingsDep
 ) -> AcceptedResponse:
-    get_limiter(request).hit(settings.rate_limit_password_reset, "forgot_password_email", body.email)
+    await get_limiter(request).hit(settings.rate_limit_password_reset, "forgot_password_email", body.email)
     await service.forgot_password(session, email=body.email, settings=settings)
     return AcceptedResponse(detail=_FORGOT_ACCEPTED)
 

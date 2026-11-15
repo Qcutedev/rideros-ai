@@ -17,7 +17,7 @@ async def health() -> dict[str, str]:
 
 @router.get("/ready", responses={503: {"description": "A dependency is not ready"}})
 async def ready(request: Request) -> JSONResponse:
-    """Readiness: the database answers and the pickup model is loaded."""
+    """Readiness: the database answers, the pickup model is loaded and a shared limiter store answers."""
     checks: dict[str, Any] = {}
     try:
         async with request.app.state.engine.connect() as conn:
@@ -30,7 +30,14 @@ async def ready(request: Request) -> JSONResponse:
     model = getattr(request.app.state, "model", None)
     checks["model"] = f"ok ({model.name}/{model.version})" if model is not None else "not_loaded"
 
-    ok = checks["database"] == "ok" and model is not None
+    limiter = request.app.state.rate_limiter
+    settings = request.app.state.settings
+    limiter_ok = True
+    if limiter.enabled and not settings.rate_limit_storage_url.lower().startswith("memory"):
+        limiter_ok = await limiter.check()
+        checks["rate_limit"] = "ok" if limiter_ok else "unavailable"
+
+    ok = checks["database"] == "ok" and model is not None and limiter_ok
     return JSONResponse(
         status_code=status.HTTP_200_OK if ok else status.HTTP_503_SERVICE_UNAVAILABLE,
         content={"status": "ok" if ok else "unavailable", "checks": checks},

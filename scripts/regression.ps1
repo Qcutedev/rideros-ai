@@ -133,7 +133,7 @@ function Test-PythonSuite([string]$Suite, [string]$Dir, [string[]]$PytestArgs) {
 try {
     # --- backend ----------------------------------------------------------------------------------
     if ($Skip -notcontains 'backend') {
-        $dbOk = Invoke-Step 'backend' 'compose db up (healthy)' $Root { docker compose up -d --wait db }
+        $dbOk = Invoke-Step 'backend' 'compose db + valkey up (healthy)' $Root { docker compose up -d --wait db valkey }
         if ($dbOk) {
             Test-PythonSuite 'backend' (Join-Path $Root 'backend') @(
                 '--cov=app/modules', '--cov=app/core', '--cov-report=term:skip-covered',

@@ -19,6 +19,8 @@ dependencies = [
     "tzdata>=2025.2",
     "geoalchemy2>=0.18",
     "limits>=5.0",
+    # Shared rate-limit store (RATE_LIMIT_STORAGE_URL=redis://…); talks to Valkey in production.
+    "redis>=6.4",
     # ML serving (P2c). rideros-ml provides the classes pipeline.joblib references plus the feature
     # builder. The libraries below must equal the versions in the artifact's metadata.json
     # ("libraries"); app/ml/registry.py refuses to load the model otherwise.

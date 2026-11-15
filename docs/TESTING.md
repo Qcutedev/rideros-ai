@@ -14,7 +14,7 @@ cd "C:\dev\RiderOS AI"
 ```
 
 - ทุกขั้นรันต่อแม้ขั้นก่อนหน้า Fail (ยกเว้น `-FailFast`) แล้วพิมพ์ตารางสรุป · Exit code 0 = ผ่านทุกขั้น, 1 = มีขั้นที่ Fail
-- ต้องมี: Docker Desktop (Backend tests ใช้ Service `db` ของ Compose — สคริปต์สั่ง `docker compose up -d --wait db` เอง) · uv (บน PATH หรือ `python -m uv`; ถ้า `python` ชี้ venv ที่ไม่มี uv ให้ตั้ง `$env:RIDEROS_PYTHON` หรือ `-Python` เป็น Interpreter ที่มี uv) · Flutter บน PATH
+- ต้องมี: Docker Desktop (Backend tests ใช้ Service `db` และ `valkey` ของ Compose — สคริปต์สั่ง `docker compose up -d --wait db valkey` เอง) · uv (บน PATH หรือ `python -m uv`; ถ้า `python` ชี้ venv ที่ไม่มี uv ให้ตั้ง `$env:RIDEROS_PYTHON` หรือ `-Python` เป็น Interpreter ที่มี uv) · Flutter บน PATH
 - Python ทุกชุดรันด้วย `uv run --locked` → ถ้า `uv.lock` ไม่ตรง `pyproject.toml` จะ Fail แทนที่จะเขียน Lock ใหม่
 - ถ้า Shell เปิด venv ค้างไว้ (เช่น `ml/.venv` ที่ไม่มี uv) สคริปต์จะเอา `Scripts` ของ venv ออกจาก `PATH` และล้าง `VIRTUAL_ENV` ระหว่างรัน (เหมือน `deactivate`) แล้วคืนค่าเดิมตอนจบ · หา uv ตามลำดับ: `uv` → `python -m uv` → `py -3 -m uv`
 - Windows PowerShell 5.1 แปลง stderr ของคำสั่งภายนอก (Progress ของ docker/flutter) เป็น Error → สคริปต์ตัดสินผลจาก Exit code อย่างเดียว · Output ทุกบรรทัดออกทาง `Write-Host` จึงเก็บ Log ได้ด้วย `.\scripts\regression.ps1 *> regression.log`
@@ -77,6 +77,7 @@ cd "C:\dev\RiderOS AI"
 | ความปลอดภัย | `test_cross_user.py` | ผู้ใช้ A อ่าน/แก้/ลบข้อมูลของ B ไม่ได้ทุก Endpoint |
 | ความปลอดภัย | `test_security_audit.py` | Inventory ทุก Route (Public/ต้อง Login) + 401 · Body limit · Log ไม่มี Password/Token/พิกัด |
 | ความปลอดภัย | `test_rate_limits.py` | Register/Login/Forgot/Token เสีย ต่อ IP (Login ต่ออีเมลด้วย) · ค่าเริ่มต้นต่อ User · `/health` ไม่ถูกจำกัด |
+| ความปลอดภัย | `test_rate_limit_storage.py` (P7a) | 2 App บน Valkey เดียวกัน (= 2 Worker) นับรวมกัน · Store ล่ม → 503 + `/ready` 503 · Production ไม่ยอม `memory://` กับหลาย Worker · `X-Forwarded-For` ใช้เฉพาะจาก Caddy (ต้องมี Compose `valkey`, `TEST_REDIS_URL` ค่าเริ่มต้น `redis://127.0.0.1:6379/15`) |
 | Platform | `test_platform.py`, `test_migrations.py` | `/health`, `/ready`, Error envelope, 500 ไม่รั่วรายละเอียด, Request ID, Migration ตรง ORM (ไม่มี Drift) |
 
 ### 2.2 ML Pipeline (`ml/tests/`)

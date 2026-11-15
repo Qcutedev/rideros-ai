@@ -82,6 +82,7 @@ void main() {
           id: 'i-2',
           category: 'road_damage',
           status: 'corroborated',
+          lat: 13.7663, // ~1.1 km north: apart on screen, so not clustered
         ),
       );
       await open(tester);
@@ -162,6 +163,49 @@ void main() {
       await open(tester);
       await tapKey(tester, 'road.myReports');
       expect(find.text('route:${Routes.roadMyReports}'), findsOneWidget);
+    });
+
+    group('clusters', () {
+      testWidgets('incidents on one spot: a count bubble that lists them', (
+        tester,
+      ) async {
+        // i-1 (flooding) and i-2 (accident) at the same point: before Phase 7
+        // only the top marker could be tapped.
+        road.repo.incidents.add(
+          testIncident(id: 'i-2', category: 'traffic_incident'),
+        );
+        await open(tester);
+        expect(find.byKey(const Key('marker.i-1')), findsNothing);
+        expect(find.byKey(const Key('cluster.i-1')), findsOneWidget);
+        expect(find.text('2'), findsOneWidget);
+        expect(find.bySemanticsLabel(t.roadClusterLabel(2)), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('cluster.i-1')));
+        await tester.pumpAndSettle();
+        expect(find.text(t.roadClusterSheetTitle(2)), findsOneWidget);
+        expect(find.byKey(const Key('clusterItem.i-1')), findsOneWidget);
+        expect(find.text(t.roadCategoryTrafficIncident), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('clusterItem.i-2')));
+        await tester.pumpAndSettle();
+        expect(find.text('route:${Routes.incident('i-2')}'), findsOneWidget);
+      });
+
+      testWidgets('nearby incidents: tapping the bubble zooms in to them', (
+        tester,
+      ) async {
+        // ~150 m apart: about 16 px at the opening zoom (14), so one bubble.
+        road.repo.incidents.add(testIncident(id: 'i-2', lat: 13.7577));
+        await open(tester);
+        expect(find.byKey(const Key('cluster.i-1')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('cluster.i-1')));
+        await settleMap(tester);
+        expect(find.byKey(const Key('road.clusterSheet')), findsNothing);
+        expect(find.byKey(const Key('cluster.i-1')), findsNothing);
+        expect(find.byKey(const Key('marker.i-1')), findsOneWidget);
+        expect(find.byKey(const Key('marker.i-2')), findsOneWidget);
+      });
     });
   });
 

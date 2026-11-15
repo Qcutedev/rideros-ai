@@ -66,7 +66,7 @@
 | Log | ไม่มี `LogInterceptor`/`print` ที่พิมพ์ Request หรือ Token | ✅ |
 | สิทธิ์ | ขอตำแหน่งเฉพาะตอนใช้งาน (ไม่มี Background location) | ✅ |
 | Deep link | `rideros://reset-password?token=…` เป็น Custom scheme | ⚠️ R-4 |
-| Release signing | `build.gradle.kts` ของ Release ยังเซ็นด้วย Debug key | ⚠️ R-7 (Phase 7) |
+| Release signing | `build.gradle.kts` ของ Release ยังเซ็นด้วย Debug key | ✅ แก้แล้วใน P7a (R-7) |
 
 ## 4. ข้อบกพร่องที่พบและแก้ใน P6a
 
@@ -82,12 +82,12 @@
 |---|---|---|---|
 | R-1 | Low | `POST /auth/register` ตอบ 409 `email_taken` → รู้ได้ว่า E-mail มีบัญชีหรือไม่ · `forgot-password` ตอบเหมือนกันทุกกรณี แต่กรณีมีบัญชีจะเขียน DB ด้วย จึงใช้เวลาต่างกันเล็กน้อย | UX ของการสมัครต้องบอกผู้ใช้ · จำกัด 3/นาที/IP · ค่า Login ใช้ Hash หลอกให้เวลาตอบใกล้กัน |
 | R-2 | Low | Access token ที่ออกไปแล้วยังใช้ได้จนหมดอายุ (≤ 15 นาที) หลัง Logout หรือ Reset password | เป็นข้อแลกเปลี่ยนปกติของ JWT แบบ Stateless · ส่วน Refresh token ถูกเพิกถอนทันที |
-| R-3 | Low | Rate limiter อยู่ใน Memory ต่อ Process และยังไม่เชื่อ `X-Forwarded-For` | ตอนนี้มี 1 Process และไม่มี Proxy · **Phase 7:** ตั้งค่า Trusted proxy + พิจารณา Redis (HANDOFF §4.13 ข้อ 3) |
+| ~~R-3~~ | — | ~~Rate limiter อยู่ใน Memory ต่อ Process และยังไม่เชื่อ `X-Forwarded-For`~~ | **แก้แล้วใน P7a (HANDOFF §4.15):** Production ใช้ Valkey ร่วมทุก Worker (Settings ไม่ยอมให้ `WEB_CONCURRENCY` > 1 กับ `memory://`) · Store ล่ม → 503 · uvicorn เชื่อ `X-Forwarded-For` เฉพาะจาก IP คงที่ของ Caddy · Test: `tests/api/test_rate_limit_storage.py` · ตรวจกับ Stack จริงในเครื่อง: XFF ปลอม 7 ครั้ง → ครั้งที่ 6 ได้ 429 และ Key เป็น IP จริง |
 | R-4 | Low | Deep link แบบ Custom scheme: แอปอื่นลงทะเบียน `rideros://` ซ้ำได้ จึงอาจดัก Reset token | ตอนนี้ Reset link มีเฉพาะใน Dev log (D5) · Token ใช้ครั้งเดียว อายุ 30 นาที · **Phase 7:** ถ้ามี Email provider ให้ใช้ Android App Links (https + `assetlinks.json`) |
 | R-5 | Low | CV Service (`/classify`) ไม่มี Body limit แบบ Streaming | ไม่มี Port ที่เปิดออกนอก Docker network · มีแค่ Backend เรียก และส่งรูปที่ Re-encode แล้ว (≤ 1600 px) |
 | R-6 | Medium | 47 High ใน Debian base (util-linux, ncurses, perl-base, sqlite, systemd libs) ยังไม่มีแพตช์จาก Debian | แอปไม่เรียกใช้โปรแกรมเหล่านี้กับ Input ของผู้ใช้ · Container รันเป็น User `app` (UID 10001) · **Phase 7:** สแกนซ้ำก่อน Deploy |
-| R-7 | Medium | Release APK ยังเซ็นด้วย Debug key | **Phase 7:** Release keystore นอก Repo (Roadmap) |
-| R-8 | Low | ไม่มี Security headers (HSTS ฯลฯ) | Client เป็นแอปมือถือ ไม่ใช่ Browser · **Phase 7:** ตั้ง HSTS/TLS ที่ Reverse proxy |
+| ~~R-7~~ | — | ~~Release APK ยังเซ็นด้วย Debug key~~ | **แก้แล้วใน P7a:** `android/key.properties` (gitignored) → Keystore ที่ `%USERPROFILE%\.rideros\` · ไม่มีไฟล์ → Release build ไม่ถูกเซ็น (ติดตั้งไม่ได้) แทนการใช้ Debug key |
+| ~~R-8~~ | — | ~~ไม่มี Security headers (HSTS ฯลฯ)~~ | **แก้แล้วใน P7a:** Caddy (`deploy/Caddyfile`) ทำ TLS อัตโนมัติ, HTTP → 308 HTTPS, ส่ง `Strict-Transport-Security`, `X-Content-Type-Options`, `Referrer-Policy`, ตัด `Server` · เปิดเฉพาะ `/api/v1/*` |
 | R-9 | Info | Dev compose เปิด DB/API ที่ `127.0.0.1` เท่านั้น · `/docs` เปิดเมื่อไม่ใช่ Production | Production ปิด `/docs` และ `/openapi.json` (`test_production_hides_openapi_docs`) |
 
 ## 6. OWASP API Security Top 10 (2023)

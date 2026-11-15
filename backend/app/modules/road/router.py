@@ -33,8 +33,8 @@ _NOT_FOUND = {404: {"description": "Not found"}}
 Description = Annotated[str, StringConstraints(strip_whitespace=True, max_length=DESCRIPTION_MAX_LENGTH)]
 
 
-def _limit_reports(request: Request, settings: SettingsDep, user: CurrentUser) -> None:
-    get_limiter(request).hit(settings.rate_limit_road_report, "road_report", str(user.id))
+async def _limit_reports(request: Request, settings: SettingsDep, user: CurrentUser) -> None:
+    await get_limiter(request).hit(settings.rate_limit_road_report, "road_report", str(user.id))
 
 
 @router.post(
@@ -65,7 +65,7 @@ async def create_report(
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > max_bytes + MULTIPART_OVERHEAD_BYTES:
         raise ImageTooLargeError(f"The photo must be at most {max_bytes // (1024 * 1024)} MB")
-    _limit_reports(request, settings, user)
+    await _limit_reports(request, settings, user)
     data: bytes | None = None
     if image is not None:
         data = await image.read(max_bytes + 1)
@@ -154,7 +154,7 @@ async def confirm_incident(
     settings: SettingsDep,
 ) -> IncidentDetail:
     """Say the incident is still there (`true`) or gone (`false`). A new answer replaces your old one."""
-    _limit_reports(request, settings, user)
+    await _limit_reports(request, settings, user)
     return await service.confirm(session, settings, user.id, incident_id, body.still_present)
 
 

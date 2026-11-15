@@ -224,7 +224,7 @@ sequenceDiagram
 | Authorization | ทุก Query ของข้อมูลผู้ใช้ Filter ด้วย `user_id = current_user.id` ใน Repository Layer; Role `rider`/`admin`; มี Test Cross-user Access ทุก Endpoint |
 | SQL Injection | ใช้ SQLAlchemy ORM/Bound Parameters เท่านั้น ห้ามต่อ String เป็น SQL |
 | Validation | Pydantic `extra="forbid"` + Range/Length Constraints (ไม่ใช้ Strict mode: แปลงชนิดได้ เช่น `"500"` → Decimal); Validation ระดับ Domain ใน Service; Body ≤ 256 KiB (Multipart ≤ 5 MB + 64 KiB) ตรวจตอนรับข้อมูล |
-| Rate limiting | `limits` (Moving window, In-memory ต่อ Process): login 5/นาที ต่อ IP และต่อ E-mail, register 3/นาที/IP, forgot-password 3/นาที ต่อ IP และต่อ E-mail, reset 3/นาที/IP, รายงานเหตุ 10/นาที/User, ค่าทั่วไป 60/นาที/User · `X-Forwarded-For` ตั้งใน Phase 7 |
+| Rate limiting | `limits` (Moving window · `RATE_LIMIT_STORAGE_URL`: `memory://` ต่อ Process ใน Dev, Valkey `redis://` ใช้ร่วมทุก Worker ใน Production · Store ล่ม → 503 `rate_limit_unavailable` ไม่ปล่อยผ่าน): login 5/นาที ต่อ IP และต่อ E-mail, register 3/นาที/IP, forgot-password 3/นาที ต่อ IP และต่อ E-mail, reset 3/นาที/IP, รายงานเหตุ 10/นาที/User, ค่าทั่วไป 60/นาที/User · `X-Forwarded-For` เชื่อเฉพาะจาก Caddy (`FORWARDED_ALLOW_IPS=172.30.0.10`) · `docs/DEPLOYMENT.md` |
 | CORS | Mobile App ไม่ต้องใช้ CORS; อนุญาตเฉพาะ Origin ที่กำหนดใน ENV (ค่าเริ่มต้นคือว่าง) |
 | File upload | ตรวจ Magic Bytes (JPEG/PNG/WebP), ≤ 5 MB และ ≤ 40 MP, Re-encode ภาพ (ลบ EXIF รวมถึงพิกัด GPS), ตั้งชื่อไฟล์ใหม่เป็น UUID, ห้าม Serve จาก Path ที่ผู้ใช้ควบคุม |
 | Secrets | `.env` (gitignored) + `.env.example`; Production ใช้ Secret ของ Platform; gitleaks ตรวจก่อน Commit (ใส่ใน CI ตอน Phase 7) |

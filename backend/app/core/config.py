@@ -64,8 +64,13 @@ class Settings(BaseSettings):
     cv_service_url: str | None = None
     cv_timeout_seconds: float = Field(default=15.0, gt=0, le=120)
 
-    # ---- Rate limits (per process, in memory; `limits` syntax) ----
+    # ---- Rate limits (`limits` syntax) ----
     rate_limit_enabled: bool = True
+    # memory:// counts per process (one worker); redis://host:6379/0 (Redis/Valkey) shares the counts
+    # between workers and instances. It may carry a password, so it is a secret in logs.
+    rate_limit_storage_url: str = "memory://"
+    # uvicorn reads the same WEB_CONCURRENCY for its worker count; here it only guards production.
+    web_concurrency: int = Field(default=1, ge=1, le=32)
     rate_limit_default: str = "60/minute"  # per user (valid access token), else per IP
     rate_limit_login: str = "5/minute"  # per IP, and separately per e-mail
     rate_limit_register: str = "3/minute"  # per IP
@@ -106,6 +111,11 @@ class Settings(BaseSettings):
                 raise ValueError("JWT_SECRET looks like a placeholder; refusing to start in production")
             if self.db_echo:
                 raise ValueError("DB_ECHO must be off in production (it logs query parameters)")
+            if self.web_concurrency > 1 and self.rate_limit_storage_url.lower().startswith("memory"):
+                raise ValueError(
+                    "WEB_CONCURRENCY > 1 needs a shared RATE_LIMIT_STORAGE_URL (redis://…) in production;"
+                    " memory:// would count each worker separately"
+                )
         return self
 
     @property

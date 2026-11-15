@@ -14,25 +14,33 @@ final mapTilesEnabledProvider = Provider<bool>((ref) => true);
 const defaultMapCenter = RoadPoint(lat: 13.7563, lng: 100.5018);
 const defaultMapZoom = 14.0;
 
-/// OpenStreetMap standard tiles. Development only (OSM tile policy); Phase 7
-/// switches the provider (decision 7, §4.11).
+/// OpenStreetMap standard tiles (Phase 7, HANDOFF §4.15 decision 7). The OSM
+/// tile policy allows light use like this when the app identifies itself
+/// (flutter_map sends `flutter_map (<package>)` as User-Agent), shows the
+/// attribution, caches tiles (flutter_map's built-in cache) and does not
+/// bulk-download. Heavier use needs another provider.
 const osmTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapUserAgentPackage = 'com.rideros.rideros_ai';
 
 LatLng toLatLng(RoadPoint p) => LatLng(p.lat, p.lng);
 RoadPoint toRoadPoint(LatLng p) => RoadPoint(lat: p.latitude, lng: p.longitude);
 
-/// Tiles (when enabled) and the required "© OpenStreetMap contributors".
+/// Tiles (when enabled). In dark mode the same OSM tiles are colour-inverted
+/// on the device (flutter_map's [darkModeTileBuilder]): no dark tile
+/// service was free to use (CARTO's hosted basemaps are for enterprise
+/// customers only).
 class RoadBaseLayers extends ConsumerWidget {
   const RoadBaseLayers({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!ref.watch(mapTilesEnabledProvider)) return const SizedBox.shrink();
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return TileLayer(
       urlTemplate: osmTileUrl,
       userAgentPackageName: mapUserAgentPackage,
       maxNativeZoom: 19,
+      tileBuilder: dark ? darkModeTileBuilder : null,
     );
   }
 }

@@ -1,0 +1,45 @@
+# RiderOS AI API behind Caddy: automatic HTTPS (Let's Encrypt) for API_DOMAIN, e.g.
+# api.203-0-113-7.sslip.io (docs/DEPLOYMENT.md). No upstream proxy is trusted here, so Caddy passes the
+# real peer address in X-Forwarded-For; the backend trusts that header from Caddy's address only and
+# uses its right-most entry, so a client-sent value cannot change the rate-limit key.
+{
+	servers {
+		# Slow-client protection; uploads are capped by the backend (5 MB photo + form fields).
+		timeouts {
+			read_header 10s
+			read_body 60s
+			idle 2m
+		}
+	}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	# The API lives under /api/v1; anything else is not served.
+	handle /api/v1/* {
+		request_body {
+			max_size 6MB
+		}
+		reverse_proxy backend:8000 {
+			health_uri /api/v1/health
+			health_interval 30s
+		}
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

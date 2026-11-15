@@ -82,6 +82,8 @@ Incident testIncident({
   String status = 'unverified',
   double? distance,
   int reporters = 1,
+  double lat = 13.7563,
+  double lng = 100.5018,
 }) => Incident.fromJson(
   incidentJson(
     id: id,
@@ -89,6 +91,8 @@ Incident testIncident({
     status: status,
     distance: distance,
     reporters: reporters,
+    lat: lat,
+    lng: lng,
   ),
 );
 

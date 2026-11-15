@@ -16,6 +16,7 @@ import '../data/device_services.dart';
 import '../domain/road_models.dart';
 import 'road_labels.dart';
 import 'road_providers.dart';
+import 'widgets/incident_clusters.dart';
 import 'widgets/road_map.dart';
 
 /// `/road`: incidents on a map and the list of those near the rider, plus
@@ -242,18 +243,11 @@ class _MapTabState extends ConsumerState<_MapTab>
                     height: 22,
                     child: const MyLocationDot(key: Key('road.me')),
                   ),
-                for (final incident in shown?.items ?? const <Incident>[])
-                  Marker(
-                    point: toLatLng(incident.location),
-                    width: 40,
-                    height: 40,
-                    child: GestureDetector(
-                      key: Key('marker.${incident.id}'),
-                      onTap: () => context.push(Routes.incident(incident.id)),
-                      child: IncidentMarkerIcon(incident: incident),
-                    ),
-                  ),
               ],
+            ),
+            IncidentClusterLayer(
+              incidents: shown?.items ?? const <Incident>[],
+              onOpen: (id) => context.push(Routes.incident(id)),
             ),
             const OsmAttribution(),
           ],

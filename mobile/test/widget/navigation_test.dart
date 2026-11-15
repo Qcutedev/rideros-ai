@@ -492,7 +492,7 @@ void main() {
       tester,
     ) async {
       final road = RoadFakes();
-      road.repo.incidents.add(testIncident(id: 'i-new'));
+      road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
       await pumpApp(
         tester,
         fakeRepositories(auth, profiles, profit, null, null, road),
@@ -534,7 +534,7 @@ void main() {
       tester,
     ) async {
       final road = RoadFakes();
-      road.repo.incidents.add(testIncident(id: 'i-new'));
+      road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
       await pumpApp(
         tester,
         fakeRepositories(auth, profiles, profit, null, null, road),
