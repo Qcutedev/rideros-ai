@@ -388,7 +388,7 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - Tests: Backend unit `tests/unit/test_trend_analysis.py` (13) + API 2 ตัวใน `test_profit_reports.py` · Mobile model 1 + widget 5 (`true_profit_screen_test.dart` group "trend analysis")
 - ผลตรวจ: `scripts/regression.ps1` **PASSED 14/14** · Backend **493 passed** (เดิม 478), Coverage 98.21% · ML 134 · CV 38 · Mobile analyze No issues, **501 passed** (เดิม 495), Coverage 96.74% (6,645/6,869)
 
-### 4.15 Phase 7 Deploy & Portfolio (W13) — **แผน + การตัดสินใจ 12 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-15 ("เอาตามที่แนะนำเลย")**
+### 4.15 Phase 7 Deploy & Portfolio (W13) — **อนุมัติแล้ว 2026-11-16 (P7a + P7c; P7b พัก)** · **แผน + การตัดสินใจ 12 ข้อ ผู้ใช้ยืนยันตามที่แนะนำ 2026-11-15 ("เอาตามที่แนะนำเลย")**
 ลำดับ: P7a เตรียม Production ในเครื่อง → P7b Deploy จริง + Restore test + Release APK → P7c GitHub + CI + README + Resume + Phase 7 Report · รายงานหลังจบแต่ละช่วง · ห้าม Commit จนกว่าผู้ใช้สั่ง
 1. Hosting: Oracle Cloud Always Free (ARM A1 4 OCPU/24 GB) · สำรอง VPS ~€4–5/เดือน (Hetzner) · ผู้ใช้สมัครบัญชีเอง · ตรวจ Build arm64 (torch, xgboost, PostGIS) ด้วย `docker buildx --platform linux/arm64` ใน P7a ก่อน
 2. Domain/HTTPS: `api.<IP>.sslip.io` + Caddy (Let's Encrypt อัตโนมัติ) · เปลี่ยนเป็นโดเมนของผู้ใช้ได้ภายหลัง
@@ -420,6 +420,8 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
   · ไฟล์ใหม่ (ยังไม่ Commit): `.github/workflows/ci.yml` · `README.md` (อังกฤษ 16 หัวข้อ + สารบัญ; Overview อยู่หัวไฟล์ · ตัวเลขทุกตัวมีที่มา) · `LICENSE` (MIT, ผู้ถือลิขสิทธิ์ "Qcutedev" + หมายเหตุ Data/Model ไม่อยู่ใต้ MIT) · `docs/PORTFOLIO.md` (Resume bullets EN/TH + ที่มาตัวเลข) · `docs/screenshots/` 6 ภาพ (กว้าง 480 px รวม ~780 KB: home, profit, pickup_predict, shift_compare, road_map.jpg, login)
   · Screenshots: บัญชี Demo `demo.screens@example.com` (รหัส `demo screens 2026`) Seed ผ่าน API ด้วยสคริปต์ชั่วคราวใน Scratchpad (ไม่อยู่ใน Repo; ใช้ `perf.run.Api`) → 92 กะ 120 วัน, ร้าน "Demo Kitchen", 3 Scenario, 7 เหตุถนน "Demo report" · README ระบุว่าเป็นบัญชี Demo ข้อมูล Seed · ถ่ายจาก Emulator (Status bar demo mode) · ยังอยู่ใน Dev DB
   · ตรวจ History ก่อน Public: Pack 1.24 MiB, Blob ใหญ่สุด 174 KB (HANDOFF), ไม่มี csv/parquet/zip/jpg/pt/joblib/jks/pem · **พบข้อมูลส่วนตัว 2 จุด:** อีเมลผู้ Commit จริงในทั้ง 43 Commits และ Path ชื่อผู้ใช้ Windows ใน HANDOFF (History) → ผู้ใช้เลือกเขียน History ใหม่ → แก้แล้ว (§4.16)
+
+- **P7c Push แล้ว (2026-11-16, ผู้ใช้สั่ง "ต่อ")**: Commit `a9f38e1` (P7c) → `gh repo create` **https://github.com/Qcutedev/rideros-ai** (Public) → Push `main` + Tag `mvp-freeze` · CI รอบแรกแดง: `astral-sh/setup-uv@v10` ไม่มี Major tag → Pin `v10.3.3` (`ci: …` Commit ถัดมา) · **CI รอบสอง เขียวทั้ง 5 Jobs** (~2.5 นาที): backend 498 passed + 2 skipped (ไม่มี Artifact), Coverage 98.17% · ml 117 passed + 17 skipped · cv 38 passed · mobile analyze สะอาด, 507 passed, Coverage 96.70% (7377/7629; บน Linux นับบรรทัดต่างจาก Windows 96.8% 6723/6945) · gitleaks no leaks
 
 ### 4.16 เขียน Git History ใหม่ก่อนเปิด Public (2026-11-16, ผู้ใช้เลือก)
 เหตุผล: Repo จะเป็น Public ตั้งแต่ Push แรก แต่ทั้ง 43 Commits มีอีเมลส่วนตัวของผู้ใช้ และ HANDOFF ทุกเวอร์ชันมี Path ที่มีชื่อผู้ใช้ Windows
@@ -476,7 +478,9 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 | `36378fa` | `f16a2cf` | docs: record P7a approval and commit in HANDOFF |
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-15: P7c งานในเครื่องเสร็จ (CI, README, LICENSE, PORTFOLIO, Screenshots · §4.15) ยังไม่ Commit → รอผู้ใช้:** (1) ~~ข้อมูลส่วนตัวใน History~~ **เขียน History ใหม่แล้ว 2026-11-16 (§4.16; Hash เปลี่ยนทั้งหมด)** (2) สั่ง Commit (3) แล้วจึงสร้าง Repo `rideros-ai` Public ด้วย `gh` → Push (รวม Tag `mvp-freeze`) → ดู CI จนเขียว แก้ถ้าแดง → Phase 7 Report (P7b ค้าง) · ก่อน Commit: gitleaks ตาม §4.5
+**2026-11-16: ผู้ใช้อนุมัติ Phase 7 (P7a + P7c) และสั่ง Commit HANDOFF** · Repo Public https://github.com/Qcutedev/rideros-ai · CI เขียว · **P7b Deploy ยังพัก** (ไม่มีวิธีชำระเงินที่ Oracle รับ) → ถ้ากลับมาทำ: ทางเลือก Hugging Face Spaces + Neon (ต้องปรับ Deploy), VPS เสียเงิน (Hetzner, ใช้ `deploy/` ได้ทันที) หรือวิดีโอ Demo จาก Emulator ใส่ README · งานถัดไปเริ่มเมื่อผู้ใช้สั่งเท่านั้น · ย้ำผู้ใช้สำรอง Keystore + `key.properties` นอกเครื่อง · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
+
+(เดิม) **2026-11-15: P7c งานในเครื่องเสร็จ (CI, README, LICENSE, PORTFOLIO, Screenshots · §4.15) ยังไม่ Commit → รอผู้ใช้:** (1) ~~ข้อมูลส่วนตัวใน History~~ **เขียน History ใหม่แล้ว 2026-11-16 (§4.16; Hash เปลี่ยนทั้งหมด)** (2) สั่ง Commit (3) แล้วจึงสร้าง Repo `rideros-ai` Public ด้วย `gh` → Push (รวม Tag `mvp-freeze`) → ดู CI จนเขียว แก้ถ้าแดง → Phase 7 Report (P7b ค้าง) · ก่อน Commit: gitleaks ตาม §4.5
 
 **2026-11-15: P7a อนุมัติ + Commit `e196411` (§4.15) → Session หน้าทำงานค้างตามลำดับ:** (1) ~~Regression เต็มรอบ~~ **ผ่านแล้ว 2026-11-15 (§4.15)** (2) ~~ดู Cluster + แผนที่มืดบน Emulator~~ **ผ่านแล้ว 2026-11-15 (§4.15)** (3) **P7b พักไว้ก่อนตามที่ผู้ใช้สั่ง (2026-11-15)**: สมัคร Oracle ไม่ผ่าน (Oracle ไม่รับวิธีชำระเงินที่ผู้ใช้มี) · ทางเลือกที่ไม่ต้องใช้บัตร เผื่อกลับมาทำ: Hugging Face Spaces + Neon (ต้องปรับ Deploy) หรือรันในเครื่อง + `adb reverse` · ผู้ใช้ทำโปรเจกต์ไว้ใส่ Resume/GitHub → ทำ P7c ก่อน · (เดิม) P7b: รอผู้ใช้สมัคร Oracle Cloud + สร้าง VM ตาม `docs/DEPLOYMENT.md` §2 ข้อ 1–2 แล้วส่ง Public IP + SSH user → ผมทำ §2 ข้อ 3–5 ผ่าน SSH → Deploy, smoke test URL จริง, restore_test, ตรวจ IP จริงผ่าน XFF, Release APK ด้วย `API_BASE_URL` จริง, เติม `DEPLOYMENT.md` §8.2 (4) P7c · ย้ำผู้ใช้สำรอง Keystore + `key.properties` ไว้นอกเครื่อง · ห้าม Commit จนกว่าผู้ใช้สั่ง · ก่อน Commit: gitleaks ตาม §4.5
 
