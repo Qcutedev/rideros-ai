@@ -57,9 +57,14 @@ What the app shows follows a few rules:
 The screenshots come from the Android emulator against the local stack. The rider is a **demo account
 with seeded test data**, not real earnings. The UI is in Thai.
 
+The visual design is "Lime Obsidian": an ivory background, cards that alternate sage, teal, mist and
+Obsidian, and electric lime for actions and highlights. It has a separate dark theme, and every card tone
+is tested for text contrast of at least 4.5:1. Animations stop when the system asks for reduced motion.
+The rider illustration on Home is drawn in code. Design spec: [`docs/RIDEROS_UI_DESIGN.md`](docs/RIDEROS_UI_DESIGN.md).
+
 | Home | TrueProfit trend + work patterns | Pickup estimate |
 |---|---|---|
-| <img src="docs/screenshots/home.png" width="240" alt="Home dashboard"> | <img src="docs/screenshots/profit.png" width="240" alt="Weekly net profit chart with 4-week moving average and K-Means work patterns"> | <img src="docs/screenshots/pickup_predict.png" width="240" alt="Order-to-pickup estimate 5–21 minutes with domain-shift warning"> |
+| <img src="docs/screenshots/home.png" width="240" alt="Home with greeting banner, today's net profit and this week"> | <img src="docs/screenshots/profit.png" width="240" alt="Weekly net profit chart with 4-week moving average and K-Means work patterns"> | <img src="docs/screenshots/pickup_predict.png" width="240" alt="Order-to-pickup estimate 4–20 minutes with domain-shift warning"> |
 
 | Shift comparison | Road incidents map | Login |
 |---|---|---|
@@ -256,7 +261,7 @@ All settings are environment variables. [`.env.example`](.env.example) lists the
 | Backend (pytest, real PostGIS + Valkey) | 500 | coverage of `app/modules` + `app/core`: **98.17%** (gate 96%) |
 | ML pipeline | 134 | ruff + pytest |
 | CV service | 38 | ruff + pytest |
-| Mobile (unit + widget) | 507 | coverage of `lib/` without generated code: **96.8%** (gate 94.7%) |
+| Mobile (unit + widget) | 534 | coverage of `lib/` without generated code: **96.8%** (gate 94.7%) |
 | E2E (`flutter drive` on the emulator) | 1 journey | checks 21 database rows through SQL, then deletes the test account |
 
 The tests include cross-user access checks on every endpoint, token expiry, reuse and forgery, a check that
