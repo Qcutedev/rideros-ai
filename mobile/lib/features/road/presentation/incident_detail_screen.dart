@@ -6,6 +6,8 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/widgets/app_badge.dart';
 import '../../../core/widgets/app_cards.dart';
+import '../../../core/widgets/form_widgets.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/road_models.dart';
@@ -162,7 +164,6 @@ class _Confirmation extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final incident = detail.incident;
     if (!incident.status.isOpen) {
       return AppBanner(
@@ -189,7 +190,7 @@ class _Confirmation extends ConsumerWidget {
       if (ok) {
         messenger
           ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(l10n.roadConfirmSaved)));
+          ..showSnackBar(successSnackBar(l10n.roadConfirmSaved));
       }
     }
 
@@ -199,72 +200,79 @@ class _Confirmation extends ConsumerWidget {
     };
     return SectionCard(
       key: const Key('detail.confirm'),
+      tone: AppTone.mist,
       title: l10n.roadConfirmQuestion,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (mine != null) ...[
-            if (staleCleared)
-              AppBanner(
-                key: const Key('detail.mineStale'),
-                message: l10n.roadConfirmMineClearedStale(
-                  agoLabel(l10n, mine.createdAt, now),
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (mine != null) ...[
+              if (staleCleared)
+                AppBanner(
+                  key: const Key('detail.mineStale'),
+                  message: l10n.roadConfirmMineClearedStale(
+                    agoLabel(l10n, mine.createdAt, now),
+                  ),
+                  tone: BannerTone.warning,
+                )
+              else
+                Text(
+                  mine.stillPresent
+                      ? l10n.roadConfirmMineStill(
+                          agoLabel(l10n, mine.createdAt, now),
+                        )
+                      : l10n.roadConfirmMineCleared(
+                          agoLabel(l10n, mine.createdAt, now),
+                        ),
+                  key: const Key('detail.mine'),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                tone: BannerTone.warning,
-              )
-            else
-              Text(
-                mine.stillPresent
-                    ? l10n.roadConfirmMineStill(
-                        agoLabel(l10n, mine.createdAt, now),
-                      )
-                    : l10n.roadConfirmMineCleared(
-                        agoLabel(l10n, mine.createdAt, now),
-                      ),
-                key: const Key('detail.mine'),
-                style: theme.textTheme.bodyMedium,
-              ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          Row(
-            children: [
-              Expanded(
-                child: _AnswerButton(
-                  key: const Key('detail.still'),
-                  label: l10n.roadConfirmStill,
-                  icon: Icons.report_outlined,
-                  selected: mine?.stillPresent == true,
-                  onPressed: busy ? null : () => answer(true),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: _AnswerButton(
+                    key: const Key('detail.still'),
+                    label: l10n.roadConfirmStill,
+                    icon: Icons.report_outlined,
+                    selected: mine?.stillPresent == true,
+                    onPressed: busy ? null : () => answer(true),
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _AnswerButton(
-                  key: const Key('detail.gone'),
-                  label: l10n.roadConfirmCleared,
-                  icon: Icons.check_circle_outline_rounded,
-                  selected: mine?.stillPresent == false && !staleCleared,
-                  onPressed: busy ? null : () => answer(false),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: _AnswerButton(
+                    key: const Key('detail.gone'),
+                    label: l10n.roadConfirmCleared,
+                    icon: Icons.check_circle_outline_rounded,
+                    selected: mine?.stillPresent == false && !staleCleared,
+                    onPressed: busy ? null : () => answer(false),
+                  ),
                 ),
+              ],
+            ),
+            if (busy) ...[
+              const SizedBox(height: AppSpacing.md),
+              const LinearProgressIndicator(),
+            ],
+            if (failure != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              AppBanner.failure(
+                context,
+                failure,
+                key: const Key('detail.error'),
               ),
             ],
-          ),
-          if (busy) ...[
             const SizedBox(height: AppSpacing.md),
-            const LinearProgressIndicator(),
-          ],
-          if (failure != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            AppBanner.failure(context, failure, key: const Key('detail.error')),
-          ],
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.roadConfirmHelp,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            Text(
+              l10n.roadConfirmHelp,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -335,20 +343,42 @@ class _MyReport extends ConsumerWidget {
           ],
           if (ai != null) ...[
             const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  ai,
-                  key: const Key('detail.ai'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            // AI insight panel: pulsing while the photo is being classified.
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: context.semanticColors.mint,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Row(
+                children: [
+                  if (report.aiStatus == AiStatus.pending)
+                    const AiPulse(key: Key('detail.aiPulse'), size: 36)
+                  else
+                    const IconWell(icon: Icons.auto_awesome_rounded, size: 36),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          ai,
+                          key: const Key('detail.ai'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        AppBadge(
+                          label: l10n.badgeEstimate,
+                          tone: BadgeTone.warning,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                AppBadge(label: l10n.badgeEstimate, tone: BadgeTone.warning),
-              ],
+                ],
+              ),
             ),
           ],
         ],

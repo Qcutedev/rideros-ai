@@ -30,49 +30,67 @@ class AppShell extends ConsumerWidget {
         child: HeroMode(enabled: false, child: shell),
       ),
       // RoadContext (Phase 5) gets no tab until the feature works (§3).
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: context.semanticColors.border)),
+      // Floating Obsidian bar: a lime pill slides to the selected tab.
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
         ),
-        child: NavigationBar(
-          selectedIndex: shell.currentIndex,
-          // Tapping the current tab again returns to its first screen.
-          onDestinationSelected: (index) => shell.goBranch(
-            index,
-            initialLocation: index == shell.currentIndex,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            boxShadow: Theme.of(context).brightness == Brightness.light
+                ? AppShadows.floating
+                : null,
           ),
-          destinations: [
-            NavigationDestination(
-              key: const Key('nav.home'),
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home_rounded),
-              label: l10n.navHome,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: NavigationBar(
+              selectedIndex: shell.currentIndex,
+              animationDuration: AppDurations.slow,
+              // Tapping the current tab again returns to its first screen.
+              onDestinationSelected: (index) => shell.goBranch(
+                index,
+                initialLocation: index == shell.currentIndex,
+              ),
+              destinations: [
+                NavigationDestination(
+                  key: const Key('nav.home'),
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home_rounded),
+                  label: l10n.navHome,
+                ),
+                NavigationDestination(
+                  key: const Key('nav.pickup'),
+                  icon: const Icon(Icons.storefront_outlined),
+                  selectedIcon: const Icon(Icons.storefront_rounded),
+                  label: l10n.navPickup,
+                ),
+                NavigationDestination(
+                  key: const Key('nav.profit'),
+                  icon: const Icon(Icons.account_balance_wallet_outlined),
+                  selectedIcon: const Icon(
+                    Icons.account_balance_wallet_rounded,
+                  ),
+                  label: l10n.navProfit,
+                ),
+                NavigationDestination(
+                  key: const Key('nav.shifts'),
+                  icon: const Icon(Icons.event_note_outlined),
+                  selectedIcon: const Icon(Icons.event_note_rounded),
+                  label: l10n.navShifts,
+                ),
+                NavigationDestination(
+                  key: const Key('nav.profile'),
+                  icon: const Icon(Icons.person_outline_rounded),
+                  selectedIcon: const Icon(Icons.person_rounded),
+                  label: l10n.navProfile,
+                ),
+              ],
             ),
-            NavigationDestination(
-              key: const Key('nav.pickup'),
-              icon: const Icon(Icons.storefront_outlined),
-              selectedIcon: const Icon(Icons.storefront_rounded),
-              label: l10n.navPickup,
-            ),
-            NavigationDestination(
-              key: const Key('nav.profit'),
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: const Icon(Icons.account_balance_wallet_rounded),
-              label: l10n.navProfit,
-            ),
-            NavigationDestination(
-              key: const Key('nav.shifts'),
-              icon: const Icon(Icons.event_note_outlined),
-              selectedIcon: const Icon(Icons.event_note_rounded),
-              label: l10n.navShifts,
-            ),
-            NavigationDestination(
-              key: const Key('nav.profile'),
-              icon: const Icon(Icons.person_outline_rounded),
-              selectedIcon: const Icon(Icons.person_rounded),
-              label: l10n.navProfile,
-            ),
-          ],
+          ),
         ),
       ),
     );

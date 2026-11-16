@@ -14,6 +14,7 @@ import '../utils/validators.dart';
 import 'app_buttons.dart';
 import 'app_text_field.dart';
 import 'form_layout.dart';
+import 'motion.dart';
 import 'status_views.dart';
 
 /// Earliest date the backend accepts for records (`occurred_on` 2000-01-01).
@@ -260,8 +261,20 @@ void closeForm(BuildContext context, String message) {
   context.pop();
   messenger
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(successSnackBar(message));
 }
+
+/// "Saved" style message: a check mark pops in beside the text.
+SnackBar successSnackBar(String message, {SnackBarAction? action}) => SnackBar(
+  action: action,
+  content: Row(
+    children: [
+      const SuccessCheck(),
+      const SizedBox(width: AppSpacing.md),
+      Expanded(child: Text(message)),
+    ],
+  ),
+);
 
 /// Loads the record for an edit screen with loading / error states.
 class RecordLoader<T> extends ConsumerWidget {

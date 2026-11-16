@@ -182,6 +182,8 @@ Future<void> tapKey(
 }) async {
   final finder = find.byKey(Key(key));
   await tester.ensureVisible(finder);
+  // Lay out the scrolled position before measuring where to tap.
+  await tester.pump();
   await tester.tap(finder);
   if (settle) {
     await tester.pumpAndSettle();

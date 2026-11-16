@@ -44,7 +44,9 @@ void main() {
     );
   });
 
-  testWidgets('elsewhere: the emblem on a rounded forest tile', (tester) async {
+  testWidgets('elsewhere: the emblem on a rounded Obsidian tile', (
+    tester,
+  ) async {
     await pump(tester, onDark: false);
     expect(painter(tester).color, AppColors.logoIvory);
     final tile = tester.widget<Container>(
@@ -53,6 +55,6 @@ void main() {
         matching: find.byType(Container),
       ),
     );
-    expect((tile.decoration! as BoxDecoration).color, AppColors.forest);
+    expect((tile.decoration! as BoxDecoration).color, AppColors.obsidian);
   });
 }

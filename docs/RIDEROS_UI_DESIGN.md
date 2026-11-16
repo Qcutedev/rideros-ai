@@ -1,7 +1,7 @@
 # RiderOS AI --- UI/UX Design Specification
 
-**เวอร์ชัน:** 1.0\
-**วันที่:** 10 พฤศจิกายน 2026\
+**เวอร์ชัน:** 2.0 (Lime Obsidian)\
+**วันที่:** 10 พฤศจิกายน 2026 · ปรับ Visual identity 16 พฤศจิกายน 2026\
 **แพลตฟอร์ม:** Flutter (Android) · Material 3 · ภาษาไทย\
 **เอกสารอ้างอิงโครงสร้างหน้าจอ:** `UI_STRUCTURE.md`
 
@@ -20,63 +20,82 @@
 
 **RiderOS AI --- Smart Rider, Smarter Journey**
 
-แนวคิดหลัก: - สีเขียวเป็นสีประจำแบรนด์ สื่อถึงการเคลื่อนไหว การเติบโต และความสดใหม่ -
-ใช้พื้นผิวสีขาว/เขียวอ่อนเพื่อให้อ่านง่าย - ใช้สีเขียวเข้มกับ Header
-และจุดสำคัญเพื่อสร้างเอกลักษณ์ - ใช้กราฟและตัวเลขเพื่อสื่อสารข้อมูล
-ไม่ตกแต่งจนรบกวนการอ่าน - AI ต้องอธิบายที่มาและข้อจำกัด
-ไม่แสดงผลเกินกว่าข้อมูลที่ระบบรองรับ
+แนวคิดหลัก (ปรับ 2026-11-16 จาก "Rider Green" เป็น "Lime Obsidian"): -
+Modern Minimalist Luxury + Futuristic Lifestyle Technology ไม่ใช่หน้าตาแอปธนาคารสีเขียว -
+พื้นหลังสีงาช้าง (Soft Ivory) สลับการ์ดหลายโทน ไม่ใช่การ์ดขาวทุกใบ -
+Electric Lime ใช้กับปุ่มหลัก สถานะที่เลือก ความคืบหน้า และจุดเน้นสำคัญ -
+การ์ด Obsidian สำหรับตัวเลขเด่น (Hero) และส่วนที่ต้องการ Contrast สูง -
+ใช้กราฟและตัวเลขเพื่อสื่อสารข้อมูล ไม่ตกแต่งจนรบกวนการอ่าน -
+AI ต้องอธิบายที่มาและข้อจำกัด ไม่แสดงผลเกินกว่าข้อมูลที่ระบบรองรับ
 
 ## 2. Visual direction
 
-### 2.1 แนวทางหลัก: Rider Green
+### 2.1 แนวทางหลัก: Lime Obsidian
 
-ภาพรวมเป็น Modern Green Mobility App ผสมกับ Data/Fintech Dashboard: -
-Clean, modern, confident, practical - ใช้การ์ดมุมโค้งและเงาอ่อน -
-ใช้พื้นที่ว่างให้เพียงพอ - ใช้ไอคอนเส้น/ไอคอน Rounded ที่มีรูปแบบสม่ำเสมอ -
-ใช้ภาพประกอบไรเดอร์เฉพาะจุด เช่น Splash หรือ Onboarding
-ไม่ใช้ภาพประกอบขนาดใหญ่ทุกหน้า - หลีกเลี่ยง Gradient หนัก, Glassmorphism
-มากเกินไป, Neon และองค์ประกอบ Sci-Fi ที่ทำให้ดูเป็นแอปเกม
+ภาพรวมเหมือนระบบปฏิบัติการมือถือระดับพรีเมียม: - การ์ดมุมโค้งใหญ่ (24--28 dp)
+สลับโทน Sage / Teal / Mist / Obsidian / Lime บนพื้น Ivory - ตัวเลขการเงินใหญ่ ชัด
+(Display 44 บน Hero card) - ไอคอน Rounded ชุดเดียว วางในวงกลม/สี่เหลี่ยมมนสี Lime
+(`IconWell`) - Gradient ใช้แค่แสง Lime จาง ๆ มุมบนขวาของการ์ด Obsidian -
+แถบเมนูล่างเป็นแคปซูล Obsidian ลอย มีเม็ด Lime เลื่อนไปที่แท็บที่เลือก -
+Dark mode ออกแบบแยก: พื้นเกือบดำ การ์ด Obsidian ยกระดับ ปุ่มหลักสี Lime
+ไม่ใช่การกลับสีของธีมสว่าง - หลีกเลี่ยง Glassmorphism, Neon และองค์ประกอบ Sci-Fi
 
-### 2.2 Design tokens --- Light mode
+### 2.2 Design tokens --- Palette และ Light mode
 
-  Token                 Hex         การใช้งาน
-  --------------------- ----------- ------------------------------------
-  Brand / Rider Green   `#00796B`   สีแบรนด์, App bar, Active navigation
-  Primary Action        `#00A884`   ปุ่มหลัก, CTA
-  Forest Green          `#123B32`   Header เข้ม, จุดเน้น
-  Mint Surface          `#DDF5EB`   การ์ดรอง, Selected state
-  App Background        `#F5FAF7`   พื้นหลังหลัก
-  Surface               `#FFFFFF`   การ์ดและฟอร์ม
-  Text Primary          `#17231F`   ข้อความหลัก
-  Text Secondary        `#63736B`   คำอธิบาย
-  Border                `#DCE8E1`   เส้นแบ่งและขอบ
-  Success               `#1B7F3B`   กำไรบวก/สำเร็จ
-  Warning               `#8A5A00`   คำเตือน
-  Warning Surface       `#FFF1D6`   พื้นหลังคำเตือน
-  Error                 `#C62828`   ข้อผิดพลาด/ลบ
-  Error Surface         `#FDE8E7`   พื้นหลังข้อผิดพลาด
+  Token                 Hex                     การใช้งาน
+  --------------------- ----------------------- ------------------------------------------------
+  Electric Lime         `#D5FF83`               เม็ดเมนูที่เลือก, FAB, ตัวเลขเด่นบน Obsidian, ป้ายปุ่มหลัก
+  Sage Mint             `#9DC9B4`               การ์ดฟีเจอร์ (เช่น สัปดาห์นี้, รูปแบบการทำงาน)
+  Muted Teal            `#78B6A4`               การ์ดฟีเจอร์ (เช่น ทางลัด, หัวกะงาน)
+  Obsidian              `#151A17`               Hero card, ปุ่มหลัก (ธีมสว่าง), แถบเมนูล่าง, ข้อความหลัก
+  Soft Ivory            `#F5F6F1`               พื้นหลังหลัก, App bar
+  Mist Gray             `#DDE3DC`               พื้นผิวรอง: Metric tile, Banner, แถบแท็บ
+  Surface               `#FFFFFF`               การ์ดทั่วไป (Paper) และช่องกรอก
+  Text Secondary        `#56615A`               คำอธิบาย
+  Border                `#E4E8E2`               เส้นแบ่ง
+  Border Strong         `#828E86`               ขอบช่องกรอก (≥ 3:1)
+  Teal Ink              `#2C6658`               ลิงก์/TextButton บนพื้นสว่าง
+  Success               `#3D6B12`               กำไรบวกบนพื้นสว่าง
+  Warning / Surface     `#8A5A00` / `#FFF1D6`   คำเตือน, ป้าย `ค่าประมาณ`
+  Error / Surface       `#B3261E` / `#FBE9E7`   ข้อผิดพลาด/ขาดทุน
+
+ปุ่มหลักในธีมสว่าง = พื้น Obsidian + ตัวอักษร Lime (Lime บน Ivory มี Contrast แค่ ≈ 1.05:1
+จึงไม่ใช้ Lime เป็นสีตัวอักษรหรือขอบบนพื้นสว่าง)
 
 ### 2.3 Design tokens --- Dark mode
 
-  Token              Hex         การใช้งาน
-  ------------------ ----------- ---------------------
-  App Background     `#0D1915`   พื้นหลังหลัก
-  Surface            `#172820`   การ์ด
-  Surface Elevated   `#20372D`   Dialog/Bottom sheet
-  Brand              `#55C7A5`   สีแบรนด์บนพื้นมืด
-  Primary Action     `#00A884`   ปุ่มหลัก
-  Mint Surface       `#1E4034`   Selected state
-  Text Primary       `#F1F7F3`   ข้อความหลัก
-  Text Secondary     `#A9BDB2`   คำอธิบาย
-  Border             `#30483C`   เส้นแบ่ง
-  Success            `#7FD69A`   สำเร็จ/กำไรบวก
-  Warning            `#FFC266`   คำเตือน
-  Warning Surface    `#4A3200`   พื้นหลังคำเตือน
-  Error              `#FF7770`   ข้อผิดพลาด
-  Error Surface      `#482321`   พื้นหลังข้อผิดพลาด
+  Token              Hex                     การใช้งาน
+  ------------------ ----------------------- ---------------------------------------
+  App Background     `#0D100E`               พื้นหลังหลัก (ตรงกับ Native splash)
+  Surface            `#171D19`               การ์ด
+  Surface Elevated   `#1F2621`               Hero, Dialog, Bottom sheet, ช่องกรอก
+  Surface Highest    `#29312C`               Metric tile, แถบแท็บ
+  Primary            `#D5FF83`               ปุ่มหลัก (ตัวอักษร Obsidian)
+  Text Primary       `#EEF1EA`               ข้อความหลัก
+  Text Secondary     `#A3ADA5`               คำอธิบาย
+  Success            `#D5FF83`               กำไรบวก
+  Warning / Surface  `#FFC266` / `#3B2C0A`   คำเตือน
+  Error / Surface    `#FF8F80` / `#3A1E1B`   ข้อผิดพลาด/ขาดทุน
 
-> ตรวจสอบ Contrast ของข้อความและปุ่มในทั้งสองธีมก่อนส่งมอบ
-> โดยเฉพาะข้อความสีบนพื้นสีเขียว
+### 2.3.1 Surface tones
+
+การ์ดเลือกโทนได้ 6 แบบ (`AppTone`: paper, mist, sage, teal, lime, obsidian) ผ่าน
+`ToneCard` / `SectionCard(tone:)` / `TileGroup(tone:)` ทุกโทนมีธีมของตัวเอง
+(`AppTheme.toned`) ข้อความ ปุ่ม และสีเงินข้างในเปลี่ยนตามพื้นอัตโนมัติ
+เนื้อหาที่อ่านสีจาก `Theme.of(context)` ต้องสร้างใน `Builder` ใต้การ์ด
+ไม่ใช่ใช้ `theme` ที่อ่านไว้ก่อนสร้างการ์ด
+Test `surfaces_and_motion_test.dart` ตรวจ Contrast ≥ 4.5:1 ทุกโทนทั้งสองธีม
+(ข้อความหลัก/รอง, Error, กำไรบวก, ข้อความบน Tile, ปุ่มหลัก, เนื้อหาบน Lime)
+
+### 2.3.2 Motion
+
+ทุกแอนิเมชันปิดเมื่อระบบเปิด "ลดการเคลื่อนไหว" (`MediaQuery.disableAnimations`):
+การ์ดหดเล็กน้อยตอนกด (`PressableScale`) · การ์ดค่อย ๆ ขึ้นทีละใบ (`RevealIn`) ·
+ตัวเลขเงินนับขึ้นแล้วจบที่ค่าจริงเป๊ะ Screen reader อ่านค่าจริงเท่านั้น (`AnimatedFigure`) ·
+กราฟวาดจากซ้ายไปขวา (`RevealFromStart`) · Skeleton มีแสงวิ่ง (`Shimmer`) ·
+AI กำลังประมวลผล = วงแหวนกระเพื่อม (`AiPulse`) · บันทึกสำเร็จ = เครื่องหมายถูกเด้ง
+(`successSnackBar`) · เปลี่ยนหน้า = เฟด + เลื่อนขึ้น (`RiderPageTransitionsBuilder`) ·
+แอนิเมชันวนซ้ำมีเวลาจำกัด (Shimmer ≈ 8 วินาที, AiPulse ≈ 19 วินาที) แล้วหยุดนิ่ง
 
 ### 2.4 Typography
 
@@ -85,7 +104,8 @@ Fallback: Noto Sans Thai หรือฟอนต์ระบบที่รอ�
 
   Style          ขนาด น้ำหนัก        Line height ใช้กับ
   ------------ ------ ---------- ------------- --------------
-  Display          32 Bold                 1.2 ตัวเลขกำไรเด่น
+  Display L        44 Bold                 1.1 ตัวเลขบน Hero card
+  Display          32 Bold                1.15 ตัวเลขกำไรเด่น
   H1               24 Bold                 1.3 หัวข้อหน้าหลัก
   H2               20 SemiBold             1.3 หัวข้อส่วน
   H3               18 SemiBold            1.35 หัวข้อการ์ด
@@ -99,12 +119,12 @@ Fallback: Noto Sans Thai หรือฟอนต์ระบบที่รอ�
 ### 2.5 Spacing, radius, elevation
 
 -   Spacing scale: 4, 8, 12, 16, 20, 24, 32 dp
--   Card radius: 16--20 dp
--   Input radius: 12--14 dp
--   Button radius: 14 dp
--   Dialog radius: 20 dp
--   ปุ่มและพื้นที่แตะสำคัญอย่างน้อย 48 dp; ปุ่มหลักสูง 52 dp
--   ใช้เงาอ่อนและเส้นขอบบางแทนเงาหนัก
+-   Card radius: 24 dp (Hero/Dialog/Bottom sheet 28 dp)
+-   Input radius: 16 dp
+-   Button: แคปซูล (Stadium)
+-   ปุ่มและพื้นที่แตะสำคัญอย่างน้อย 48 dp; ปุ่มหลักสูง 54 dp
+-   ธีมสว่าง: เงาอ่อนสองชั้นบนการ์ด Paper/Obsidian; การ์ดสีใช้สีแยกชั้นแทนเงา
+-   ธีมมืด: ไม่ใช้เงา ใช้ระดับสีพื้นผิว + เส้นขอบบางมาก
 -   ความกว้างฟอร์มสูงสุด 480 dp
 
 ### 2.6 Iconography

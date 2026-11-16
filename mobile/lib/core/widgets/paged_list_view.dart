@@ -66,16 +66,28 @@ class PagedListView<T> extends ConsumerWidget {
         child: RefreshIndicator(
           onRefresh: () => ref.refresh(provider.future),
           child: ListView.separated(
-            padding: EdgeInsets.only(bottom: bottomPadding),
+            padding: EdgeInsets.only(
+              top: lead == 0 ? AppSpacing.md : 0,
+              bottom: bottomPadding,
+            ),
             itemCount: lead + s.items.length + 1,
             separatorBuilder: (_, index) => index < lead
                 ? const SizedBox.shrink()
-                : const Divider(height: 1),
+                : const SizedBox(height: AppSpacing.sm),
             itemBuilder: (context, index) {
               if (index < lead) return header!;
               final i = index - lead;
+              // Each row is its own rounded card on the page background.
               return i < s.items.length
-                  ? itemBuilder(s.items[i])
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.md + 2),
+                        child: itemBuilder(s.items[i]),
+                      ),
+                    )
                   : _ListFooter(
                       state: s,
                       keyPrefix: keyPrefix,
@@ -136,7 +148,7 @@ class _ListFooter extends StatelessWidget {
   }
 }
 
-/// Round mint icon in front of a list row.
+/// Rounded-square icon in front of a list row, on the soft secondary surface.
 class RoundIcon extends StatelessWidget {
   const RoundIcon(this.icon, {super.key});
 
@@ -144,12 +156,18 @@ class RoundIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     decoration: BoxDecoration(
       color: context.semanticColors.mint,
-      shape: BoxShape.circle,
+      borderRadius: BorderRadius.circular(AppRadius.sm + 4),
     ),
-    child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+    child: Icon(
+      icon,
+      size: 20,
+      color: Theme.of(context).brightness == Brightness.light
+          ? Theme.of(context).colorScheme.onSurface
+          : AppColors.lime,
+    ),
   );
 }

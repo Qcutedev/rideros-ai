@@ -91,39 +91,62 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final location = restaurant.location;
     final orders = restaurant.nOrders;
-    return Card(
+    return ToneCard(
       key: const Key('restaurant.header'),
-      child: Padding(
-        padding: AppSpacing.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(restaurant.name, style: theme.textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.sm),
-            RestaurantBadges(restaurant: restaurant),
-            if (!restaurant.isOwn && orders != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.pickupOrdersInData(Formats.count(orders)),
-                style: theme.textTheme.bodyMedium,
+      tone: AppTone.sage,
+      radius: AppRadius.xl,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconWell(
+                    icon: restaurant.isOwn
+                        ? Icons.storefront_rounded
+                        : Icons.dataset_rounded,
+                    square: true,
+                    color: theme.colorScheme.onSurface,
+                    iconColor: theme.colorScheme.surface,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      restaurant.name,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-            if (location != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.restaurantLocation(
-                  location.lat.toStringAsFixed(6),
-                  location.lng.toStringAsFixed(6),
+              RestaurantBadges(restaurant: restaurant),
+              if (!restaurant.isOwn && orders != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.pickupOrdersInData(Formats.count(orders)),
+                  style: theme.textTheme.bodyMedium,
                 ),
-                key: const Key('restaurant.location'),
-                style: theme.textTheme.bodySmall,
-              ),
+              ],
+              if (location != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.restaurantLocation(
+                    location.lat.toStringAsFixed(6),
+                    location.lng.toStringAsFixed(6),
+                  ),
+                  key: const Key('restaurant.location'),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
             ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -239,41 +262,43 @@ class _WaitStatsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final stats = ref.watch(waitStatsProvider(restaurantId));
     return SectionCard(
+      tone: AppTone.mist,
       key: const Key('restaurant.waitStats'),
       title: l10n.waitStatsTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.waitStatsHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.waitStatsHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          switch (stats) {
-            AsyncData(:final value) => _WaitStatsBody(stats: value),
-            AsyncError(:final error) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppBanner.failure(
-                  context,
-                  error is AppFailure ? error : UnknownFailure(error),
-                ),
-                TextButton(
-                  key: const Key('waitStats.retry'),
-                  onPressed: () =>
-                      ref.invalidate(waitStatsProvider(restaurantId)),
-                  child: Text(l10n.commonRetry),
-                ),
-              ],
-            ),
-            _ => const SkeletonBox(height: 56, radius: AppRadius.md),
-          },
-        ],
+            const SizedBox(height: AppSpacing.md),
+            switch (stats) {
+              AsyncData(:final value) => _WaitStatsBody(stats: value),
+              AsyncError(:final error) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppBanner.failure(
+                    context,
+                    error is AppFailure ? error : UnknownFailure(error),
+                  ),
+                  TextButton(
+                    key: const Key('waitStats.retry'),
+                    onPressed: () =>
+                        ref.invalidate(waitStatsProvider(restaurantId)),
+                    child: Text(l10n.commonRetry),
+                  ),
+                ],
+              ),
+              _ => const SkeletonBox(height: 56, radius: AppRadius.md),
+            },
+          ],
+        ),
       ),
     );
   }

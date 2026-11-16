@@ -179,23 +179,23 @@ class ClusterMarkerIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
       label: AppLocalizations.of(context).roadClusterLabel(count),
       excludeSemantics: true,
       child: Container(
+        // Obsidian with a lime count: groups read apart from the red markers.
         decoration: BoxDecoration(
-          color: scheme.error,
+          color: AppColors.obsidian,
           shape: BoxShape.circle,
-          border: Border.all(color: scheme.surface, width: 3),
-          boxShadow: const [BoxShadow(blurRadius: 4, color: Color(0x33000000))],
+          border: Border.all(color: AppColors.lime, width: 2.5),
+          boxShadow: const [BoxShadow(blurRadius: 6, color: Color(0x40000000))],
         ),
         alignment: Alignment.center,
         child: Text(
           count > 99 ? '99+' : '$count',
           style: Theme.of(context).textTheme.labelLarge
-              ?.copyWith(color: scheme.onError, fontWeight: FontWeight.w700),
+              ?.copyWith(color: AppColors.lime, fontWeight: FontWeight.w700),
         ),
       ),
     );

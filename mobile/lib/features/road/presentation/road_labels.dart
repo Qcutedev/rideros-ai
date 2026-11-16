@@ -111,7 +111,7 @@ class IncidentStatusBadge extends StatelessWidget {
   );
 }
 
-/// Category icon in a tinted circle.
+/// Category icon on an amber rounded square (hazard colour).
 class CategoryIcon extends StatelessWidget {
   const CategoryIcon({required this.category, this.size = 40, super.key});
 
@@ -126,7 +126,7 @@ class CategoryIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: context.semanticColors.warningContainer,
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(size * 0.3),
       ),
       child: Icon(
         categoryIcon(category),
@@ -151,6 +151,7 @@ class IncidentRow extends StatelessWidget {
     final distance = incident.distanceM;
     return ListTile(
       key: Key('incident.${incident.id}'),
+      tileColor: theme.colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,

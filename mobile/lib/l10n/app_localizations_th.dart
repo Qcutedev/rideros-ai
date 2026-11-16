@@ -231,14 +231,15 @@ class AppLocalizationsTh extends AppLocalizations {
   String get vehicleOther => 'อื่นๆ';
 
   @override
+  String get homeHello => 'สวัสดี';
+
+  @override
   String homeGreeting(String name) {
     return 'สวัสดี $name';
   }
 
   @override
-  String homeSignedInAs(String email) {
-    return 'เข้าสู่ระบบด้วย $email';
-  }
+  String get homeBannerMessage => 'ขับขี่ปลอดภัย\nวันนี้ก็สู้ ๆ นะ';
 
   @override
   String get logout => 'ออกจากระบบ';
@@ -290,6 +291,24 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get homeOpenProfit => 'ดูกำไรทั้งหมด (TrueProfit)';
+
+  @override
+  String get homeAiTools => 'เครื่องมือ AI';
+
+  @override
+  String get homePickupCardTitle => 'Pickup Intelligence';
+
+  @override
+  String get homePickupCardMessage => 'ประมาณเวลารอรับอาหารของแต่ละร้าน';
+
+  @override
+  String get homeShiftCardTitle => 'Shift Simulator';
+
+  @override
+  String get homeShiftCardMessage => 'จำลองกะงาน ดูกำไรประมาณก่อนออกวิ่ง';
+
+  @override
+  String get homeOpen => 'เปิด';
 
   @override
   String get trueProfitTitle => 'TrueProfit';

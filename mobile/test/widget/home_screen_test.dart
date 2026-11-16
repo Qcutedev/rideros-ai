@@ -58,7 +58,8 @@ void main() {
 
   testWidgets('empty: no records today or this week', (tester) async {
     await pumpHome(tester);
-    expect(find.text(t.homeGreeting(testUser.displayName)), findsOneWidget);
+    expect(find.text(t.homeHello), findsOneWidget);
+    expect(find.text(testUser.displayName), findsOneWidget);
     expect(find.text(t.homeEmptyTitle), findsOneWidget);
     expect(find.byKey(const Key('home.today')), findsNothing);
   });

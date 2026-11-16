@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window colour before Flutter draws: the first colour of the brand intro (AppColors.darkBackground). -->
-    <color name="splash_background">#0D1915</color>
+    <color name="splash_background">#0D100E</color>
 </resources>

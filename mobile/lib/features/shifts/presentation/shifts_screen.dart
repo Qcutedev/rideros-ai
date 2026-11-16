@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/app_badge.dart';
+import '../../../core/widgets/app_surfaces.dart';
 import '../../../core/widgets/paged_list_view.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -97,103 +98,122 @@ class ScenarioTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final currency = ref.watch(shiftCurrencyProvider);
     final s = scenario;
-    return Material(
-      color: theme.colorScheme.surface,
-      child: InkWell(
-        key: Key('shift.${s.id}'),
-        onTap: () => context.push(Routes.shiftDetail(s.id)),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xs,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.md,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                key: Key('shift.${s.id}.select'),
-                value: selected,
-                semanticLabel: l10n.shiftsSelect(s.name),
-                onChanged: selected || canSelect
-                    ? (_) =>
-                          ref.read(shiftSelectionProvider.notifier).toggle(s.id)
-                    : null,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            s.name,
-                            style: theme.textTheme.titleSmall,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        AppBadge(
-                          label: l10n.badgeEstimate,
-                          tone: BadgeTone.warning,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${shiftTimeRange(s)} · '
-                      '${plannedDayLabel(l10n, s.plannedWeekday)} · '
-                      '${methodLabel(l10n, s.estimationMethod)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+    // Selected for comparison: the row turns Electric Lime.
+    return ToneScope(
+      tone: selected ? AppTone.lime : AppTone.paper,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return AnimatedContainer(
+            duration: AppDurations.medium,
+            color: theme.colorScheme.surface,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: Key('shift.${s.id}'),
+                onTap: () => context.push(Routes.shiftDetail(s.id)),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        key: Key('shift.${s.id}.select'),
+                        value: selected,
+                        semanticLabel: l10n.shiftsSelect(s.name),
+                        onChanged: selected || canSelect
+                            ? (_) => ref
+                                  .read(shiftSelectionProvider.notifier)
+                                  .toggle(s.id)
+                            : null,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.md,
-                      crossAxisAlignment: WrapCrossAlignment.end,
-                      children: [
-                        Text(
-                          shiftMoney(s.estimatedNetProfit, currency),
-                          key: Key('shift.${s.id}.net'),
-                          style: AppTypography.figures(
-                            theme.textTheme.titleMedium?.copyWith(
-                              color: moneyColor(context, s.estimatedNetProfit),
+                      const SizedBox(width: AppSpacing.xs),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    s.name,
+                                    style: theme.textTheme.titleSmall,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                AppBadge(
+                                  label: l10n.badgeEstimate,
+                                  tone: BadgeTone.warning,
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        Text(
-                          l10n.shiftPerHourValue(
-                            shiftMoney(s.estimatedNetProfitPerHour, currency),
-                          ),
-                          style: AppTypography.figures(
-                            theme.textTheme.bodyMedium?.copyWith(
-                              color: moneyColor(
-                                context,
-                                s.estimatedNetProfitPerHour,
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              '${shiftTimeRange(s)} · '
+                              '${plannedDayLabel(l10n, s.plannedWeekday)} · '
+                              '${methodLabel(l10n, s.estimationMethod)}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Wrap(
+                              spacing: AppSpacing.md,
+                              crossAxisAlignment: WrapCrossAlignment.end,
+                              children: [
+                                Text(
+                                  shiftMoney(s.estimatedNetProfit, currency),
+                                  key: Key('shift.${s.id}.net'),
+                                  style: AppTypography.figures(
+                                    theme.textTheme.titleMedium?.copyWith(
+                                      color: moneyColor(
+                                        context,
+                                        s.estimatedNetProfit,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  l10n.shiftPerHourValue(
+                                    shiftMoney(
+                                      s.estimatedNetProfitPerHour,
+                                      currency,
+                                    ),
+                                  ),
+                                  style: AppTypography.figures(
+                                    theme.textTheme.bodyMedium?.copyWith(
+                                      color: moneyColor(
+                                        context,
+                                        s.estimatedNetProfitPerHour,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.md),
+                        child: Icon(Icons.chevron_right_rounded),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: AppSpacing.md),
-                child: Icon(Icons.chevron_right_rounded),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -207,53 +227,59 @@ class _CompareBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final canCompare = selected.length >= ShiftLimits.minCompare;
-    return Material(
-      color: theme.colorScheme.surface,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: context.semanticColors.border)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
+    // Obsidian action bar with lime actions.
+    return ToneScope(
+      tone: AppTone.obsidian,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Material(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.shiftsSelectedCount(selected.length),
-                    key: const Key('shifts.selectedCount'),
-                    style: theme.textTheme.bodyMedium,
-                  ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
                 ),
-                TextButton(
-                  key: const Key('shifts.clearSelection'),
-                  onPressed: () =>
-                      ref.read(shiftSelectionProvider.notifier).clear(),
-                  child: Text(l10n.shiftsClearSelection),
-                ),
-                if (canCompare) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  FilledButton.icon(
-                    key: const Key('shifts.compare'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, AppSizes.minTouch),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.shiftsSelectedCount(selected.length),
+                        key: const Key('shifts.selectedCount'),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
-                    onPressed: () =>
-                        context.push(Routes.shiftCompareFor(selected)),
-                    icon: const Icon(Icons.compare_arrows_rounded),
-                    label: Text(l10n.shiftsCompareCount(selected.length)),
-                  ),
-                ],
-              ],
+                    TextButton(
+                      key: const Key('shifts.clearSelection'),
+                      onPressed: () =>
+                          ref.read(shiftSelectionProvider.notifier).clear(),
+                      child: Text(l10n.shiftsClearSelection),
+                    ),
+                    if (canCompare) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      FilledButton.icon(
+                        key: const Key('shifts.compare'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, AppSizes.minTouch),
+                        ),
+                        onPressed: () =>
+                            context.push(Routes.shiftCompareFor(selected)),
+                        icon: const Icon(Icons.compare_arrows_rounded),
+                        label: Text(l10n.shiftsCompareCount(selected.length)),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

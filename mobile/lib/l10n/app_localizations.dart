@@ -496,17 +496,23 @@ abstract class AppLocalizations {
   /// **'อื่นๆ'**
   String get vehicleOther;
 
+  /// No description provided for @homeHello.
+  ///
+  /// In th, this message translates to:
+  /// **'สวัสดี'**
+  String get homeHello;
+
   /// No description provided for @homeGreeting.
   ///
   /// In th, this message translates to:
   /// **'สวัสดี {name}'**
   String homeGreeting(String name);
 
-  /// No description provided for @homeSignedInAs.
+  /// No description provided for @homeBannerMessage.
   ///
   /// In th, this message translates to:
-  /// **'เข้าสู่ระบบด้วย {email}'**
-  String homeSignedInAs(String email);
+  /// **'ขับขี่ปลอดภัย\nวันนี้ก็สู้ ๆ นะ'**
+  String get homeBannerMessage;
 
   /// No description provided for @logout.
   ///
@@ -591,6 +597,42 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ดูกำไรทั้งหมด (TrueProfit)'**
   String get homeOpenProfit;
+
+  /// No description provided for @homeAiTools.
+  ///
+  /// In th, this message translates to:
+  /// **'เครื่องมือ AI'**
+  String get homeAiTools;
+
+  /// No description provided for @homePickupCardTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'Pickup Intelligence'**
+  String get homePickupCardTitle;
+
+  /// No description provided for @homePickupCardMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ประมาณเวลารอรับอาหารของแต่ละร้าน'**
+  String get homePickupCardMessage;
+
+  /// No description provided for @homeShiftCardTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'Shift Simulator'**
+  String get homeShiftCardTitle;
+
+  /// No description provided for @homeShiftCardMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'จำลองกะงาน ดูกำไรประมาณก่อนออกวิ่ง'**
+  String get homeShiftCardMessage;
+
+  /// No description provided for @homeOpen.
+  ///
+  /// In th, this message translates to:
+  /// **'เปิด'**
+  String get homeOpen;
 
   /// No description provided for @trueProfitTitle.
   ///

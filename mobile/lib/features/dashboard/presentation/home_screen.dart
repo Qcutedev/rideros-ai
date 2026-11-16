@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/app_cards.dart';
+import '../../../core/widgets/form_layout.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/domain/session_state.dart';
@@ -14,6 +16,7 @@ import '../../profit/domain/profit_summary.dart';
 import '../../profit/presentation/profit_labels.dart';
 import '../../profit/presentation/profit_providers.dart';
 import '../../profit/presentation/widgets/profit_metrics_view.dart';
+import 'widgets/rider_banner.dart';
 
 class HomeSummary {
   const HomeSummary({required this.today, required this.week});
@@ -37,55 +40,96 @@ final homeSummaryProvider = FutureProvider.autoDispose<HomeSummary>((
   return HomeSummary(today: results[0], week: results[1]);
 });
 
-/// Signed-in landing tab: greeting, today's and this week's actual profit, and
-/// shortcuts to record income, expenses and work sessions.
+/// Signed-in landing tab, the rider's command centre: greeting, today's actual
+/// profit (hero), this week, quick record shortcuts and the AI tools.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final session = ref.watch(sessionControllerProvider);
     final user = session is SignedIn ? session.user : null;
     final summary = ref.watch(homeSummaryProvider);
 
     return Scaffold(
       // Logout lives on the profile tab.
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const AppLogoMark(size: 30),
+            const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
+            Text(l10n.appTitle),
+          ],
+        ),
+        actions: [
+          if (user != null)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: _ProfileAvatar(name: user.displayName),
+            ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(homeSummaryProvider.future),
-        child: ListView(
-          padding: AppSpacing.screen,
-          children: [
-            if (user != null) ...[
-              Text(
-                l10n.homeGreeting(user.displayName),
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                l10n.homeSignedInAs(user.email),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+        child: PageColumn(
+          child: ListView(
+            padding: AppSpacing.screen,
+            children: [
+              if (user != null) ...[
+                RevealIn(child: RiderGreetingBanner(name: user.displayName)),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              AsyncValueView(
+                value: summary,
+                onRetry: () => ref.invalidate(homeSummaryProvider),
+                loading: const SummarySkeleton(),
+                isEmpty: (s) => s.isEmpty,
+                // The quick actions below stay visible in the empty state.
+                empty: const RevealIn(child: _EmptyCard()),
+                data: (s) => _Summaries(summary: s),
               ),
               const SizedBox(height: AppSpacing.xl),
+              const RevealIn(index: 2, child: _QuickActions()),
+              const SizedBox(height: AppSpacing.xl),
+              const RevealIn(index: 3, child: _AiTools()),
             ],
-            AsyncValueView(
-              value: summary,
-              onRetry: () => ref.invalidate(homeSummaryProvider),
-              loading: const SummarySkeleton(),
-              isEmpty: (s) => s.isEmpty,
-              // The quick actions below stay visible in the empty state.
-              empty: const _EmptyCard(),
-              data: (s) => _Summaries(summary: s),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            const _QuickActions(),
-            const SizedBox(height: AppSpacing.lg),
-            const _RoadCard(),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Rider's initial in a lime circle; opens the profile tab.
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final initial = name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
+    return IconButton(
+      key: const Key('home.avatar'),
+      tooltip: l10n.navProfile,
+      onPressed: () => context.go(Routes.profile),
+      icon: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: context.semanticColors.accent,
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          initial,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: context.semanticColors.onAccent,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -98,43 +142,39 @@ class _EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return Card(
+    return ToneCard(
       key: const Key('home.empty'),
-      child: Padding(
-        padding: AppSpacing.cardPadding,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: context.semanticColors.mint,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.inbox_outlined,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.homeEmptyTitle, style: theme.textTheme.titleSmall),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    l10n.homeEmptyMessage,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+      tone: AppTone.obsidian,
+      radius: AppRadius.xl,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const IconWell(icon: Icons.bolt_rounded, square: true),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.homeEmptyTitle,
+                      style: theme.textTheme.titleSmall,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.homeEmptyMessage,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -153,28 +193,34 @@ class _Summaries extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ProfitHeroCard(
-          key: const Key('home.today'),
-          title: l10n.homeToday(
-            periodRangeLabel(
-              l10n,
-              today.period,
-              today.startDate,
-              today.endDate,
+        RevealIn(
+          child: ProfitHeroCard(
+            key: const Key('home.today'),
+            title: l10n.homeToday(
+              periodRangeLabel(
+                l10n,
+                today.period,
+                today.startDate,
+                today.endDate,
+              ),
             ),
+            metrics: today.metrics,
+            currency: today.currency,
           ),
-          metrics: today.metrics,
-          currency: today.currency,
         ),
-        const SizedBox(height: AppSpacing.lg),
-        SectionCard(
-          key: const Key('home.week'),
-          title: l10n.homeThisWeek(
-            periodRangeLabel(l10n, week.period, week.startDate, week.endDate),
-          ),
-          child: ProfitMetricsView(
-            metrics: week.metrics,
-            currency: week.currency,
+        const SizedBox(height: AppSpacing.cardGap),
+        RevealIn(
+          index: 1,
+          child: SectionCard(
+            key: const Key('home.week'),
+            tone: AppTone.sage,
+            title: l10n.homeThisWeek(
+              periodRangeLabel(l10n, week.period, week.startDate, week.endDate),
+            ),
+            child: ProfitMetricsView(
+              metrics: week.metrics,
+              currency: week.currency,
+            ),
           ),
         ),
       ],
@@ -200,7 +246,8 @@ class _QuickActions extends StatelessWidget {
               Expanded(
                 child: _QuickAction(
                   key: const Key('home.addIncome'),
-                  icon: Icons.payments_outlined,
+                  tone: AppTone.lime,
+                  icon: Icons.add_card_rounded,
                   label: l10n.incomeAdd,
                   route: Routes.incomeNew,
                 ),
@@ -209,7 +256,8 @@ class _QuickActions extends StatelessWidget {
               Expanded(
                 child: _QuickAction(
                   key: const Key('home.addExpense'),
-                  icon: Icons.receipt_outlined,
+                  tone: AppTone.teal,
+                  icon: Icons.receipt_long_rounded,
                   label: l10n.expenseAdd,
                   route: Routes.expenseNew,
                 ),
@@ -218,7 +266,8 @@ class _QuickActions extends StatelessWidget {
               Expanded(
                 child: _QuickAction(
                   key: const Key('home.addSession'),
-                  icon: Icons.timer_outlined,
+                  tone: AppTone.mist,
+                  icon: Icons.timer_rounded,
                   label: l10n.sessionAdd,
                   route: Routes.workSessionNew,
                 ),
@@ -226,17 +275,185 @@ class _QuickActions extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xs),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             key: const Key('home.openProfit'),
             onPressed: () => context.go(Routes.profit),
-            icon: const Icon(Icons.insights_outlined),
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
             label: Text(l10n.homeOpenProfit),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Shortcut tile on a coloured surface: icon above a short label.
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.tone,
+    required this.icon,
+    required this.label,
+    required this.route,
+    super.key,
+  });
+
+  final AppTone tone;
+  final IconData icon;
+  final String label;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToneCard(
+      tone: tone,
+      radius: AppRadius.lg - AppSpacing.xs,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.md + AppSpacing.xxs,
+      ),
+      onTap: () => context.push(route),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 84),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconWell(
+                  icon: icon,
+                  size: 40,
+                  color: theme.colorScheme.onSurface,
+                  iconColor: theme.colorScheme.surface,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Entry cards to the AI modules. Descriptions only: every figure the rider
+/// sees comes from the module itself.
+class _AiTools extends StatelessWidget {
+  const _AiTools();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: l10n.homeAiTools),
+        const SizedBox(height: AppSpacing.md),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _AiToolCard(
+                  key: const Key('home.pickup'),
+                  tone: AppTone.obsidian,
+                  icon: Icons.storefront_rounded,
+                  title: l10n.homePickupCardTitle,
+                  message: l10n.homePickupCardMessage,
+                  onTap: () => context.go(Routes.pickup),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _AiToolCard(
+                  key: const Key('home.shifts'),
+                  tone: AppTone.teal,
+                  icon: Icons.auto_graph_rounded,
+                  title: l10n.homeShiftCardTitle,
+                  message: l10n.homeShiftCardMessage,
+                  onTap: () => context.go(Routes.shifts),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        const _RoadCard(),
+      ],
+    );
+  }
+}
+
+class _AiToolCard extends StatelessWidget {
+  const _AiToolCard({
+    required this.tone,
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.onTap,
+    super.key,
+  });
+
+  final AppTone tone;
+  final IconData icon;
+  final String title;
+  final String message;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToneCard(
+      tone: tone,
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconWell(icon: icon, size: 40, square: true),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -248,33 +465,27 @@ class _RoadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        key: const Key('home.road'),
-        onTap: () => context.push(Routes.road),
-        child: Padding(
-          padding: AppSpacing.cardPadding,
-          child: Row(
+    return ToneCard(
+      key: const Key('home.road'),
+      tone: AppTone.sage,
+      onTap: () => context.push(Routes.road),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: context.semanticColors.warningContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: context.semanticColors.warning,
-                ),
-              ),
+              const IconWell(icon: Icons.alt_route_rounded, square: true),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.homeRoadTitle, style: theme.textTheme.titleSmall),
+                    Text(
+                      l10n.homeRoadTitle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       l10n.homeRoadMessage,
@@ -285,71 +496,11 @@ class _RoadCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: AppSpacing.sm),
               const Icon(Icons.chevron_right_rounded),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Shortcut tile: icon on mint above a short label.
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.route,
-    super.key,
-  });
-
-  final IconData icon;
-  final String label;
-  final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final semantic = context.semanticColors;
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: semantic.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push(route),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 96),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.md,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xxs),
-                  decoration: BoxDecoration(
-                    color: semantic.mint,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: theme.colorScheme.primary),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

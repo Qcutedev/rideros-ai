@@ -36,7 +36,7 @@ class SplashScreen extends ConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColors.forest,
+        backgroundColor: AppColors.obsidian,
         body: SafeArea(
           child: Column(
             children: [
@@ -56,7 +56,7 @@ class SplashScreen extends ConsumerWidget {
                 dimension: 28,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  color: AppColors.mint,
+                  color: AppColors.lime,
                 ),
               ),
               const SizedBox(height: AppSpacing.md),

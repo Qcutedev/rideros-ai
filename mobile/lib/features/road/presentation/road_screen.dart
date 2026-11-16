@@ -10,6 +10,8 @@ import '../../../app/theme/tokens.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/errors/failure_messages.dart';
 import '../../../core/utils/clock.dart';
+import '../../../core/widgets/app_surfaces.dart';
+import '../../../core/widgets/form_widgets.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/device_services.dart';
@@ -68,10 +70,8 @@ class _RoadScreenState extends ConsumerState<RoadScreen> {
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(
-            created.merged ? l10n.roadReportMerged : l10n.roadReportSent,
-          ),
+        successSnackBar(
+          created.merged ? l10n.roadReportMerged : l10n.roadReportSent,
           action: SnackBarAction(
             key: const Key('road.viewReported'),
             label: l10n.roadReportView,
@@ -99,7 +99,7 @@ class _RoadScreenState extends ConsumerState<RoadScreen> {
                 onPressed: () => context.push(Routes.roadMyReports),
               ),
             ],
-            bottom: TabBar(
+            bottom: PillTabBar(
               tabs: [
                 Tab(key: const Key('road.tabMap'), text: l10n.roadTabMap),
                 Tab(key: const Key('road.tabNearby'), text: l10n.roadTabNearby),
@@ -326,10 +326,11 @@ class _MapStatus extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         key: const Key('road.mapStatus'),
+        // Obsidian pill floating over the map; amber when something is wrong.
         color: warn
             ? context.semanticColors.warningContainer
-            : theme.colorScheme.surface,
-        elevation: 2,
+            : AppColors.obsidian,
+        elevation: 3,
         borderRadius: BorderRadius.circular(AppRadius.pill),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -343,7 +344,9 @@ class _MapStatus extends StatelessWidget {
                 child: Text(
                   text,
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: warn ? context.semanticColors.warning : null,
+                    color: warn
+                        ? context.semanticColors.warning
+                        : AppColors.ivory,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -480,7 +483,9 @@ class _NearbyList extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.roadNearbyHeader(km),
-                    style: theme.textTheme.titleSmall,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   const RoadNotice(),
@@ -495,8 +500,14 @@ class _NearbyList extends ConsumerWidget {
               ),
             ),
             for (final (i, incident) in list.items.indexed) ...[
-              if (i > 0) const Divider(height: 1),
-              IncidentRow(incident: incident, now: now),
+              if (i > 0) const SizedBox(height: AppSpacing.sm),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.md + 2),
+                  child: IncidentRow(incident: incident, now: now),
+                ),
+              ),
             ],
           ],
         ),

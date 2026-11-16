@@ -5,6 +5,7 @@ import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_badge.dart';
+import '../../../core/widgets/app_surfaces.dart';
 import '../../../core/widgets/paged_list_view.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -53,7 +54,7 @@ class _RecordsScreenState extends State<RecordsScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.recordsTitle),
-        bottom: TabBar(
+        bottom: PillTabBar(
           controller: _tabs,
           tabs: [
             Tab(key: const Key('records.tab.income'), text: l10n.incomeTitle),

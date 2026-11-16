@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/app_surfaces.dart';
 import '../../../core/widgets/paged_list_view.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
@@ -164,6 +165,7 @@ class _PickupSearchScreenState extends State<PickupSearchScreen> {
                 children: [
                   _EntryChip(
                     key: const Key('pickup.history'),
+                    tone: AppTone.sage,
                     icon: Icons.history_rounded,
                     label: l10n.pickupHistory,
                     onTap: () => context.push(Routes.predictionHistory),
@@ -171,6 +173,7 @@ class _PickupSearchScreenState extends State<PickupSearchScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   _EntryChip(
                     key: const Key('pickup.logs'),
+                    tone: AppTone.teal,
                     icon: Icons.timer_outlined,
                     label: l10n.pickupMyLogs,
                     onTap: () => context.push(Routes.pickupLogs),
@@ -178,6 +181,7 @@ class _PickupSearchScreenState extends State<PickupSearchScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   _EntryChip(
                     key: const Key('pickup.model'),
+                    tone: AppTone.obsidian,
                     icon: Icons.insights_outlined,
                     label: l10n.pickupModelInfo,
                     onTap: () => context.push(Routes.modelInfo),
@@ -229,24 +233,48 @@ class _PickupSearchScreenState extends State<PickupSearchScreen> {
   }
 }
 
+/// Shortcut pill on a coloured surface (history, my logs, model info).
 class _EntryChip extends StatelessWidget {
   const _EntryChip({
+    required this.tone,
     required this.icon,
     required this.label,
     required this.onTap,
     super.key,
   });
 
+  final AppTone tone;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ActionChip(
-    avatar: Icon(icon, size: 18),
-    label: Text(label),
-    onPressed: onTap,
-    materialTapTargetSize: MaterialTapTargetSize.padded,
+  Widget build(BuildContext context) => ToneCard(
+    tone: tone,
+    radius: AppRadius.pill,
+    onTap: onTap,
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.md,
+    ),
+    child: Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: theme.colorScheme.onSurface),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        );
+      },
+    ),
   );
 }
 

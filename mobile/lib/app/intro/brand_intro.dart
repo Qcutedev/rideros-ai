@@ -9,7 +9,7 @@ import 'ride_scene.dart';
 
 /// The animated intro shown over the app at start (≈3 s), a short ride:
 ///
-/// 1. the deep-forest background fades in (the native launch window has its
+/// 1. the deep Obsidian background fades in (the native launch window has its
 ///    darkest colour, so there is no jump);
 /// 2. the rider rides in from the left on a hairline road and slows to the
 ///    centre; the camera then rides along (lane marks and wind keep streaming);
@@ -158,7 +158,7 @@ class _BrandIntroState extends State<BrandIntro> with TickerProviderStateMixin {
               gradient: RadialGradient(
                 center: Alignment(0, -0.1),
                 radius: 1.1,
-                colors: [AppColors.forest, AppColors.darkBackground],
+                colors: [Color(0xFF1F2A22), AppColors.darkBackground],
               ),
             ),
             child: Semantics(

@@ -5,6 +5,8 @@ import '../../../../app/theme/tokens.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_badge.dart';
+import '../../../../core/widgets/app_cards.dart';
+import '../../../../core/widgets/motion.dart';
 import '../../../../core/widgets/status_views.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/work_patterns.dart';
@@ -23,6 +25,7 @@ class WorkPatternsCard extends ConsumerWidget {
     final value = ref.watch(workPatternsProvider);
     return SectionCard(
       key: const Key('profit.patterns'),
+      tone: AppTone.sage,
       title: l10n.patternsTitle,
       child: switch (value) {
         AsyncData(:final value) => _Body(patterns: value),
@@ -59,12 +62,25 @@ class _Body extends StatelessWidget {
         children: [
           Text(l10n.patternsInsufficient(patterns.sessionsMissing)),
           const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: LinearProgressIndicator(
+          // Lime on Obsidian (the theme's progress style) animated in.
+          TweenAnimationBuilder<double>(
+            tween: Tween(
+              begin: 0,
+              end: patterns.sessionCount / patterns.minSessions,
+            ),
+            duration: motionEnabled(context)
+                ? AppDurations.reveal
+                : Duration.zero,
+            curve: AppCurves.enter,
+            builder: (context, v, _) => LinearProgressIndicator(
               key: const Key('patterns.progress'),
-              value: patterns.sessionCount / patterns.minSessions,
-              minHeight: 8,
+              value: v,
+              minHeight: 10,
+              color: AppColors.lime,
+              backgroundColor: theme.brightness == Brightness.light
+                  ? AppColors.obsidian
+                  : Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
           const SizedBox(height: AppSpacing.xs),

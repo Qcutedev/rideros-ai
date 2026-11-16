@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../core/widgets/app_badge.dart';
+import '../../../core/widgets/app_cards.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_summary.dart';
@@ -42,31 +44,33 @@ class TrueProfitScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(trueProfitDataProvider.future),
-        child: ListView(
-          padding: AppSpacing.screen,
-          children: [
-            SegmentedButton<ProfitPeriod>(
-              key: const Key('profit.period'),
-              showSelectedIcon: false,
-              segments: [
-                for (final period in ProfitPeriod.values)
-                  ButtonSegment(
-                    value: period,
-                    label: Text(periodName(l10n, period)),
-                  ),
-              ],
-              selected: {view.period},
-              onSelectionChanged: (selection) =>
-                  controller.selectPeriod(selection.single),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AsyncValueView(
-              value: data,
-              onRetry: () => ref.invalidate(trueProfitDataProvider),
-              loading: const SummarySkeleton(cards: 2),
-              data: (d) => _Content(data: d, view: view),
-            ),
-          ],
+        child: PageColumn(
+          child: ListView(
+            padding: AppSpacing.screen,
+            children: [
+              SegmentedButton<ProfitPeriod>(
+                key: const Key('profit.period'),
+                showSelectedIcon: false,
+                segments: [
+                  for (final period in ProfitPeriod.values)
+                    ButtonSegment(
+                      value: period,
+                      label: Text(periodName(l10n, period)),
+                    ),
+                ],
+                selected: {view.period},
+                onSelectionChanged: (selection) =>
+                    controller.selectPeriod(selection.single),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              AsyncValueView(
+                value: data,
+                onRetry: () => ref.invalidate(trueProfitDataProvider),
+                loading: const SummarySkeleton(cards: 2),
+                data: (d) => _Content(data: d, view: view),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -82,20 +86,21 @@ class _Content extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final summary = data.summary;
     final controller = ref.read(profitViewProvider.notifier);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
+        ToneCard(
+          tone: AppTone.mist,
+          radius: AppRadius.xl,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs,
+            vertical: AppSpacing.sm,
+          ),
+          child: Builder(
+            builder: (context) => Row(
               children: [
                 IconButton(
                   key: const Key('profit.previous'),
@@ -114,7 +119,8 @@ class _Content extends ConsumerWidget {
                           summary.endDate,
                         ),
                         key: const Key('profit.periodLabel'),
-                        style: theme.textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
                         textAlign: TextAlign.center,
                       ),
                       if (view.isCurrent)
@@ -150,34 +156,42 @@ class _Content extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
-        SectionCard(
-          title: l10n.profitSummaryTitle,
-          child: summary.metrics.isEmpty
-              ? _EmptyPeriod(message: l10n.profitEmptyPeriod)
-              : ProfitMetricsView(
-                  metrics: summary.metrics,
-                  currency: summary.currency,
-                  detailed: true,
-                ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        SectionCard(
-          title: l10n.profitTrendTitle(
-            periodName(l10n, data.trends.granularity),
+        const SizedBox(height: AppSpacing.cardGap),
+        RevealIn(
+          child: SectionCard(
+            tone: AppTone.obsidian,
+            title: l10n.profitSummaryTitle,
+            child: summary.metrics.isEmpty
+                ? _EmptyPeriod(message: l10n.profitEmptyPeriod)
+                : ProfitMetricsView(
+                    metrics: summary.metrics,
+                    currency: summary.currency,
+                    detailed: true,
+                  ),
           ),
-          child: data.trends.isEmpty
-              ? _EmptyPeriod(message: l10n.profitTrendEmpty)
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    NetProfitChart(trends: data.trends),
-                    TrendSummary(trends: data.trends),
-                  ],
-                ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        const WorkPatternsCard(),
+        const SizedBox(height: AppSpacing.cardGap),
+        RevealIn(
+          index: 1,
+          child: SectionCard(
+            title: l10n.profitTrendTitle(
+              periodName(l10n, data.trends.granularity),
+            ),
+            child: data.trends.isEmpty
+                ? _EmptyPeriod(message: l10n.profitTrendEmpty)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      RevealFromStart(
+                        child: NetProfitChart(trends: data.trends),
+                      ),
+                      TrendSummary(trends: data.trends),
+                    ],
+                  ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.cardGap),
+        const RevealIn(index: 2, child: WorkPatternsCard()),
         const SizedBox(height: AppSpacing.lg),
         AppBanner(message: l10n.profitActualOnlyNote(summary.timezone)),
       ],
@@ -197,11 +211,7 @@ class _EmptyPeriod extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Column(
         children: [
-          Icon(
-            Icons.inbox_outlined,
-            size: AppSizes.iconLg,
-            color: theme.colorScheme.primary,
-          ),
+          const IconWell(icon: Icons.inbox_outlined, square: true),
           const SizedBox(height: AppSpacing.sm),
           Text(
             message,

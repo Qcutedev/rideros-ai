@@ -63,7 +63,11 @@ void main() {
         FakeRiderProfileRepository(configured: true),
       ),
     );
-    expect(find.text(t.homeGreeting(testUser.displayName)), findsOneWidget);
-    expect(find.text(t.homeSignedInAs(testUser.email)), findsOneWidget);
+    expect(find.text(t.homeHello), findsOneWidget);
+    expect(find.text(testUser.displayName), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(t.homeGreeting(testUser.displayName))),
+      findsOneWidget,
+    );
   });
 }

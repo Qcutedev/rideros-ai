@@ -35,11 +35,7 @@ class AppBadge extends StatelessWidget {
     final semantic = context.semanticColors;
     final (Color background, Color foreground, Color? border) = switch (tone) {
       BadgeTone.warning => (semantic.warningContainer, semantic.warning, null),
-      BadgeTone.info => (
-        semantic.mint,
-        theme.colorScheme.onPrimaryContainer,
-        null,
-      ),
+      BadgeTone.info => (semantic.mint, theme.colorScheme.onSurface, null),
       BadgeTone.neutral => (
         Colors.transparent,
         theme.colorScheme.onSurfaceVariant,
@@ -48,8 +44,8 @@ class AppBadge extends StatelessWidget {
     };
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        horizontal: AppSpacing.sm + AppSpacing.xxs,
+        vertical: AppSpacing.xxs + 1,
       ),
       decoration: BoxDecoration(
         color: background,

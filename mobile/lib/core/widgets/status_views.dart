@@ -5,6 +5,8 @@ import '../../app/theme/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../errors/app_failure.dart';
 import '../errors/failure_messages.dart';
+import 'app_surfaces.dart';
+import 'motion.dart';
 
 /// Spinner with a message (never a bare spinner, §5.6).
 class LoadingView extends StatelessWidget {
@@ -37,6 +39,41 @@ class LoadingView extends StatelessWidget {
   }
 }
 
+/// Waiting for a model: the pulsing AI mark with a message.
+class AiLoadingView extends StatelessWidget {
+  const AiLoadingView({required this.message, super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: AppSpacing.screen,
+        child: Semantics(
+          liveRegion: true,
+          label: message,
+          child: ExcludeSemantics(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const AiPulse(key: Key('aiLoading.pulse'), size: 88),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Grey placeholder block for skeleton loading states.
 class SkeletonBox extends StatelessWidget {
   const SkeletonBox({
@@ -55,7 +92,7 @@ class SkeletonBox extends StatelessWidget {
     height: height,
     width: width,
     decoration: BoxDecoration(
-      color: context.semanticColors.border.withValues(alpha: 0.7),
+      color: context.semanticColors.mint,
       borderRadius: BorderRadius.circular(radius),
     ),
   );
@@ -82,21 +119,20 @@ class SummarySkeleton extends StatelessWidget {
       label: l10n.commonLoading,
       liveRegion: true,
       child: ExcludeSemantics(
-        child: Column(
-          key: const Key('skeleton'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < cards; i++) ...[
-              if (i > 0) const SizedBox(height: AppSpacing.lg),
-              Card(
-                child: Padding(
-                  padding: AppSpacing.cardPadding,
+        child: Shimmer(
+          child: Column(
+            key: const Key('skeleton'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < cards; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.lg),
+                ToneCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SkeletonBox(width: 140),
                       const SizedBox(height: AppSpacing.lg),
-                      const SkeletonBox(width: 180, height: 36),
+                      const SkeletonBox(width: 180, height: 40),
                       const SizedBox(height: AppSpacing.lg),
                       tileRow(),
                       const SizedBox(height: AppSpacing.md),
@@ -104,9 +140,9 @@ class SummarySkeleton extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -126,40 +162,43 @@ class ListSkeleton extends StatelessWidget {
       label: l10n.commonLoading,
       liveRegion: true,
       child: ExcludeSemantics(
-        child: Card(
-          key: const Key('skeleton.list'),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < rows; i++)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: Row(
-                      children: [
-                        SkeletonBox(
-                          width: 40,
-                          height: 40,
-                          radius: AppRadius.pill,
-                        ),
-                        SizedBox(width: AppSpacing.lg),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SkeletonBox(width: 160),
-                              SizedBox(height: AppSpacing.sm),
-                              SkeletonBox(width: 100, height: 12),
-                            ],
+        child: Shimmer(
+          child: ToneCard(
+            key: const Key('skeleton.list'),
+            padding: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < rows; i++)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      child: Row(
+                        children: [
+                          SkeletonBox(
+                            width: 40,
+                            height: 40,
+                            radius: AppRadius.pill,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: AppSpacing.lg),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SkeletonBox(width: 160),
+                                SizedBox(height: AppSpacing.sm),
+                                SkeletonBox(width: 100, height: 12),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -199,25 +238,19 @@ class StatusView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: AppSizes.iconXl + AppSpacing.lg,
-                height: AppSizes.iconXl + AppSpacing.lg,
-                decoration: BoxDecoration(
-                  color: isError
-                      ? scheme.errorContainer
-                      : context.semanticColors.mint,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: AppSizes.iconLg - AppSpacing.sm,
-                  color: isError ? scheme.error : scheme.primary,
-                ),
+              IconWell(
+                icon: icon,
+                size: AppSizes.iconXl + AppSpacing.lg,
+                square: true,
+                color: isError ? scheme.errorContainer : null,
+                iconColor: isError ? scheme.onErrorContainer : null,
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 title,
-                style: theme.textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
                 textAlign: TextAlign.center,
               ),
               if (message != null) ...[
@@ -349,7 +382,7 @@ class AppBanner extends StatelessWidget {
     final (Color background, Color foreground, IconData icon) = switch (tone) {
       BannerTone.info => (
         semantic.mint,
-        scheme.onPrimaryContainer,
+        scheme.onSurface,
         Icons.info_outline_rounded,
       ),
       BannerTone.warning => (
@@ -362,10 +395,10 @@ class AppBanner extends StatelessWidget {
         scheme.onErrorContainer,
         Icons.error_outline_rounded,
       ),
-      // Text in the darker on-mint colour: success green on mint is < 4.5:1.
+      // Text in the normal colour; the icon carries the success colour.
       BannerTone.success => (
         semantic.mint,
-        scheme.onPrimaryContainer,
+        scheme.onSurface,
         Icons.check_circle_outline_rounded,
       ),
     };
@@ -380,7 +413,7 @@ class AppBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: foreground.withValues(alpha: 0.35)),
+          border: Border.all(color: foreground.withValues(alpha: 0.18)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

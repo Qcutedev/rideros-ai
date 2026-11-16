@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/tokens.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_cards.dart';
+import '../../../../core/widgets/motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/profit_summary.dart';
 
@@ -37,11 +38,14 @@ class ProfitMetricsView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          Formats.currency(metrics.netProfit, currency),
-          key: const Key('metrics.net'),
-          style: AppTypography.figures(
-            theme.textTheme.headlineSmall?.copyWith(
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: MoneyFigure(
+            value: metrics.netProfit,
+            currency: currency,
+            textKey: const Key('metrics.net'),
+            style: theme.textTheme.displaySmall?.copyWith(
               color: moneyColor(context, metrics.netProfit),
             ),
           ),
@@ -53,8 +57,36 @@ class ProfitMetricsView extends StatelessWidget {
   }
 }
 
-/// Headline card of the home screen (§4.2): Forest Green, net profit in the
-/// display size, then the revenue / expense / hours tiles.
+/// Money that counts up to its value (see [AnimatedFigure]); the final text is
+/// the exact formatted amount.
+class MoneyFigure extends StatelessWidget {
+  const MoneyFigure({
+    required this.value,
+    required this.currency,
+    this.style,
+    this.textKey,
+    super.key,
+  });
+
+  final Decimal value;
+  final String currency;
+  final TextStyle? style;
+  final Key? textKey;
+
+  @override
+  Widget build(BuildContext context) => AnimatedFigure(
+    value: value.toDouble(),
+    text: Formats.currency(value, currency),
+    format: (v) =>
+        Formats.currency(Decimal.parse(v.toStringAsFixed(2)), currency),
+    textKey: textKey,
+    style: AppTypography.figures(style),
+  );
+}
+
+/// Headline card of the home screen (§4.2): an Obsidian card with a soft lime
+/// glow, net profit in the largest figure size, then the revenue / expense /
+/// hours tiles.
 class ProfitHeroCard extends StatelessWidget {
   const ProfitHeroCard({
     required this.title,
@@ -70,77 +102,99 @@ class ProfitHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final semantic = context.semanticColors;
-    final net = metrics.netProfit;
-    final netColor = net > Decimal.zero
-        ? semantic.heroPositive
-        : net < Decimal.zero
-        ? semantic.heroNegative
-        : semantic.onHero;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        side: BorderSide(color: semantic.border),
+    return ToneCard(
+      tone: AppTone.obsidian,
+      radius: AppRadius.xl,
+      padding: EdgeInsets.zero,
+      gradient: const RadialGradient(
+        center: Alignment(1.1, -1.2),
+        radius: 1.25,
+        colors: [Color(0x38D5FF83), Color(0x00D5FF83)],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            color: semantic.hero,
-            padding: AppSpacing.cardPadding,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          final semantic = context.semanticColors;
+          final scheme = theme.colorScheme;
+          final net = metrics.netProfit;
+          final netColor = net > Decimal.zero
+              ? semantic.heroPositive
+              : net < Decimal.zero
+              ? semantic.heroNegative
+              : scheme.onSurface;
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.card,
+              AppSpacing.card,
+              AppSpacing.card,
+              AppSpacing.card,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.today_rounded,
-                      size: 18,
-                      color: semantic.onHeroMuted,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Semantics(
-                        header: true,
-                        child: Text(
-                          title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: semantic.onHero,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: semantic.mint,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.today_rounded,
+                            size: 16,
+                            color: semantic.accent,
                           ),
-                        ),
+                          const SizedBox(width: AppSpacing.xs + AppSpacing.xxs),
+                          Flexible(
+                            child: Semantics(
+                              header: true,
+                              child: Text(
+                                title,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: scheme.onSurface,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.profitNet,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: semantic.onHeroMuted,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    Formats.currency(net, currency),
-                    key: const Key('metrics.net'),
-                    style: AppTypography.figures(
-                      theme.textTheme.displaySmall?.copyWith(color: netColor),
+                  child: MoneyFigure(
+                    value: net,
+                    currency: currency,
+                    textKey: const Key('metrics.net'),
+                    style: theme.textTheme.displayLarge?.copyWith(
+                      color: netColor,
                     ),
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xl),
+                ProfitTiles(metrics: metrics, currency: currency),
               ],
             ),
-          ),
-          Padding(
-            padding: AppSpacing.cardPadding,
-            child: ProfitTiles(metrics: metrics, currency: currency),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

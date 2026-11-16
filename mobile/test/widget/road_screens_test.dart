@@ -657,6 +657,16 @@ void main() {
     });
 
     group('photo suggestion pending', () {
+      // The "AI working" pulse is decorative: with reduced motion it holds
+      // still, so pumpAndSettle measures only the polling under test.
+      setUp(() {
+        final dispatcher =
+            TestWidgetsFlutterBinding.instance.platformDispatcher;
+        dispatcher.accessibilityFeaturesTestValue =
+            const FakeAccessibilityFeatures(disableAnimations: true);
+        addTearDown(dispatcher.clearAccessibilityFeaturesTestValue);
+      });
+
       IncidentDetail withReport(
         String aiStatus, {
         Duration createdAgo = const Duration(seconds: 20),

@@ -35,7 +35,12 @@ class FormLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (title != null)
-                  Text(title!, style: theme.textTheme.headlineSmall),
+                  Text(
+                    title!,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 if (subtitle != null) ...[
                   if (title != null) const SizedBox(height: AppSpacing.sm),
                   Text(
@@ -62,15 +67,15 @@ const formGap = SizedBox(height: AppSpacing.lg);
 
 /// RiderOS AI logo mark: the brand emblem (speed trails and rider) from
 /// `assets/brand/rideros_logo.svg`, the same artwork as the ride intro and the
-/// launcher icon. On the Forest Green headers it is drawn in ivory on the
-/// green itself; elsewhere in ivory on a rounded green tile (like the icon).
+/// launcher icon. On the Obsidian headers it is drawn in ivory on the dark
+/// itself; elsewhere in ivory on a rounded Obsidian tile.
 /// [size] is the height; the emblem is wider than tall.
 class AppLogoMark extends StatefulWidget {
   const AppLogoMark({this.size = 64, this.onDark = false, super.key});
 
   final double size;
 
-  /// On the Forest Green header: no tile.
+  /// On the Obsidian header: no tile.
   final bool onDark;
 
   @override
@@ -117,8 +122,11 @@ class _AppLogoMarkState extends State<AppLogoMark> {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppColors.forest,
-          borderRadius: BorderRadius.circular(size * 0.28),
+          // Raised a step in dark mode so the tile reads on the dark page.
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.darkSurfaceHighest
+              : AppColors.obsidian,
+          borderRadius: BorderRadius.circular(size * 0.3),
         ),
         child: mark,
       );

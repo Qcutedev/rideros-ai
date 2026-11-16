@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/theme/tokens.dart';
+import 'app_surfaces.dart';
 import 'form_layout.dart';
 
 /// Layout of the signed-out screens (login, register, forgot/reset password):
-/// a Forest Green header with a rounded bottom edge, the form in a white card
-/// overlapping it, then optional [footer] links below the card.
+/// an Obsidian header with a soft lime glow and a rounded bottom edge, the form
+/// in a card overlapping it, then optional [footer] links below the card.
 class AuthLayout extends StatelessWidget {
   const AuthLayout({
     required this.header,
@@ -27,7 +28,7 @@ class AuthLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // Light status bar icons on the green header.
+      // Light status bar icons on the Obsidian header.
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         body: SingleChildScrollView(
@@ -37,9 +38,15 @@ class AuthLayout extends StatelessWidget {
               Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: AppColors.forest,
+                  gradient: RadialGradient(
+                    center: Alignment(0.9, -1.1),
+                    radius: 1.3,
+                    // Lime glow fading into Obsidian.
+                    colors: [Color(0xFF3B4A28), AppColors.obsidian],
+                    stops: [0, 1],
+                  ),
                   borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(AppRadius.xl + AppSpacing.sm),
+                    bottom: Radius.circular(AppRadius.xl + AppSpacing.md),
                   ),
                 ),
                 child: SafeArea(
@@ -64,13 +71,16 @@ class AuthLayout extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Card(
-                            child: Padding(
-                              padding: AppSpacing.cardPadding,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: children,
-                              ),
+                          ToneCard(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.card,
+                              AppSpacing.xl,
+                              AppSpacing.card,
+                              AppSpacing.card,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: children,
                             ),
                           ),
                           if (footer.isNotEmpty) ...[

@@ -14,9 +14,6 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final muted = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
     return Scaffold(
       appBar: AppBar(title: Text(l10n.aboutTitle)),
       body: FormLayout(
@@ -27,27 +24,33 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           SectionCard(
             key: const Key('about.data'),
+            tone: AppTone.sage,
             title: l10n.aboutDataTitle,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l10n.aboutDataBody, style: muted),
-                const SizedBox(height: AppSpacing.md),
-                // Required wording, kept in English (Meituan licence terms).
-                Text(
-                  l10n.meituanAcknowledgement,
-                  key: const Key('about.acknowledgement'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontStyle: FontStyle.italic,
+            child: Builder(
+              builder: (context) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l10n.aboutDataBody, style: _muted(context)),
+                  const SizedBox(height: AppSpacing.md),
+                  // Required wording, kept in English (Meituan licence terms).
+                  Text(
+                    l10n.meituanAcknowledgement,
+                    key: const Key('about.acknowledgement'),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontStyle: FontStyle.italic),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.cardGap),
           SectionCard(
+            tone: AppTone.mist,
             title: l10n.aboutFontTitle,
-            child: Text(l10n.aboutFontBody, style: muted),
+            child: Builder(
+              builder: (context) =>
+                  Text(l10n.aboutFontBody, style: _muted(context)),
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           AppSecondaryButton(
@@ -62,4 +65,11 @@ class AboutScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+TextStyle? _muted(BuildContext context) {
+  final theme = Theme.of(context);
+  return theme.textTheme.bodyMedium?.copyWith(
+    color: theme.colorScheme.onSurfaceVariant,
+  );
 }

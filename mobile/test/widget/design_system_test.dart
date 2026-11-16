@@ -144,7 +144,7 @@ void main() {
     );
   });
 
-  group('Rider Green components', () {
+  group('Lime Obsidian components', () {
     testWidgets('AsyncValueView uses the given loading widget', (tester) async {
       await _pump(
         tester,
@@ -258,12 +258,17 @@ void main() {
       expect(find.text('body:second'), findsNothing);
     });
 
-    test('themes use the Rider Green tokens and the bundled font', () {
-      expect(AppTheme.light.colorScheme.primary, AppColors.brand);
-      expect(AppTheme.light.scaffoldBackgroundColor, AppColors.background);
-      expect(AppTheme.light.appBarTheme.backgroundColor, AppColors.brand);
-      expect(AppTheme.dark.colorScheme.primary, AppColors.darkBrand);
+    test('themes use the Lime Obsidian tokens and the bundled font', () {
+      // Light: Obsidian actions with lime labels on Soft Ivory.
+      expect(AppTheme.light.colorScheme.primary, AppColors.obsidian);
+      expect(AppTheme.light.colorScheme.onPrimary, AppColors.lime);
+      expect(AppTheme.light.scaffoldBackgroundColor, AppColors.ivory);
+      expect(AppTheme.light.appBarTheme.backgroundColor, AppColors.ivory);
+      // Dark: lime actions on true-dark Obsidian surfaces.
+      expect(AppTheme.dark.colorScheme.primary, AppColors.lime);
+      expect(AppTheme.dark.colorScheme.onPrimary, AppColors.obsidian);
       expect(AppTheme.dark.scaffoldBackgroundColor, AppColors.darkBackground);
+      expect(AppTheme.light.navigationBarTheme.indicatorColor, AppColors.lime);
       expect(
         AppTheme.light.textTheme.bodyLarge?.fontFamily,
         AppTypography.fontFamily,

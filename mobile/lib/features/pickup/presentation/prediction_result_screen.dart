@@ -29,7 +29,7 @@ class PredictionResultScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.predictionTitle)),
       body: AsyncValueView(
         value: prediction,
-        loading: LoadingView(message: l10n.predictionLoading),
+        loading: AiLoadingView(message: l10n.predictionLoading),
         onRetry: () => ref.invalidate(predictionProvider(restaurantId)),
         data: (p) => ListView(
           padding: AppSpacing.screen,
@@ -71,7 +71,8 @@ class PredictionResultScreen extends ConsumerWidget {
   }
 }
 
-/// Hero card: title, the interval (large), midpoint (small), coverage.
+/// Hero card: title, the interval (large), midpoint (small), coverage. An
+/// Obsidian card with a lime glow and the interval in lime.
 class PredictionCard extends StatelessWidget {
   const PredictionCard({required this.prediction, super.key});
 
@@ -80,71 +81,101 @@ class PredictionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final semantic = context.semanticColors;
     final coverage = prediction.interval.nominalCoverage;
     final name = prediction.restaurantName;
-    return Card(
+    return ToneCard(
       key: const Key('prediction.card'),
-      color: semantic.hero,
-      child: Padding(
-        padding: AppSpacing.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      tone: AppTone.obsidian,
+      radius: AppRadius.xl,
+      padding: EdgeInsets.zero,
+      gradient: const RadialGradient(
+        center: Alignment(1.1, -1.2),
+        radius: 1.25,
+        colors: [Color(0x38D5FF83), Color(0x00D5FF83)],
+      ),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          final scheme = theme.colorScheme;
+          return Padding(
+            padding: AppSpacing.cardPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
+                Row(
+                  children: [
+                    const IconWell(icon: Icons.auto_awesome_rounded, size: 36),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        l10n.predictionTitle,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    _HeroBadge(label: l10n.badgeEstimate),
+                  ],
+                ),
+                if (name != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.xl),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    l10n.predictionTitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: semantic.onHero,
+                    minutesRange(l10n, prediction.interval),
+                    key: const Key('prediction.range'),
+                    style: AppTypography.figures(
+                      theme.textTheme.displayMedium?.copyWith(
+                        color: AppColors.lime,
+                      ),
                     ),
                   ),
                 ),
-                _HeroBadge(label: l10n.badgeEstimate),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.predictionMidpoint(
+                    minutes1(prediction.predictedMinutes),
+                  ),
+                  key: const Key('prediction.midpoint'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                if (coverage != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.semanticColors.mint,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Text(
+                      l10n.predictionCoverage(
+                        (coverage * 100).round().toString(),
+                      ),
+                      key: const Key('prediction.coverage'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
-            if (name != null) ...[
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                name,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: semantic.onHeroMuted,
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              minutesRange(l10n, prediction.interval),
-              key: const Key('prediction.range'),
-              style: AppTypography.figures(
-                theme.textTheme.displaySmall?.copyWith(
-                  color: semantic.onHero,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              l10n.predictionMidpoint(minutes1(prediction.predictedMinutes)),
-              key: const Key('prediction.midpoint'),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: semantic.onHeroMuted,
-              ),
-            ),
-            if (coverage != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.predictionCoverage((coverage * 100).round().toString()),
-                key: const Key('prediction.coverage'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: semantic.onHero,
-                ),
-              ),
-            ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -158,21 +189,21 @@ class _HeroBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       key: const Key('prediction.estimateBadge'),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
+        horizontal: AppSpacing.sm + AppSpacing.xxs,
+        vertical: AppSpacing.xxs + 1,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: semantic.onHero.withValues(alpha: 0.6)),
+        border: Border.all(color: onSurface.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall
-            ?.copyWith(color: semantic.onHero, fontWeight: FontWeight.w700),
+            ?.copyWith(color: onSurface, fontWeight: FontWeight.w700),
       ),
     );
   }

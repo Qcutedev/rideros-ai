@@ -43,16 +43,16 @@ class PickupLogsScreen extends ConsumerWidget {
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.recordDeleted
-                : failureMessage(
+        ok
+            ? successSnackBar(l10n.recordDeleted)
+            : SnackBar(
+                content: Text(
+                  failureMessage(
                     l10n,
                     error is AppFailure ? error : const UnknownFailure(),
                   ),
-          ),
-        ),
+                ),
+              ),
       );
   }
 

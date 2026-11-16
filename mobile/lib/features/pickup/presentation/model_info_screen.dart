@@ -74,26 +74,29 @@ class _WhatCard extends StatelessWidget {
     final trained = info.trainedAt;
     final algorithm = info.algorithm;
     return SectionCard(
+      tone: AppTone.obsidian,
       key: const Key('model.what'),
       title: l10n.modelWhatTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.modelWhatBody),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            [
-              l10n.modelVersion(info.name, info.version),
-              if (algorithm != null) l10n.modelAlgorithm(algorithm),
-              if (trained != null)
-                l10n.modelTrainedAt(
-                  Formats.date(trained.toLocal(), l10n.localeName),
-                ),
-            ].join(' · '),
-            key: const Key('model.version'),
-            style: _muted(context),
-          ),
-        ],
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.modelWhatBody),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              [
+                l10n.modelVersion(info.name, info.version),
+                if (algorithm != null) l10n.modelAlgorithm(algorithm),
+                if (trained != null)
+                  l10n.modelTrainedAt(
+                    Formats.date(trained.toLocal(), l10n.localeName),
+                  ),
+              ].join(' · '),
+              key: const Key('model.version'),
+              style: _muted(context),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -155,30 +158,36 @@ class _CoverageCard extends StatelessWidget {
     final nominal = info.nominalCoverage;
     final width = info.meanWidthMinutes;
     return SectionCard(
+      tone: AppTone.sage,
       key: const Key('model.coverage'),
       title: l10n.modelCoverageTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          MetricTileRow(
-            tiles: [
-              if (nominal != null)
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            MetricTileRow(
+              tiles: [
+                if (nominal != null)
+                  MetricTile(
+                    label: l10n.modelNominalCoverage,
+                    value: '${(nominal * 100).round()}%',
+                  ),
                 MetricTile(
-                  label: l10n.modelNominalCoverage,
-                  value: '${(nominal * 100).round()}%',
+                  key: const Key('model.testCoverage'),
+                  label: l10n.modelTestCoverage,
+                  value: _percent(info.testCoverage!),
                 ),
-              MetricTile(
-                key: const Key('model.testCoverage'),
-                label: l10n.modelTestCoverage,
-                value: _percent(info.testCoverage!),
+              ],
+            ),
+            if (width != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                l10n.modelMeanWidth(_fixed(width, 1)),
+                style: _muted(context),
               ),
             ],
-          ),
-          if (width != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(l10n.modelMeanWidth(_fixed(width, 1)), style: _muted(context)),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -193,41 +202,44 @@ class _LimitationsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return SectionCard(
+      tone: AppTone.mist,
       key: const Key('model.limitations'),
       title: l10n.modelLimitationsTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.modelLimitationsBody),
-          if (info.limitations.isNotEmpty)
-            Theme(
-              // No divider lines around the expansion tile inside the card.
-              data: Theme.of(context)
-                  .copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                key: const Key('model.serverLimitations'),
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                title: Text(
-                  l10n.modelServerLimitations,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                children: [
-                  for (final item in info.limitations)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('•  ', style: _muted(context)),
-                          Expanded(child: Text(item, style: _muted(context))),
-                        ],
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.modelLimitationsBody),
+            if (info.limitations.isNotEmpty)
+              Theme(
+                // No divider lines around the expansion tile inside the card.
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  key: const Key('model.serverLimitations'),
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  title: Text(
+                    l10n.modelServerLimitations,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  children: [
+                    for (final item in info.limitations)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('•  ', style: _muted(context)),
+                            Expanded(child: Text(item, style: _muted(context))),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

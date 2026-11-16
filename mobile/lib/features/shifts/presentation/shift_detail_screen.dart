@@ -46,16 +46,16 @@ class ShiftDetailScreen extends ConsumerWidget {
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? success
-                : failureMessage(
+        ok
+            ? successSnackBar(success)
+            : SnackBar(
+                content: Text(
+                  failureMessage(
                     l10n,
                     error is AppFailure ? error : const UnknownFailure(),
                   ),
-          ),
-        ),
+                ),
+              ),
       );
     return ok;
   }
@@ -181,41 +181,49 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final s = scenario;
-    return Card(
+    return ToneCard(
       key: const Key('shift.header'),
-      child: Padding(
-        padding: AppSpacing.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(s.name, style: theme.textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                AppBadge(label: l10n.badgeEstimate, tone: BadgeTone.warning),
-                AppBadge(
-                  label: methodLabel(l10n, s.estimationMethod),
-                  tone: BadgeTone.neutral,
+      tone: AppTone.teal,
+      radius: AppRadius.xl,
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                s.name,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              shiftTimeRange(s),
-              key: const Key('shift.time'),
-              style: AppTypography.figures(theme.textTheme.titleMedium),
-            ),
-            Text(
-              '${shiftLengthLabel(l10n, s)} · '
-              '${plannedDayLabel(l10n, s.plannedWeekday)}',
-              style: theme.textTheme.bodyMedium,
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  AppBadge(label: l10n.badgeEstimate, tone: BadgeTone.warning),
+                  AppBadge(
+                    label: methodLabel(l10n, s.estimationMethod),
+                    tone: BadgeTone.neutral,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                shiftTimeRange(s),
+                key: const Key('shift.time'),
+                style: AppTypography.figures(theme.textTheme.headlineMedium),
+              ),
+              Text(
+                '${shiftLengthLabel(l10n, s)} · '
+                '${plannedDayLabel(l10n, s.plannedWeekday)}',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -229,79 +237,88 @@ class _EstimateCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final currency = ref.watch(shiftCurrencyProvider);
     final s = scenario;
     String money(Decimal v) => shiftMoney(v, currency);
     return SectionCard(
       title: l10n.shiftNetEstimate,
       trailing: AppBadge(label: l10n.badgeEstimate, tone: BadgeTone.warning),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            money(s.estimatedNetProfit),
-            key: const Key('shift.net'),
-            style: AppTypography.figures(
-              theme.textTheme.headlineSmall?.copyWith(
-                color: moneyColor(context, s.estimatedNetProfit),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          MetricTileRow(
-            tiles: [
-              MetricTile(
-                key: const Key('shift.revenue'),
-                label: l10n.shiftEstimatedRevenue,
-                value: money(s.estimatedRevenue),
-                icon: Icons.trending_up_rounded,
-              ),
-              MetricTile(
-                key: const Key('shift.expenses'),
-                label: l10n.shiftEstimatedExpenses,
-                value: money(s.estimatedExpenses),
-                icon: Icons.trending_down_rounded,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          MetricTileRow(
-            tiles: [
-              MetricTile(
-                key: const Key('shift.perHour'),
-                label: l10n.shiftPerHourEstimate,
-                value: l10n.shiftPerHourValue(
-                  money(s.estimatedNetProfitPerHour),
-                ),
-                icon: Icons.schedule_rounded,
-                valueColor: moneyColor(context, s.estimatedNetProfitPerHour),
-              ),
-              MetricTile(
-                label: l10n.shiftShiftHours,
-                value: durationLabel(
-                  l10n,
-                  Duration(minutes: s.durationMinutes),
-                ),
-                icon: Icons.timelapse_rounded,
-              ),
-            ],
-          ),
-          if (s.hasRange) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Text(l10n.shiftRangeTitle, style: theme.textTheme.bodyMedium),
-            const SizedBox(height: AppSpacing.xs),
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Text(
-              l10n.shiftRangeValue(
-                money(s.estimateLow!),
-                money(s.estimateHigh!),
+              money(s.estimatedNetProfit),
+              key: const Key('shift.net'),
+              style: AppTypography.figures(
+                Theme.of(context).textTheme.displaySmall?.copyWith(
+                  color: moneyColor(context, s.estimatedNetProfit),
+                ),
               ),
-              key: const Key('shift.range'),
-              style: AppTypography.figures(theme.textTheme.titleMedium),
             ),
-            Text(l10n.shiftRangeHint, style: theme.textTheme.bodySmall),
+            const SizedBox(height: AppSpacing.lg),
+            MetricTileRow(
+              tiles: [
+                MetricTile(
+                  key: const Key('shift.revenue'),
+                  label: l10n.shiftEstimatedRevenue,
+                  value: money(s.estimatedRevenue),
+                  icon: Icons.trending_up_rounded,
+                ),
+                MetricTile(
+                  key: const Key('shift.expenses'),
+                  label: l10n.shiftEstimatedExpenses,
+                  value: money(s.estimatedExpenses),
+                  icon: Icons.trending_down_rounded,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            MetricTileRow(
+              tiles: [
+                MetricTile(
+                  key: const Key('shift.perHour'),
+                  label: l10n.shiftPerHourEstimate,
+                  value: l10n.shiftPerHourValue(
+                    money(s.estimatedNetProfitPerHour),
+                  ),
+                  icon: Icons.schedule_rounded,
+                  valueColor: moneyColor(context, s.estimatedNetProfitPerHour),
+                ),
+                MetricTile(
+                  label: l10n.shiftShiftHours,
+                  value: durationLabel(
+                    l10n,
+                    Duration(minutes: s.durationMinutes),
+                  ),
+                  icon: Icons.timelapse_rounded,
+                ),
+              ],
+            ),
+            if (s.hasRange) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                l10n.shiftRangeTitle,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.shiftRangeValue(
+                  money(s.estimateLow!),
+                  money(s.estimateHigh!),
+                ),
+                key: const Key('shift.range'),
+                style: AppTypography.figures(
+                  Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text(
+                l10n.shiftRangeHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -468,47 +485,52 @@ class _InputsCard extends ConsumerWidget {
         ? shiftMoney(v, currency)
         : Formats.decimalInput(v);
     return SectionCard(
+      tone: AppTone.mist,
       key: const Key('shift.inputsCard'),
       title: l10n.shiftInputsTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _InfoRow(
-            label: l10n.shiftFieldOrdersPerHour,
-            value: value(a.ordersPerHour),
-          ),
-          _InfoRow(
-            label: l10n.shiftFieldIncomePerOrder,
-            value: value(a.incomePerOrder, isMoney: true),
-          ),
-          _InfoRow(
-            label: l10n.shiftFieldKmPerOrder,
-            value: value(a.kmPerOrder),
-          ),
-          _InfoRow(
-            label: l10n.onboardingFuelKmPerLiter,
-            value: value(a.fuelKmPerLiter),
-            note: a.fuelKmPerLiter == null ? l10n.shiftInputFromProfile : null,
-          ),
-          _InfoRow(
-            label: l10n.onboardingFuelPricePerLiter,
-            value: value(a.fuelPricePerLiter),
-            note: a.fuelPricePerLiter == null
-                ? l10n.shiftInputFromProfile
-                : null,
-          ),
-          _InfoRow(
-            label: l10n.onboardingDepreciationPerKm,
-            value: value(a.depreciationPerKm),
-            note: a.depreciationPerKm == null
-                ? l10n.shiftInputFromProfile
-                : null,
-          ),
-          _InfoRow(
-            label: l10n.shiftFieldOtherCosts,
-            value: value(a.otherCosts, isMoney: true),
-          ),
-        ],
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _InfoRow(
+              label: l10n.shiftFieldOrdersPerHour,
+              value: value(a.ordersPerHour),
+            ),
+            _InfoRow(
+              label: l10n.shiftFieldIncomePerOrder,
+              value: value(a.incomePerOrder, isMoney: true),
+            ),
+            _InfoRow(
+              label: l10n.shiftFieldKmPerOrder,
+              value: value(a.kmPerOrder),
+            ),
+            _InfoRow(
+              label: l10n.onboardingFuelKmPerLiter,
+              value: value(a.fuelKmPerLiter),
+              note: a.fuelKmPerLiter == null
+                  ? l10n.shiftInputFromProfile
+                  : null,
+            ),
+            _InfoRow(
+              label: l10n.onboardingFuelPricePerLiter,
+              value: value(a.fuelPricePerLiter),
+              note: a.fuelPricePerLiter == null
+                  ? l10n.shiftInputFromProfile
+                  : null,
+            ),
+            _InfoRow(
+              label: l10n.onboardingDepreciationPerKm,
+              value: value(a.depreciationPerKm),
+              note: a.depreciationPerKm == null
+                  ? l10n.shiftInputFromProfile
+                  : null,
+            ),
+            _InfoRow(
+              label: l10n.shiftFieldOtherCosts,
+              value: value(a.otherCosts, isMoney: true),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -537,46 +559,54 @@ class _LinkCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final sessionId = scenario.actualWorkSessionId;
     return SectionCard(
+      tone: AppTone.sage,
       key: const Key('shift.linkCard'),
       title: l10n.shiftLinkTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (sessionId == null)
-            Text(l10n.shiftLinkNone, style: theme.textTheme.bodyMedium)
-          else
-            _LinkedSession(id: sessionId),
-          const SizedBox(height: AppSpacing.xs),
-          Text(l10n.shiftLinkHint, style: theme.textTheme.bodySmall),
-          const SizedBox(height: AppSpacing.md),
-          if (sessionId == null)
-            AppSecondaryButton(
-              key: const Key('shift.link'),
-              label: l10n.shiftLinkAction,
-              onPressed: busy ? null : () => _pick(context),
-            )
-          else
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                TextButton(
-                  key: const Key('shift.linkChange'),
-                  onPressed: busy ? null : () => _pick(context),
-                  child: Text(l10n.shiftLinkChange),
-                ),
-                TextButton(
-                  key: const Key('shift.unlink'),
-                  onPressed: busy
-                      ? null
-                      : () => onLink(null, l10n.shiftUnlinked),
-                  child: Text(l10n.shiftUnlink),
-                ),
-              ],
+      child: Builder(
+        builder: (context) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (sessionId == null)
+              Text(
+                l10n.shiftLinkNone,
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
+            else
+              _LinkedSession(id: sessionId),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.shiftLinkHint,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
-        ],
+            const SizedBox(height: AppSpacing.md),
+            if (sessionId == null)
+              AppSecondaryButton(
+                key: const Key('shift.link'),
+                label: l10n.shiftLinkAction,
+                onPressed: busy ? null : () => _pick(context),
+              )
+            else
+              Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  TextButton(
+                    key: const Key('shift.linkChange'),
+                    onPressed: busy ? null : () => _pick(context),
+                    child: Text(l10n.shiftLinkChange),
+                  ),
+                  TextButton(
+                    key: const Key('shift.unlink'),
+                    onPressed: busy
+                        ? null
+                        : () => onLink(null, l10n.shiftUnlinked),
+                    child: Text(l10n.shiftUnlink),
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

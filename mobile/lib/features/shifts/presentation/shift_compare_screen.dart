@@ -114,54 +114,55 @@ class _ScenarioCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final currency = ref.watch(shiftCurrencyProvider);
     final s = scenario;
     final highlighted = bestNet || bestPerHour;
     String money(Decimal v) => shiftMoney(v, currency);
 
-    Widget row(
-      String label,
-      String value, {
-      Color? color,
-      bool strong = false,
-    }) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: MergeSemantics(
-        child: Row(
-          children: [
-            Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
-            Text(
-              value,
-              style: AppTypography.figures(
-                (strong
-                        ? theme.textTheme.titleMedium
-                        : theme.textTheme.bodyMedium)
-                    ?.copyWith(color: color),
+    // The best scenario sits on Electric Lime; the theme inside follows it.
+    return ToneCard(
+      key: Key('compare.${s.id}'),
+      tone: highlighted ? AppTone.lime : AppTone.paper,
+      onTap: () => context.push(Routes.shiftDetail(s.id)),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          Widget row(
+            String label,
+            String value, {
+            Color? color,
+            bool strong = false,
+          }) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            child: MergeSemantics(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(label, style: theme.textTheme.bodyMedium),
+                  ),
+                  Text(
+                    value,
+                    style: AppTypography.figures(
+                      (strong
+                              ? theme.textTheme.titleMedium
+                              : theme.textTheme.bodyMedium)
+                          ?.copyWith(color: color),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
 
-    return Card(
-      key: Key('compare.${s.id}'),
-      shape: highlighted
-          ? RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              side: BorderSide(color: theme.colorScheme.primary, width: 2),
-            )
-          : null,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push(Routes.shiftDetail(s.id)),
-        child: Padding(
-          padding: AppSpacing.cardPadding,
-          child: Column(
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(s.name, style: theme.textTheme.titleMedium),
+              Text(
+                s.name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -210,8 +211,8 @@ class _ScenarioCard extends ConsumerWidget {
                   ),
                 ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
