@@ -1161,6 +1161,149 @@ abstract class AppLocalizations {
   /// **'จัดกลุ่มด้วย K-Means จากเวลาเริ่ม ความยาว และวันธรรมดา/สุดสัปดาห์ ของ {days} วันล่าสุด · กำไร/ชม. เป็นค่าประมาณจากรายได้และค่าใช้จ่ายที่ผูกกับช่วงทำงานเท่านั้น'**
   String patternsNote(int days);
 
+  /// No description provided for @profitHeatmapTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'กำไรต่อชั่วโมงตามช่วงเวลา'**
+  String get profitHeatmapTitle;
+
+  /// No description provided for @profitHeatmapInsufficient.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกช่วงทำงานที่มีรายได้อีก {missing} ครั้ง เพื่อดูว่าวันและเวลาไหนได้กำไรต่อชั่วโมงดีที่สุด'**
+  String profitHeatmapInsufficient(int missing);
+
+  /// No description provided for @profitHeatmapProgress.
+  ///
+  /// In th, this message translates to:
+  /// **'{have} / {need} ช่วงทำงานที่มีรายได้ใน {days} วันล่าสุด'**
+  String profitHeatmapProgress(int have, int need, int days);
+
+  /// No description provided for @profitHeatmapTimerHint.
+  ///
+  /// In th, this message translates to:
+  /// **'กดปุ่มเริ่มงานที่หน้าหลักทุกครั้งที่ออกวิ่ง จะได้ช่วงทำงานพร้อมเวลาจริงโดยไม่ต้องกรอกเอง'**
+  String get profitHeatmapTimerHint;
+
+  /// No description provided for @profitHeatmapUnpaidSessions.
+  ///
+  /// In th, this message translates to:
+  /// **'มี {count} ช่วงทำงานที่ยังไม่มีรายได้ จึงยังไม่นับ: ผูกรายได้กับช่วงทำงาน หรือบันทึกรายได้ในวันเดียวกัน'**
+  String profitHeatmapUnpaidSessions(int count);
+
+  /// No description provided for @profitHeatmapGridLabel.
+  ///
+  /// In th, this message translates to:
+  /// **'ตารางกำไรสุทธิต่อชั่วโมง 7 วัน ช่วงละ {hours} ชั่วโมง'**
+  String profitHeatmapGridLabel(int hours);
+
+  /// No description provided for @profitHeatmapTapHint.
+  ///
+  /// In th, this message translates to:
+  /// **'แตะช่องเพื่อดูรายละเอียด'**
+  String get profitHeatmapTapHint;
+
+  /// No description provided for @profitHeatmapPerHour.
+  ///
+  /// In th, this message translates to:
+  /// **'{amount}/ชม.'**
+  String profitHeatmapPerHour(String amount);
+
+  /// No description provided for @profitHeatmapCellDetail.
+  ///
+  /// In th, this message translates to:
+  /// **'รายได้ {revenue}/ชม. · {hours} ชม. จาก {count} ช่วงทำงาน'**
+  String profitHeatmapCellDetail(String revenue, String hours, int count);
+
+  /// No description provided for @profitHeatmapCellThin.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลน้อย: {count} ช่วง {hours} ชม. (ต้องมีอย่างน้อย {minSessions} ช่วง และ {minHours} ชม.)'**
+  String profitHeatmapCellThin(
+    int count,
+    String hours,
+    int minSessions,
+    int minHours,
+  );
+
+  /// No description provided for @profitHeatmapCellEmpty.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่มีช่วงทำงานในช่วงนี้'**
+  String get profitHeatmapCellEmpty;
+
+  /// No description provided for @profitHeatmapCellSemantics.
+  ///
+  /// In th, this message translates to:
+  /// **'{day} {range}: {detail}'**
+  String profitHeatmapCellSemantics(String day, String range, String detail);
+
+  /// No description provided for @profitHeatmapRank.
+  ///
+  /// In th, this message translates to:
+  /// **'อันดับ {rank}'**
+  String profitHeatmapRank(int rank);
+
+  /// No description provided for @profitHeatmapLegendLow.
+  ///
+  /// In th, this message translates to:
+  /// **'ต่ำ'**
+  String get profitHeatmapLegendLow;
+
+  /// No description provided for @profitHeatmapLegendHigh.
+  ///
+  /// In th, this message translates to:
+  /// **'สูง'**
+  String get profitHeatmapLegendHigh;
+
+  /// No description provided for @profitHeatmapLegendRange.
+  ///
+  /// In th, this message translates to:
+  /// **'{low} – {high} ต่อชม.'**
+  String profitHeatmapLegendRange(String low, String high);
+
+  /// No description provided for @profitHeatmapLegendLoss.
+  ///
+  /// In th, this message translates to:
+  /// **'ขาดทุน/เท่าทุน'**
+  String get profitHeatmapLegendLoss;
+
+  /// No description provided for @profitHeatmapLegendThin.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อมูลน้อย'**
+  String get profitHeatmapLegendThin;
+
+  /// No description provided for @profitHeatmapBestTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วงที่ได้ดีที่สุด'**
+  String get profitHeatmapBestTitle;
+
+  /// No description provided for @profitHeatmapBestNone.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่มีช่วงที่ข้อมูลพอ ทำงานช่วงเวลาเดิมซ้ำอย่างน้อย {minSessions} ครั้ง แล้วช่องนั้นจะแสดงกำไร/ชม.'**
+  String profitHeatmapBestNone(int minSessions);
+
+  /// No description provided for @profitHeatmapAverage.
+  ///
+  /// In th, this message translates to:
+  /// **'เฉลี่ยทุกช่วง {amount}/ชม.'**
+  String profitHeatmapAverage(String amount);
+
+  /// No description provided for @profitHeatmapNote.
+  ///
+  /// In th, this message translates to:
+  /// **'ค่าประมาณจาก {count} ช่วงทำงานใน {days} วันล่าสุด · รายได้และค่าใช้จ่ายเฉลี่ยเท่ากันตลอดช่วงทำงาน · รายการที่ไม่ได้ผูกช่วงทำงานแบ่งตามชั่วโมงของช่วงทำงานในวันเดียวกัน'**
+  String profitHeatmapNote(int count, int days);
+
+  /// No description provided for @profitHeatmapExcluded.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่ได้นับ: รายได้ {income} รายการ · ค่าใช้จ่าย {expenses} รายการ · ช่วงทำงานที่ไม่มีรายได้ {sessions} ช่วง'**
+  String profitHeatmapExcluded(int income, int expenses, int sessions);
+
   /// No description provided for @recordsTitle.
   ///
   /// In th, this message translates to:

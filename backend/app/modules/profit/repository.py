@@ -8,6 +8,7 @@ from typing import NamedTuple
 from sqlalchemy import Select, delete, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.profit.heatmap import UnlinkedDay
 from app.modules.profit.models import ExpenseRecord, IncomeRecord, WorkSession
 from app.modules.profit.patterns import SessionRow
 
@@ -223,3 +224,40 @@ async def sessions_with_money(
         .order_by(WorkSession.started_at, WorkSession.id)
     )
     return [SessionRow(s, e, Decimal(r), Decimal(x), int(n)) for s, e, r, x, n in await session.execute(stmt)]
+
+
+async def unlinked_by_day(
+    session: AsyncSession, user_id: uuid.UUID, first: date, last: date
+) -> dict[date, UnlinkedDay]:
+    """Income and expenses dated [first, last] that are linked to no work session, per date."""
+    untimed = IncomeRecord.working_hours.is_(None)
+    income = (
+        select(
+            IncomeRecord.occurred_on,
+            func.coalesce(func.sum(IncomeRecord.amount).filter(untimed), 0),
+            func.count().filter(untimed),
+            func.count().filter(IncomeRecord.working_hours.is_not(None)),
+        )
+        .where(
+            IncomeRecord.user_id == user_id,
+            IncomeRecord.work_session_id.is_(None),
+            IncomeRecord.occurred_on.between(first, last),
+        )
+        .group_by(IncomeRecord.occurred_on)
+    )
+    expense = (
+        select(ExpenseRecord.occurred_on, func.coalesce(func.sum(ExpenseRecord.amount), 0), func.count())
+        .where(
+            ExpenseRecord.user_id == user_id,
+            ExpenseRecord.work_session_id.is_(None),
+            ExpenseRecord.occurred_on.between(first, last),
+        )
+        .group_by(ExpenseRecord.occurred_on)
+    )
+    days: dict[date, UnlinkedDay] = {}
+    for d, r, n, timed in await session.execute(income):
+        days[d] = UnlinkedDay(revenue=Decimal(r), income_count=int(n), hours_income_count=int(timed))
+    for d, x, n in await session.execute(expense):
+        u = days.get(d, UnlinkedDay())
+        days[d] = UnlinkedDay(u.revenue, u.income_count, u.hours_income_count, Decimal(x), int(n))
+    return days

@@ -57,6 +57,7 @@ AUTHENTICATED = {
     ("GET", "/profit/summary"),
     ("GET", "/profit/trends"),
     ("GET", "/profit/patterns"),
+    ("GET", "/profit/heatmap"),
     ("GET", "/pickup/restaurants"),
     ("POST", "/pickup/restaurants"),
     ("GET", "/pickup/restaurants/{restaurant_id}/analytics"),

@@ -5,6 +5,7 @@ import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/network/paged_result.dart';
 import 'package:rideros_ai/core/utils/date_json.dart';
 import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
+import 'package:rideros_ai/features/profit/domain/profit_heatmap.dart';
 import 'package:rideros_ai/features/profit/domain/profit_period.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_repositories.dart';
@@ -85,6 +86,51 @@ PatternGroup patternGroup({
   netProfitPerHour: netPerHour == null ? null : d(netPerHour),
 );
 
+/// `GET /profit/heatmap` result for tests (window: 90 days ending [testNow]).
+ProfitHeatmap profitHeatmap({
+  HeatmapStatus status = HeatmapStatus.insufficientData,
+  int sessions = 0,
+  List<HeatmapCell> cells = const [],
+  String? netPerHour,
+  String hours = '0.0',
+  int excludedSessions = 0,
+  int excludedIncome = 0,
+  int excludedExpenses = 0,
+}) => ProfitHeatmap(
+  status: status,
+  windowDays: 90,
+  startDate: DateTime.utc(2026, 8, 13),
+  endDate: DateTime.utc(2026, 11, 10),
+  slotHours: 2,
+  sessionCount: sessions,
+  minSessions: 10,
+  minCellSessions: 2,
+  minCellHours: 1,
+  excludedSessionCount: excludedSessions,
+  excludedIncomeCount: excludedIncome,
+  excludedExpenseCount: excludedExpenses,
+  hours: d(hours),
+  netProfitPerHour: netPerHour == null ? null : d(netPerHour),
+  cells: cells,
+  currency: 'THB',
+);
+
+/// One heat map cell; `netPerHour: null` = below the cell minimum.
+HeatmapCell heatCell(
+  int weekday,
+  int slot, {
+  String? netPerHour = '150.00',
+  String hours = '6.0',
+  int count = 3,
+}) => HeatmapCell(
+  weekday: weekday,
+  slot: slot,
+  hours: d(hours),
+  sessionCount: count,
+  revenuePerHour: netPerHour == null ? null : d(netPerHour) + d('20'),
+  netProfitPerHour: netPerHour == null ? null : d(netPerHour),
+);
+
 DateTime _periodEnd(DateTime start, ProfitPeriod period) => switch (period) {
   ProfitPeriod.day => start,
   ProfitPeriod.week => start.add(const Duration(days: 6)),
@@ -116,6 +162,8 @@ class FakeProfitRepository implements ProfitRepository {
   Object? trendsError;
   WorkPatterns patternsResult = workPatterns();
   Object? patternsError;
+  ProfitHeatmap heatmapResult = profitHeatmap();
+  Object? heatmapError;
   Completer<void>? gate;
   final calls = <String>[];
 
@@ -205,6 +253,14 @@ class FakeProfitRepository implements ProfitRepository {
     await gate?.future;
     if (patternsError != null) throw patternsError!;
     return patternsResult;
+  }
+
+  @override
+  Future<ProfitHeatmap> heatmap() async {
+    calls.add('heatmap');
+    await gate?.future;
+    if (heatmapError != null) throw heatmapError!;
+    return heatmapResult;
   }
 }
 

@@ -13,6 +13,7 @@ import '../domain/profit_summary.dart';
 import 'profit_labels.dart';
 import 'profit_providers.dart';
 import 'widgets/net_profit_chart.dart';
+import 'widgets/profit_heatmap_card.dart';
 import 'widgets/profit_metrics_view.dart';
 import 'widgets/trend_summary.dart';
 import 'widgets/work_patterns_card.dart';
@@ -191,7 +192,9 @@ class _Content extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.cardGap),
-        const RevealIn(index: 2, child: WorkPatternsCard()),
+        const RevealIn(index: 2, child: ProfitHeatmapCard()),
+        const SizedBox(height: AppSpacing.cardGap),
+        const RevealIn(index: 3, child: WorkPatternsCard()),
         const SizedBox(height: AppSpacing.lg),
         AppBanner(message: l10n.profitActualOnlyNote(summary.timezone)),
       ],

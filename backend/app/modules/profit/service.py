@@ -12,6 +12,7 @@ from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.pagination import InvalidCursorError, Page, decode_cursor, encode_cursor
 from app.core.timezones import local_dates_to_utc_range, today_in
 from app.modules.profit import calculator as calc
+from app.modules.profit import heatmap as hm
 from app.modules.profit import patterns as pat
 from app.modules.profit import repository as repo
 from app.modules.profit import trend_analysis as trend
@@ -25,10 +26,12 @@ from app.modules.profit.schemas import (
     ExpenseCreate,
     ExpenseOut,
     ExpenseUpdate,
+    HeatmapCell,
     IncomeCreate,
     IncomeOut,
     IncomeUpdate,
     PatternGroup,
+    ProfitHeatmap,
     ProfitSummary,
     ProfitTrends,
     TrendAnalysisOut,
@@ -457,6 +460,40 @@ async def work_patterns(
         null_silhouette=result.null_silhouette,
         stability=result.stability,
         groups=[PatternGroup.model_validate(g, from_attributes=True) for g in result.groups],
+        timezone=locale.timezone,
+        currency=locale.currency,
+    )
+
+
+# ---- profit heat map ----
+
+
+async def heatmap(session: AsyncSession, user_id: uuid.UUID, *, now: datetime | None = None) -> ProfitHeatmap:
+    """Net profit per hour by weekday × slot over the last WINDOW_DAYS local days (incl. today)."""
+    locale = await get_locale(session, user_id)
+    last = (now or datetime.now(UTC)).astimezone(locale.zone).date()
+    first = last - timedelta(days=hm.WINDOW_DAYS - 1)
+    start, end = local_dates_to_utc_range(first, last, locale.zone)
+    rows = await repo.sessions_with_money(session, user_id, start, end)
+    unlinked = await repo.unlinked_by_day(session, user_id, first, last)
+    result = hm.build(rows, unlinked, locale.zone)  # a few segments per session: cheap, no cache
+    return ProfitHeatmap(
+        status=result.status,
+        window_days=hm.WINDOW_DAYS,
+        start_date=first,
+        end_date=last,
+        slot_hours=hm.SLOT_HOURS,
+        session_count=result.session_count,
+        min_sessions=hm.MIN_SESSIONS,
+        min_cell_sessions=hm.MIN_CELL_SESSIONS,
+        min_cell_hours=hm.MIN_CELL_HOURS,
+        excluded_session_count=result.excluded_session_count,
+        excluded_income_count=result.excluded_income_count,
+        excluded_expense_count=result.excluded_expense_count,
+        hours=result.hours,
+        revenue_per_hour=result.revenue_per_hour,
+        net_profit_per_hour=result.net_profit_per_hour,
+        cells=[HeatmapCell.model_validate(c, from_attributes=True) for c in result.cells],
         timezone=locale.timezone,
         currency=locale.currency,
     )

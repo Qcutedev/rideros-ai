@@ -636,6 +636,109 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get profitHeatmapTitle => 'กำไรต่อชั่วโมงตามช่วงเวลา';
+
+  @override
+  String profitHeatmapInsufficient(int missing) {
+    return 'บันทึกช่วงทำงานที่มีรายได้อีก $missing ครั้ง เพื่อดูว่าวันและเวลาไหนได้กำไรต่อชั่วโมงดีที่สุด';
+  }
+
+  @override
+  String profitHeatmapProgress(int have, int need, int days) {
+    return '$have / $need ช่วงทำงานที่มีรายได้ใน $days วันล่าสุด';
+  }
+
+  @override
+  String get profitHeatmapTimerHint =>
+      'กดปุ่มเริ่มงานที่หน้าหลักทุกครั้งที่ออกวิ่ง จะได้ช่วงทำงานพร้อมเวลาจริงโดยไม่ต้องกรอกเอง';
+
+  @override
+  String profitHeatmapUnpaidSessions(int count) {
+    return 'มี $count ช่วงทำงานที่ยังไม่มีรายได้ จึงยังไม่นับ: ผูกรายได้กับช่วงทำงาน หรือบันทึกรายได้ในวันเดียวกัน';
+  }
+
+  @override
+  String profitHeatmapGridLabel(int hours) {
+    return 'ตารางกำไรสุทธิต่อชั่วโมง 7 วัน ช่วงละ $hours ชั่วโมง';
+  }
+
+  @override
+  String get profitHeatmapTapHint => 'แตะช่องเพื่อดูรายละเอียด';
+
+  @override
+  String profitHeatmapPerHour(String amount) {
+    return '$amount/ชม.';
+  }
+
+  @override
+  String profitHeatmapCellDetail(String revenue, String hours, int count) {
+    return 'รายได้ $revenue/ชม. · $hours ชม. จาก $count ช่วงทำงาน';
+  }
+
+  @override
+  String profitHeatmapCellThin(
+    int count,
+    String hours,
+    int minSessions,
+    int minHours,
+  ) {
+    return 'ข้อมูลน้อย: $count ช่วง $hours ชม. (ต้องมีอย่างน้อย $minSessions ช่วง และ $minHours ชม.)';
+  }
+
+  @override
+  String get profitHeatmapCellEmpty => 'ยังไม่มีช่วงทำงานในช่วงนี้';
+
+  @override
+  String profitHeatmapCellSemantics(String day, String range, String detail) {
+    return '$day $range: $detail';
+  }
+
+  @override
+  String profitHeatmapRank(int rank) {
+    return 'อันดับ $rank';
+  }
+
+  @override
+  String get profitHeatmapLegendLow => 'ต่ำ';
+
+  @override
+  String get profitHeatmapLegendHigh => 'สูง';
+
+  @override
+  String profitHeatmapLegendRange(String low, String high) {
+    return '$low – $high ต่อชม.';
+  }
+
+  @override
+  String get profitHeatmapLegendLoss => 'ขาดทุน/เท่าทุน';
+
+  @override
+  String get profitHeatmapLegendThin => 'ข้อมูลน้อย';
+
+  @override
+  String get profitHeatmapBestTitle => 'ช่วงที่ได้ดีที่สุด';
+
+  @override
+  String profitHeatmapBestNone(int minSessions) {
+    return 'ยังไม่มีช่วงที่ข้อมูลพอ ทำงานช่วงเวลาเดิมซ้ำอย่างน้อย $minSessions ครั้ง แล้วช่องนั้นจะแสดงกำไร/ชม.';
+  }
+
+  @override
+  String profitHeatmapAverage(String amount) {
+    return 'เฉลี่ยทุกช่วง $amount/ชม.';
+  }
+
+  @override
+  String profitHeatmapNote(int count, int days) {
+    return 'ค่าประมาณจาก $count ช่วงทำงานใน $days วันล่าสุด · รายได้และค่าใช้จ่ายเฉลี่ยเท่ากันตลอดช่วงทำงาน · รายการที่ไม่ได้ผูกช่วงทำงานแบ่งตามชั่วโมงของช่วงทำงานในวันเดียวกัน';
+  }
+
+  @override
+  String profitHeatmapExcluded(int income, int expenses, int sessions) {
+    return 'ไม่ได้นับ: รายได้ $income รายการ · ค่าใช้จ่าย $expenses รายการ · ช่วงทำงานที่ไม่มีรายได้ $sessions ช่วง';
+  }
+
+  @override
   String get recordsTitle => 'รายการทั้งหมด';
 
   @override

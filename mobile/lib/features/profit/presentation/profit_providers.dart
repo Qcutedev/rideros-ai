@@ -6,6 +6,7 @@ import '../../../core/presentation/submit_notifier.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/utils/date_json.dart';
 import '../data/profit_repositories_impl.dart';
+import '../domain/profit_heatmap.dart';
 import '../domain/profit_period.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
@@ -107,6 +108,13 @@ final trueProfitDataProvider = FutureProvider.autoDispose<TrueProfitData>((
 final workPatternsProvider = FutureProvider.autoDispose<WorkPatterns>((ref) {
   ref.watch(profitDataRevisionProvider);
   return ref.watch(profitRepositoryProvider).patterns();
+});
+
+/// Profit heat map of the last 90 days. Like [workPatternsProvider]: independent
+/// of the period on screen, reloads after every record change, own error state.
+final profitHeatmapProvider = FutureProvider.autoDispose<ProfitHeatmap>((ref) {
+  ref.watch(profitDataRevisionProvider);
+  return ref.watch(profitRepositoryProvider).heatmap();
 });
 
 // ---- record lists (cursor pagination) ----

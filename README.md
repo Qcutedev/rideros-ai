@@ -41,7 +41,7 @@ that other riders report.
 
 | Module | What it does | AI / analytics |
 |---|---|---|
-| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. Set a daily net-profit goal (progress ring on Home) and time a shift with a start/stop button that fills in the work session. | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. |
+| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. Set a daily net-profit goal (progress ring on Home) and time a shift with a start/stop button that fills in the work session. | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. A **profit heat map** of net profit per hour by weekday × 2-hour slot, with the 3 best slots. |
 | **Pickup Intelligence** | Estimate order-to-pickup minutes for a restaurant, with an 80% interval. Log your own waiting times. | XGBoost regressor + split-conformal interval. Per-restaurant statistics. |
 | **Shift Simulator** | Plan shifts as scenarios and compare estimated revenue, cost and profit. | Deterministic formulas. "From my history" mode uses the rider's own past sessions (P25–P75 range). |
 | **RoadContext** | Report floods, road damage, closures and obstacles on a map. Duplicate reports merge into one incident. | MobileNetV3 photo classifier. It only **suggests** a category with a confidence score; it never changes a report. |
@@ -154,7 +154,7 @@ Splits are leakage-aware: near-duplicates are removed, and video frames are grou
 The app shows the suggestion only when confidence is ≥ 0.6. Below that it shows "AI is not sure".
 Model card: [`cv_service/reports/1.0.0/model_card.md`](cv_service/reports/1.0.0/model_card.md).
 
-### 3. TrueProfit: work patterns (K-Means) and trend
+### 3. TrueProfit: work patterns (K-Means), trend and profit heat map
 
 K-Means has no labels, so I measured it on **synthetic riders whose real groups are known**:
 6 scenarios × 3 data sizes × 30 runs. This benchmark is not accuracy on real riders.
@@ -174,6 +174,14 @@ A pattern is shown only when it passes all 3 gates:
 Silhouette alone accepted random data, which is why the permutation test was added. The trend line uses OLS
 (`scipy.stats.linregress`) and is drawn only when p < 0.05. On 400 random series with no trend, it reported a
 false up/down trend less than 9% of the time. Raw benchmark: `backend/reports/work_patterns_benchmark.json`.
+
+The profit heat map answers "which hours pay best". Income and expense records have a date but no time, so
+money reaches an hour only through work sessions: a session's linked records, plus records of the same day
+that are not linked to any session (split by session length). Each session spreads its money evenly over
+its minutes. A cell shows a value only with at least 2 sessions and 1 hour in it, and the map needs 10
+sessions with income in the last 90 days. The colour scale is one hue in 5 steps, checked for monotone
+lightness and contrast in both themes; a loss or a thin cell also carries a symbol, so colour is never the
+only cue. Method: [`backend/app/modules/profit/heatmap.py`](backend/app/modules/profit/heatmap.py).
 
 ## Datasets & licenses
 
@@ -258,10 +266,10 @@ All settings are environment variables. [`.env.example`](.env.example) lists the
 
 | Suite | Tests | Gate |
 |---|---|---|
-| Backend (pytest, real PostGIS + Valkey) | 504 | coverage of `app/modules` + `app/core`: **98.18%** (gate 96%) |
+| Backend (pytest, real PostGIS + Valkey) | 523 | coverage of `app/modules` + `app/core`: **98.18%** (gate 96%) |
 | ML pipeline | 134 | ruff + pytest |
 | CV service | 38 | ruff + pytest |
-| Mobile (unit + widget) | 571 | coverage of `lib/` without generated code: **96.95%** (gate 94.7%) |
+| Mobile (unit + widget) | 591 | coverage of `lib/` without generated code: **97.09%** (gate 94.7%) |
 | E2E (`flutter drive` on the emulator) | 1 journey | checks 21 database rows through SQL, then deletes the test account |
 
 The tests include cross-user access checks on every endpoint, token expiry, reuse and forgery, a check that
@@ -278,7 +286,7 @@ live under `/api/v1`:
 |---|---|
 | `/auth` | register, login, refresh (rotating tokens with reuse detection), logout, forgot/reset password |
 | `/me` | account, rider profile, `DELETE /me` (deletes all of the user's data) |
-| `/income`, `/expenses`, `/work-sessions`, `/profit` | TrueProfit records, summaries, trends, work patterns |
+| `/income`, `/expenses`, `/work-sessions`, `/profit` | TrueProfit records, summaries, trends, work patterns, profit heat map |
 | `/pickup` | restaurants, predictions, pickup logs, model info |
 | `/shift-scenarios` | scenario CRUD and comparison |
 | `/road` | reports (multipart photo upload), incidents by bounding box / nearby, confirmations, status |

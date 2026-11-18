@@ -247,3 +247,42 @@ class WorkPatterns(BaseModel):
     groups: list[PatternGroup] = Field(description="Largest first; empty unless status is ok")
     timezone: str
     currency: str
+
+
+# ---- profit heat map ----
+
+
+class HeatmapCell(BaseModel):
+    """One weekday × 2-hour slot, local time. Estimate: see app/modules/profit/heatmap.py."""
+
+    weekday: int = Field(ge=0, le=6, description="0 = Monday")
+    slot: int = Field(ge=0, lt=12, description="Starts at slot × 2:00 local time")
+    hours: Decimal = Field(description="Counted hours that fall in this cell (0.1 h)")
+    session_count: int = Field(description="Counted sessions with at least one minute in this cell")
+    revenue_per_hour: Decimal | None = Field(description="null below min_cell_sessions / min_cell_hours")
+    net_profit_per_hour: Decimal | None = Field(description="null below min_cell_sessions / min_cell_hours")
+
+
+class ProfitHeatmap(BaseModel):
+    status: Literal["ok", "insufficient_data"]
+    window_days: int
+    start_date: date
+    end_date: date = Field(description="Inclusive")
+    slot_hours: int
+    session_count: int = Field(description="Counted sessions: those with linked or same-day unlinked income")
+    min_sessions: int = Field(description="Counted sessions needed before cells are returned")
+    min_cell_sessions: int
+    min_cell_hours: int
+    excluded_session_count: int = Field(description="Sessions in the window without any income")
+    excluded_income_count: int = Field(
+        description="Unlinked income not placed: on a day without counted sessions, or with own working_hours"
+    )
+    excluded_expense_count: int = Field(description="Unlinked expenses on a day without counted sessions")
+    hours: Decimal = Field(description="Hours of the counted sessions")
+    revenue_per_hour: Decimal | None = Field(description="Over all counted sessions; null without any")
+    net_profit_per_hour: Decimal | None = Field(description="Over all counted sessions; null without any")
+    cells: list[HeatmapCell] = Field(
+        description="Cells with any counted time, by weekday then slot; empty unless status is ok"
+    )
+    timezone: str
+    currency: str

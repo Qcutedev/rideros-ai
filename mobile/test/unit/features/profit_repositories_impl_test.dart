@@ -7,6 +7,7 @@ import 'package:rideros_ai/core/network/api_client.dart';
 import 'package:rideros_ai/core/network/token_pair.dart';
 import 'package:rideros_ai/core/storage/refresh_token_store.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
+import 'package:rideros_ai/features/profit/domain/profit_heatmap.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
 import 'package:rideros_ai/features/profit/domain/work_patterns.dart';
@@ -289,6 +290,82 @@ void main() {
     expect(patterns.status, PatternStatus.insufficientData);
     expect(patterns.sessionsMissing, 18);
     expect(patterns.groups, isEmpty);
+  });
+
+  Map<String, Object?> heatmapJson({
+    String status = 'ok',
+    int sessions = 14,
+    List<Object> cells = const [],
+  }) => {
+    'status': status,
+    'window_days': 90,
+    'start_date': '2026-08-13',
+    'end_date': '2026-11-10',
+    'slot_hours': 2,
+    'session_count': sessions,
+    'min_sessions': 10,
+    'min_cell_sessions': 2,
+    'min_cell_hours': 1,
+    'excluded_session_count': 3,
+    'excluded_income_count': 2,
+    'excluded_expense_count': 1,
+    'hours': '42.5',
+    'revenue_per_hour': '190.00',
+    'net_profit_per_hour': '160.40',
+    'cells': cells,
+    'timezone': 'Asia/Bangkok',
+    'currency': 'THB',
+  };
+
+  test('heatmap parses cells, counts and nullable estimates', () async {
+    adapter.handler = (o) => json(
+      200,
+      heatmapJson(
+        cells: [
+          {
+            'weekday': 0,
+            'slot': 9,
+            'hours': '20.0',
+            'session_count': 10,
+            'revenue_per_hour': '200.00',
+            'net_profit_per_hour': '180.00',
+          },
+          {
+            'weekday': 4,
+            'slot': 11,
+            'hours': '0.5',
+            'session_count': 1,
+            'revenue_per_hour': null,
+            'net_profit_per_hour': null,
+          },
+        ],
+      ),
+    );
+    final map = await container.read(profitRepositoryProvider).heatmap();
+    expect(adapter.requests.single.path, '/profit/heatmap');
+    expect(map.status, HeatmapStatus.ok);
+    expect(map.slotsPerDay, 12);
+    expect(map.sessionsMissing, 0);
+    expect(map.startDate, DateTime.utc(2026, 8, 13));
+    expect((map.excludedSessionCount, map.excludedIncomeCount), (3, 2));
+    expect(map.excludedExpenseCount, 1);
+    expect(map.hours, Decimal.parse('42.5'));
+    expect(map.netProfitPerHour, Decimal.parse('160.40'));
+    final monday = map.cellAt(0, 9)!;
+    expect(monday.netProfitPerHour, Decimal.parse('180.00'));
+    expect(monday.revenuePerHour, Decimal.parse('200.00'));
+    expect((monday.sessionCount, monday.hasEstimate), (10, true));
+    final thin = map.cellAt(4, 11)!;
+    expect((thin.hasEstimate, thin.revenuePerHour), (false, null));
+    expect(map.cellAt(1, 0), isNull);
+  });
+
+  test('heatmap: unknown status is a format error', () async {
+    adapter.handler = (o) => json(200, heatmapJson(status: 'maybe'));
+    await expectLater(
+      container.read(profitRepositoryProvider).heatmap(),
+      throwsA(isA<AppFailure>()),
+    );
   });
 
   test('offline becomes a NetworkFailure', () async {

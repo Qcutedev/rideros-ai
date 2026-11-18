@@ -1,4 +1,5 @@
 import '../../../core/network/paged_result.dart';
+import 'profit_heatmap.dart';
 import 'profit_records.dart';
 import 'profit_summary.dart';
 import 'work_patterns.dart';
@@ -37,4 +38,7 @@ abstract interface class ProfitRepository {
 
   /// K-Means groups of the work sessions of the last 180 days.
   Future<WorkPatterns> patterns();
+
+  /// Estimated net profit per hour by weekday × 2-hour slot (last 90 days).
+  Future<ProfitHeatmap> heatmap();
 }
