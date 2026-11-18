@@ -56,8 +56,9 @@ void main() {
       screen: const HomeScreen(),
       overrides: overrides(),
     );
+    await scrollIntoView(tester, find.byKey(const Key('home.road')));
     expect(find.text(t.homeRoadTitle), findsOneWidget);
-    await scrollAndTap(tester, 'home.road');
+    await tapKey(tester, 'home.road');
     expect(find.text('route:${Routes.road}'), findsOneWidget);
     expect(road.location.calls, 0);
   });

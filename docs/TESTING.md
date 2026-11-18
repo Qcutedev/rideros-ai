@@ -45,15 +45,18 @@ cd "C:\dev\RiderOS AI"
 - ML และ CV ไม่มี Coverage gate: Test ส่วนใหญ่ตรวจ Pipeline กับข้อมูล/โมเดลจริง และบางตัว Skip เมื่อไม่มีไฟล์ (§2.2–2.3) ตัวเลข Coverage จึงขึ้นกับเครื่องที่รัน
 - ขึ้น Gate ได้เมื่อ Coverage สูงขึ้น · ห้ามลด Gate เพื่อให้ผ่าน
 
-### 1.3 ผลล่าสุด (2026-11-14, Windows 11 · Docker Desktop · Shell ที่เปิด `ml/.venv` ค้างไว้)
+### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Commit `52d8ab3`)
 
 | ชุด | ผล | เวลา |
 |---|---|---|
-| Backend | ruff สะอาด (107 ไฟล์) · **478 passed** · Coverage 98.17% (Gate 96%) | ~111 s |
-| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~82 s |
-| CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~13 s |
-| Mobile | `flutter analyze` No issues · `dart format` 182 ไฟล์ไม่เปลี่ยน · **495 passed** · Coverage 96.68% (6,524/6,748, Gate 94.7%) | ~57 s |
-| รวม | **REGRESSION PASSED: 14 step(s)** | ~4.5 นาที |
+| Backend | ruff สะอาด (111 ไฟล์) · **504 passed** · Coverage 98.18% (Gate 96%) | ~235 s |
+| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~160 s |
+| CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~19 s |
+| Mobile | `flutter analyze` No issues · `dart format` 198 ไฟล์ไม่เปลี่ยน · **571 passed** · Coverage 96.95% (8,008/8,260, Gate 94.7%) | ~136 s |
+| รวม | **REGRESSION PASSED: 14 step(s)** | ~9 นาที |
+
+- รอบก่อน (2026-11-14): Backend 478 · ML 134 · CV 38 · Mobile 495 (Coverage 96.68%) · ~4.5 นาที · เวลารอบนี้นานขึ้นเพราะ Test เพิ่มและเครื่องเปิด VS Code + Docker ไว้ด้วย
+- แรมเครื่องไม่พอ (Emulator ~3.7 GB + Android Studio ~1 GB เปิดค้าง) ทำให้รอบ 2026-11-17 ถูกหยุดกลาง Backend pytest → ปิด Emulator/Android Studio ก่อนรัน
 
 - ตรวจว่า Gate Fail ได้จริง: `-Skip backend,ml,cv -MobileCoverageGate 99` → ขั้น `coverage gate` FAIL + Exit code 1
 

@@ -634,6 +634,216 @@ abstract class AppLocalizations {
   /// **'เปิด'**
   String get homeOpen;
 
+  /// No description provided for @goalSetTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ตั้งเป้ากำไรวันนี้'**
+  String get goalSetTitle;
+
+  /// No description provided for @goalSetMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ดูว่าอีกเท่าไรจะถึงเป้า'**
+  String get goalSetMessage;
+
+  /// No description provided for @goalTarget.
+  ///
+  /// In th, this message translates to:
+  /// **'เป้าวันนี้ {amount}'**
+  String goalTarget(String amount);
+
+  /// No description provided for @goalRemaining.
+  ///
+  /// In th, this message translates to:
+  /// **'อีก {amount} ถึงเป้า'**
+  String goalRemaining(String amount);
+
+  /// No description provided for @goalReached.
+  ///
+  /// In th, this message translates to:
+  /// **'ถึงเป้าแล้ว!'**
+  String get goalReached;
+
+  /// No description provided for @goalSurplus.
+  ///
+  /// In th, this message translates to:
+  /// **'เกินเป้า {amount}'**
+  String goalSurplus(String amount);
+
+  /// No description provided for @goalPercent.
+  ///
+  /// In th, this message translates to:
+  /// **'{percent}%'**
+  String goalPercent(int percent);
+
+  /// No description provided for @goalEdit.
+  ///
+  /// In th, this message translates to:
+  /// **'แก้เป้า'**
+  String get goalEdit;
+
+  /// No description provided for @goalSheetTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เป้ากำไรสุทธิต่อวัน'**
+  String get goalSheetTitle;
+
+  /// No description provided for @goalSheetMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'นับจากกำไรสุทธิของวันนี้ (รายได้ − ค่าใช้จ่าย) ตามเขตเวลาในโปรไฟล์'**
+  String get goalSheetMessage;
+
+  /// No description provided for @goalField.
+  ///
+  /// In th, this message translates to:
+  /// **'เป้ากำไรสุทธิ'**
+  String get goalField;
+
+  /// No description provided for @goalRemove.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบเป้า'**
+  String get goalRemove;
+
+  /// No description provided for @goalSaved.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกเป้าแล้ว'**
+  String get goalSaved;
+
+  /// No description provided for @goalRemoved.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบเป้าแล้ว'**
+  String get goalRemoved;
+
+  /// No description provided for @riderProfileDailyGoalHelper.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่บังคับ · แสดงเป็นวงแหวนบนหน้าหลัก'**
+  String get riderProfileDailyGoalHelper;
+
+  /// No description provided for @timerIdleTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'พร้อมออกวิ่งไหม?'**
+  String get timerIdleTitle;
+
+  /// No description provided for @timerIdleMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'กดเริ่มตอนออกวิ่ง กดหยุดตอนเลิก แอปจะกรอกเวลาช่วงทำงานให้'**
+  String get timerIdleMessage;
+
+  /// No description provided for @timerStart.
+  ///
+  /// In th, this message translates to:
+  /// **'เริ่มงาน'**
+  String get timerStart;
+
+  /// No description provided for @timerRunningTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'กำลังทำงาน'**
+  String get timerRunningTitle;
+
+  /// No description provided for @timerStartedAt.
+  ///
+  /// In th, this message translates to:
+  /// **'เริ่ม {time}'**
+  String timerStartedAt(String time);
+
+  /// No description provided for @timerElapsed.
+  ///
+  /// In th, this message translates to:
+  /// **'เวลาทำงาน {duration}'**
+  String timerElapsed(String duration);
+
+  /// No description provided for @timerStop.
+  ///
+  /// In th, this message translates to:
+  /// **'หยุดและบันทึก'**
+  String get timerStop;
+
+  /// No description provided for @timerDiscard.
+  ///
+  /// In th, this message translates to:
+  /// **'ทิ้ง'**
+  String get timerDiscard;
+
+  /// No description provided for @timerStoppedTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'หยุดแล้ว · ยังไม่ได้บันทึก'**
+  String get timerStoppedTitle;
+
+  /// No description provided for @timerStoppedRange.
+  ///
+  /// In th, this message translates to:
+  /// **'{duration} · {start}–{end}'**
+  String timerStoppedRange(String duration, String start, String end);
+
+  /// No description provided for @timerSave.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกช่วงทำงาน'**
+  String get timerSave;
+
+  /// No description provided for @timerResume.
+  ///
+  /// In th, this message translates to:
+  /// **'ทำต่อ'**
+  String get timerResume;
+
+  /// No description provided for @timerDiscardTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ทิ้งเวลาที่จับไว้?'**
+  String get timerDiscardTitle;
+
+  /// No description provided for @timerDiscardMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'เวลานี้ยังไม่ได้บันทึก ทิ้งแล้วเอาคืนไม่ได้'**
+  String get timerDiscardMessage;
+
+  /// No description provided for @timerTooShortTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่ถึง 1 นาที'**
+  String get timerTooShortTitle;
+
+  /// No description provided for @timerTooShortMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วงทำงานต้องยาวอย่างน้อย 1 นาที จะทำต่อหรือทิ้ง?'**
+  String get timerTooShortMessage;
+
+  /// No description provided for @timerTooLongTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ลืมกดหยุดหรือเปล่า?'**
+  String get timerTooLongTitle;
+
+  /// No description provided for @timerTooLongMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ตัวจับเวลาเดินมา {duration} เกิน 24 ชม. ที่บันทึกได้ในช่วงเดียว ตรวจเวลาเลิกงานในหน้าถัดไป'**
+  String timerTooLongMessage(String duration);
+
+  /// No description provided for @timerTooLongContinue.
+  ///
+  /// In th, this message translates to:
+  /// **'ไปแก้เวลา'**
+  String get timerTooLongContinue;
+
+  /// No description provided for @sessionTimerTooLong.
+  ///
+  /// In th, this message translates to:
+  /// **'ตัวจับเวลาเดินมา {duration} · แก้เวลาเลิกงานให้ตรงจริง (ช่วงเดียวไม่เกิน 24 ชม.)'**
+  String sessionTimerTooLong(String duration);
+
   /// No description provided for @trueProfitTitle.
   ///
   /// In th, this message translates to:

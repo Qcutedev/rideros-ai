@@ -16,7 +16,9 @@ import '../../profit/domain/profit_summary.dart';
 import '../../profit/presentation/profit_labels.dart';
 import '../../profit/presentation/profit_providers.dart';
 import '../../profit/presentation/widgets/profit_metrics_view.dart';
+import 'widgets/daily_goal_panel.dart';
 import 'widgets/rider_banner.dart';
+import 'widgets/shift_timer_card.dart';
 
 class HomeSummary {
   const HomeSummary({required this.today, required this.week});
@@ -40,8 +42,9 @@ final homeSummaryProvider = FutureProvider.autoDispose<HomeSummary>((
   return HomeSummary(today: results[0], week: results[1]);
 });
 
-/// Signed-in landing tab, the rider's command centre: greeting, today's actual
-/// profit (hero), this week, quick record shortcuts and the AI tools.
+/// Signed-in landing tab, the rider's command centre: greeting, the work timer,
+/// today's actual profit (hero) with the daily goal, this week, quick record
+/// shortcuts and the AI tools.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -80,6 +83,9 @@ class HomeScreen extends ConsumerWidget {
                 RevealIn(child: RiderGreetingBanner(name: user.displayName)),
                 const SizedBox(height: AppSpacing.xl),
               ],
+              // Outside the summary: the timer works while figures load or fail.
+              const RevealIn(child: ShiftTimerCard()),
+              const SizedBox(height: AppSpacing.cardGap),
               AsyncValueView(
                 value: summary,
                 onRetry: () => ref.invalidate(homeSummaryProvider),
@@ -206,6 +212,10 @@ class _Summaries extends StatelessWidget {
             ),
             metrics: today.metrics,
             currency: today.currency,
+            goal: DailyGoalPanel(
+              net: today.metrics.netProfit,
+              currency: today.currency,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.cardGap),

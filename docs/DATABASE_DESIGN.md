@@ -60,6 +60,7 @@ erDiagram
         numeric fuel_km_per_liter
         numeric fuel_price_per_liter
         numeric depreciation_per_km
+        numeric daily_goal
         text timezone
         text currency
     }
@@ -229,6 +230,7 @@ erDiagram
 | fuel_km_per_liter | numeric(6,2) | NULL หรือ > 0 |
 | fuel_price_per_liter | numeric(8,2) | NULL หรือ ≥ 0 |
 | depreciation_per_km | numeric(8,4) | NULL หรือ ≥ 0 (ใช้ประมาณต้นทุนใน Simulator) |
+| daily_goal | numeric(12,2) | NULL หรือ > 0 · เป้ากำไรสุทธิต่อวัน (วงแหวนบน Home) · Migration 0005 |
 | timezone | text | NOT NULL DEFAULT 'Asia/Bangkok' (ตรวจกับ IANA ใน Service) |
 | currency | text | NOT NULL DEFAULT 'THB' |
 

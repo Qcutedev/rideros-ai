@@ -6,7 +6,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 ## Resume bullets (English)
 
 - Built **RiderOS AI**, an end-to-end rider productivity app: Flutter (Android) client, FastAPI + PostgreSQL/PostGIS
-  modular-monolith backend, and three models I trained myself; 1,206 automated tests and CI on GitHub Actions.
+  modular-monolith backend, and three models I trained myself; 1,247 automated tests and CI on GitHub Actions.
 - Trained an order-to-pickup regressor on 568K real Meituan orders with leakage controls and a temporal split;
   XGBoost reached test MAE 4.51 min vs 4.64 for the per-restaurant baseline (reported honestly as a 2.7% gain),
   with a split-conformal 80% interval covering 81.6% of test orders.
@@ -22,7 +22,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 ## Resume bullets (ไทย)
 
 - พัฒนา **RiderOS AI** แอปช่วยไรเดอร์ส่งอาหารแบบครบวงจร: Flutter (Android) + FastAPI + PostgreSQL/PostGIS
-  และโมเดล AI 3 ตัวที่เทรนเอง · มี Test อัตโนมัติ 1,206 รายการ + CI บน GitHub Actions
+  และโมเดล AI 3 ตัวที่เทรนเอง · มี Test อัตโนมัติ 1,247 รายการ + CI บน GitHub Actions
 - เทรนโมเดลทำนายเวลาจากสั่งถึงรับอาหารจากออเดอร์จริงของ Meituan 568K รายการ ป้องกัน Data leakage และแบ่งข้อมูลตามเวลา ·
   XGBoost ได้ MAE 4.51 นาที เทียบ Baseline 4.64 (ดีขึ้น 2.7%) · ช่วงความเชื่อมั่น 80% แบบ Conformal ครอบคลุมจริง 81.6%
 - Fine-tune MobileNetV3 (PyTorch) จัดประเภทรูปเหตุบนถนน: Accuracy 0.880, Macro-F1 0.876, Latency median 16.5 ms บน CPU
@@ -43,7 +43,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 
 | Number | Source |
 |---|---|
-| 1,206 tests (backend 500, ML 134, CV 38, mobile 534) | `scripts/regression.ps1` run 2026-11-15 (HANDOFF §4.15); mobile 534 after the UI redesign, `flutter test` 2026-11-16 (HANDOFF §4.17) |
+| 1,247 tests (backend 504, ML 134, CV 38, mobile 571) | `scripts/regression.ps1` run 2026-11-18 (HANDOFF §4.18) |
 | 568,546 orders | `docs/DATASET_ANALYSIS.md` |
 | MAE 4.509 / 4.636 / 4.479, coverage 81.6% | `ml/README.md` → `ml/reports/pickup_o2p/` |
 | CV 0.8804 / 0.8755, 16.5 ms | `cv_service/reports/1.0.0/model_card.md`, HANDOFF §4.11 |

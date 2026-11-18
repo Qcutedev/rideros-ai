@@ -12,6 +12,7 @@ import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
 import 'package:rideros_ai/features/pickup/data/pickup_repository_impl.dart';
 import 'package:rideros_ai/features/profile/data/rider_profile_repository_impl.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
+import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
 import 'package:rideros_ai/features/road/data/device_services.dart';
 import 'package:rideros_ai/features/road/data/road_repository_impl.dart';
 import 'package:rideros_ai/features/road/presentation/widgets/road_map.dart';
@@ -54,6 +55,7 @@ List<Override> fakeRepositories(
     incomeRepositoryProvider.overrideWithValue(p.income),
     expenseRepositoryProvider.overrideWithValue(p.expenses),
     workSessionRepositoryProvider.overrideWithValue(p.sessions),
+    shiftTimerStoreProvider.overrideWithValue(p.timer),
     clockProvider.overrideWithValue(testNow),
   ];
 }

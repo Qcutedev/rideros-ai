@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_failure.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -45,12 +46,18 @@ class _RiderProfileFormState extends ConsumerState<_RiderProfileForm> {
   final _formKey = GlobalKey<FormState>();
   late final _costs = RiderProfileControllers(widget.initial);
   late final _timezone = TextEditingController(text: widget.initial.timezone);
+  late final _dailyGoal = TextEditingController(
+    text: widget.initial.dailyGoal == null
+        ? ''
+        : Formats.decimalInput(widget.initial.dailyGoal!),
+  );
   late VehicleType? _vehicleType = widget.initial.vehicleType;
 
   @override
   void dispose() {
     _costs.dispose();
     _timezone.dispose();
+    _dailyGoal.dispose();
     super.dispose();
   }
 
@@ -66,6 +73,7 @@ class _RiderProfileFormState extends ConsumerState<_RiderProfileForm> {
             fuelKmPerLiter: _costs.fuelKmPerLiterValue,
             fuelPricePerLiter: _costs.fuelPricePerLiterValue,
             depreciationPerKm: _costs.depreciationPerKmValue,
+            dailyGoal: optionalDecimalOf(_dailyGoal),
             timezone: _timezone.text.trim(),
             currency: widget.initial.currency,
           ),
@@ -97,6 +105,23 @@ class _RiderProfileFormState extends ConsumerState<_RiderProfileForm> {
                   lastAction: TextInputAction.next,
                   onVehicleTypeChanged: (value) =>
                       setState(() => _vehicleType = value),
+                ),
+                formGap,
+                AppTextField(
+                  key: const Key('riderProfile.dailyGoal'),
+                  controller: _dailyGoal,
+                  label: l10n.goalSheetTitle,
+                  helperText: l10n.riderProfileDailyGoalHelper,
+                  prefixIcon: Icons.flag_outlined,
+                  keyboardType: decimalKeyboard,
+                  suffixText: widget.initial.currency,
+                  enabled: !busy,
+                  validator: (value) => v.optionalDecimal(
+                    value,
+                    maxDigits: RiderProfileLimits.dailyGoal.maxDigits,
+                    places: RiderProfileLimits.dailyGoal.places,
+                    positive: true,
+                  ),
                 ),
                 formGap,
                 AppTextField(

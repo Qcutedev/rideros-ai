@@ -19,6 +19,7 @@ abstract final class RiderProfileLimits {
   static const fuelKmPerLiter = (maxDigits: 6, places: 2);
   static const fuelPricePerLiter = (maxDigits: 8, places: 2);
   static const depreciationPerKm = (maxDigits: 8, places: 4);
+  static const dailyGoal = (maxDigits: 12, places: 2);
 }
 
 /// `GET /me/rider-profile`. Until the first save the backend returns defaults with
@@ -30,6 +31,9 @@ abstract class RiderProfile with _$RiderProfile {
     @NullableDecimalConverter() Decimal? fuelKmPerLiter,
     @NullableDecimalConverter() Decimal? fuelPricePerLiter,
     @NullableDecimalConverter() Decimal? depreciationPerKm,
+
+    /// Net-profit target for one day (Home progress ring); `null` = no goal.
+    @NullableDecimalConverter() Decimal? dailyGoal,
     @Default(RiderProfileDefaults.timezone) String timezone,
     @Default(RiderProfileDefaults.currency) String currency,
     @Default(false) bool isConfigured,
@@ -49,7 +53,19 @@ abstract class RiderProfileInput with _$RiderProfileInput {
     @NullableDecimalConverter() Decimal? fuelKmPerLiter,
     @NullableDecimalConverter() Decimal? fuelPricePerLiter,
     @NullableDecimalConverter() Decimal? depreciationPerKm,
+    @NullableDecimalConverter() Decimal? dailyGoal,
     @Default(RiderProfileDefaults.timezone) String timezone,
     @Default(RiderProfileDefaults.currency) String currency,
   }) = _RiderProfileInput;
+
+  /// The saved profile as a `PUT` body, so one field can change and the rest stay.
+  factory RiderProfileInput.from(RiderProfile profile) => RiderProfileInput(
+    vehicleType: profile.vehicleType,
+    fuelKmPerLiter: profile.fuelKmPerLiter,
+    fuelPricePerLiter: profile.fuelPricePerLiter,
+    depreciationPerKm: profile.depreciationPerKm,
+    dailyGoal: profile.dailyGoal,
+    timezone: profile.timezone,
+    currency: profile.currency,
+  );
 }

@@ -250,19 +250,23 @@ Future<bool> confirmDelete(
 
 /// After a successful save/delete: tell the rider and leave the form. The
 /// message goes to the tab page underneath (see `shellMessengerKeyProvider`), so
-/// it sits above that page's FAB or bottom bar.
-void closeForm(BuildContext context, String message) {
-  final messenger =
-      ProviderScope.containerOf(
-        context,
-        listen: false,
-      ).read(shellMessengerKeyProvider).currentState ??
-      ScaffoldMessenger.of(context);
-  context.pop();
+/// it sits above that page's FAB or bottom bar. [result] is returned to the
+/// route that pushed the form.
+void closeForm(BuildContext context, String message, {Object? result}) {
+  final messenger = shellMessenger(context);
+  context.pop(result);
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(successSnackBar(message));
 }
+
+/// The tab pages' messenger, or the nearest one outside the tab shell.
+ScaffoldMessengerState shellMessenger(BuildContext context) =>
+    ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(shellMessengerKeyProvider).currentState ??
+    ScaffoldMessenger.of(context);
 
 /// "Saved" style message: a check mark pops in beside the text.
 SnackBar successSnackBar(String message, {SnackBarAction? action}) => SnackBar(

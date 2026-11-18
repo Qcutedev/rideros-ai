@@ -28,6 +28,10 @@ _RiderProfile _$RiderProfileFromJson(Map<String, dynamic> json) =>
             'depreciation_per_km',
             (v) => const NullableDecimalConverter().fromJson(v),
           ),
+          dailyGoal: $checkedConvert(
+            'daily_goal',
+            (v) => const NullableDecimalConverter().fromJson(v),
+          ),
           timezone: $checkedConvert(
             'timezone',
             (v) => v as String? ?? RiderProfileDefaults.timezone,
@@ -52,6 +56,7 @@ _RiderProfile _$RiderProfileFromJson(Map<String, dynamic> json) =>
         'fuelKmPerLiter': 'fuel_km_per_liter',
         'fuelPricePerLiter': 'fuel_price_per_liter',
         'depreciationPerKm': 'depreciation_per_km',
+        'dailyGoal': 'daily_goal',
         'isConfigured': 'is_configured',
         'updatedAt': 'updated_at',
       },
@@ -69,6 +74,7 @@ Map<String, dynamic> _$RiderProfileToJson(_RiderProfile instance) =>
       'depreciation_per_km': const NullableDecimalConverter().toJson(
         instance.depreciationPerKm,
       ),
+      'daily_goal': const NullableDecimalConverter().toJson(instance.dailyGoal),
       'timezone': instance.timezone,
       'currency': instance.currency,
       'is_configured': instance.isConfigured,
@@ -105,6 +111,10 @@ _RiderProfileInput _$RiderProfileInputFromJson(Map<String, dynamic> json) =>
             'depreciation_per_km',
             (v) => const NullableDecimalConverter().fromJson(v),
           ),
+          dailyGoal: $checkedConvert(
+            'daily_goal',
+            (v) => const NullableDecimalConverter().fromJson(v),
+          ),
           timezone: $checkedConvert(
             'timezone',
             (v) => v as String? ?? RiderProfileDefaults.timezone,
@@ -121,6 +131,7 @@ _RiderProfileInput _$RiderProfileInputFromJson(Map<String, dynamic> json) =>
         'fuelKmPerLiter': 'fuel_km_per_liter',
         'fuelPricePerLiter': 'fuel_price_per_liter',
         'depreciationPerKm': 'depreciation_per_km',
+        'dailyGoal': 'daily_goal',
       },
     );
 
@@ -136,6 +147,7 @@ Map<String, dynamic> _$RiderProfileInputToJson(_RiderProfileInput instance) =>
       'depreciation_per_km': const NullableDecimalConverter().toJson(
         instance.depreciationPerKm,
       ),
+      'daily_goal': const NullableDecimalConverter().toJson(instance.dailyGoal),
       'timezone': instance.timezone,
       'currency': instance.currency,
     };

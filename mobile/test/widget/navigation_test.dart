@@ -346,7 +346,7 @@ void main() {
       tester,
     ) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
-      await tapKey(tester, 'home.addExpense');
+      await scrollAndTap(tester, 'home.addExpense');
       expect(find.byType(ExpenseFormScreen), findsOneWidget);
       await tester.binding.handlePopRoute(); // Android back
       await tester.pumpAndSettle();
@@ -556,7 +556,7 @@ void main() {
 
     testWidgets('home shortcut → work session saved → home', (tester) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
-      await tapKey(tester, 'home.addSession');
+      await scrollAndTap(tester, 'home.addSession');
       expect(find.byType(WorkSessionFormScreen), findsOneWidget);
       await tapKey(tester, 'session.submit');
       expect(find.byType(HomeScreen), findsOneWidget);
