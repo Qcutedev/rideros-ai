@@ -6,11 +6,11 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_cards.dart';
-import '../../../../core/widgets/motion.dart';
 import '../../../../core/widgets/status_views.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/work_patterns.dart';
 import '../profit_providers.dart';
+import 'minimum_progress_bar.dart';
 import 'profit_metrics_view.dart';
 
 /// "รูปแบบการทำงาน": K-Means groups of the rider's sessions (last 180 days).
@@ -62,26 +62,10 @@ class _Body extends StatelessWidget {
         children: [
           Text(l10n.patternsInsufficient(patterns.sessionsMissing)),
           const SizedBox(height: AppSpacing.sm),
-          // Lime on Obsidian (the theme's progress style) animated in.
-          TweenAnimationBuilder<double>(
-            tween: Tween(
-              begin: 0,
-              end: patterns.sessionCount / patterns.minSessions,
-            ),
-            duration: motionEnabled(context)
-                ? AppDurations.reveal
-                : Duration.zero,
-            curve: AppCurves.enter,
-            builder: (context, v, _) => LinearProgressIndicator(
-              key: const Key('patterns.progress'),
-              value: v,
-              minHeight: 10,
-              color: AppColors.lime,
-              backgroundColor: theme.brightness == Brightness.light
-                  ? AppColors.obsidian
-                  : Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
+          MinimumProgressBar(
+            have: patterns.sessionCount,
+            need: patterns.minSessions,
+            barKey: const Key('patterns.progress'),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(

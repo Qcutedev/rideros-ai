@@ -52,6 +52,26 @@ abstract final class AppColors {
   static const darkError = Color(0xFFFF8F80);
   static const darkErrorSurface = Color(0xFF3A1E1B);
 
+  /// Profit heat map: five steps of one green hue, low → high profit per hour.
+  /// Checked with the dataviz ramp validator (`--ordinal`): lightness is
+  /// monotone, adjacent steps differ by ΔL ≥ 0.06, and the lowest step keeps
+  /// ≥ 2:1 against the card ([surface] 2.09:1, [darkSurface] 2.78:1) so a
+  /// low-profit cell never looks like an empty one. Dark mode runs dark → lime.
+  static const heatLight = [
+    Color(0xFF98C05E),
+    Color(0xFF7AA048),
+    Color(0xFF5C8032),
+    Color(0xFF3E5F1C),
+    Color(0xFF203F06),
+  ];
+  static const heatDark = [
+    Color(0xFF53683A),
+    Color(0xFF748E4C),
+    Color(0xFF94B45F),
+    Color(0xFFB5D971),
+    lime,
+  ];
+
   // Brand logo (`assets/brand/rideros_logo.svg`): ivory mark, muted mint "OS".
   static const logoIvory = Color(0xFFF3EEE5);
   static const logoMint = Color(0xFF8FD1A6);

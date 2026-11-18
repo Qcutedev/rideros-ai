@@ -5,6 +5,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_guard.dart';
 import '../../../core/network/paged_result.dart';
 import '../../../core/utils/date_json.dart';
+import '../domain/profit_heatmap.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
 import '../domain/profit_summary.dart';
@@ -137,5 +138,11 @@ class ProfitRepositoryImpl implements ProfitRepository {
   Future<WorkPatterns> patterns() => guardApi(() async {
     final response = await _dio.get<Map<String, dynamic>>('/profit/patterns');
     return WorkPatterns.fromJson(response.data!);
+  });
+
+  @override
+  Future<ProfitHeatmap> heatmap() => guardApi(() async {
+    final response = await _dio.get<Map<String, dynamic>>('/profit/heatmap');
+    return ProfitHeatmap.fromJson(response.data!);
   });
 }

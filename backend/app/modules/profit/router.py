@@ -1,4 +1,5 @@
-"""TrueProfit HTTP API: /work-sessions, /income, /expenses, /profit/summary, /profit/trends."""
+"""TrueProfit HTTP API: /work-sessions, /income, /expenses, /profit/summary, /profit/trends,
+/profit/patterns, /profit/heatmap."""
 
 import uuid
 from datetime import date
@@ -18,6 +19,7 @@ from app.modules.profit.schemas import (
     IncomeOut,
     IncomeUpdate,
     Period,
+    ProfitHeatmap,
     ProfitSummary,
     ProfitTrends,
     WorkPatterns,
@@ -208,6 +210,14 @@ async def profit_patterns(user: CurrentUser, session: SessionDep) -> WorkPattern
     weekday/weekend). `insufficient_data` below 30 sessions; `no_clear_pattern` when the grouping
     is not clearly better than chance (see app/modules/profit/patterns.py)."""
     return await service.work_patterns(session, user.id)
+
+
+@profit.get("/heatmap", response_model=ProfitHeatmap)
+async def profit_heatmap(user: CurrentUser, session: SessionDep) -> ProfitHeatmap:
+    """Estimated net profit per hour by local weekday × 2-hour slot over the last 90 days.
+    Income has a date only, so money is placed through work sessions (see
+    app/modules/profit/heatmap.py). `insufficient_data` below 10 counted sessions."""
+    return await service.heatmap(session, user.id)
 
 
 for _sub in (sessions, income, expenses, profit):

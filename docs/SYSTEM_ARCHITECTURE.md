@@ -196,6 +196,7 @@ sequenceDiagram
 | | `GET /profit/summary?period=day\|week\|month&date=YYYY-MM-DD` | Revenue, Expenses, Net, Hours, Rev/h, Net/h |
 | | `GET /profit/trends?granularity=day\|week\|month&from=&to=` | Time series + Moving average (7 วัน/4 สัปดาห์/3 เดือน) + Linear trend (OLS, แสดงเส้นเฉพาะเมื่อ p < 0.05; ต้องมี ≥ 4 ช่วงที่มีรายการ ไม่งั้น `insufficient_data`) |
 | | `GET /profit/patterns` | K-Means (เวลาเริ่ม, ความยาว, วันธรรมดา/สุดสัปดาห์ · 180 วัน); คืน `insufficient_data` ถ้า < 30 ช่วง และ `no_clear_pattern` ถ้าไม่ผ่าน Silhouette ≥ 0.25 + Permutation test + Bootstrap stability |
+| | `GET /profit/heatmap` | กำไรสุทธิ/ชม. (ค่าประมาณ) ตามวันในสัปดาห์ × ช่วง 2 ชม. ตามเวลาท้องถิ่น · 90 วัน · เงินลงช่องผ่านช่วงทำงานเท่านั้น (รายการที่ผูก + รายการไม่ผูกของวันเดียวกันแบ่งตามความยาวช่วง, เฉลี่ยเท่ากันตลอดช่วง) · นับเฉพาะช่วงที่มีรายได้ · `insufficient_data` ถ้า < 10 ช่วง · ช่องที่ < 2 ช่วงหรือ < 1 ชม. ไม่มีค่าต่อชม. |
 | Shift Simulator | `GET/POST /shift-scenarios`, `GET/PATCH/DELETE /shift-scenarios/{id}` | สร้างแล้วคำนวณ Estimate ทันที |
 | | `POST /shift-scenarios/compare` `{ids: [...]}` | 2–5 Scenarios |
 | | `POST /shift-scenarios/{id}/estimate` | คำนวณใหม่ด้วยข้อมูลล่าสุด |

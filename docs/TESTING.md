@@ -45,18 +45,19 @@ cd "C:\dev\RiderOS AI"
 - ML และ CV ไม่มี Coverage gate: Test ส่วนใหญ่ตรวจ Pipeline กับข้อมูล/โมเดลจริง และบางตัว Skip เมื่อไม่มีไฟล์ (§2.2–2.3) ตัวเลข Coverage จึงขึ้นกับเครื่องที่รัน
 - ขึ้น Gate ได้เมื่อ Coverage สูงขึ้น · ห้ามลด Gate เพื่อให้ผ่าน
 
-### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Commit `52d8ab3`)
+### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `feat/profit-heatmap` ต่อจาก `5fe6bfc`)
 
 | ชุด | ผล | เวลา |
 |---|---|---|
-| Backend | ruff สะอาด (111 ไฟล์) · **504 passed** · Coverage 98.18% (Gate 96%) | ~235 s |
-| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~160 s |
+| Backend | ruff สะอาด (114 ไฟล์) · **523 passed** · Coverage 98.18% (Gate 96%) | ~176 s |
+| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~156 s |
 | CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~19 s |
-| Mobile | `flutter analyze` No issues · `dart format` 198 ไฟล์ไม่เปลี่ยน · **571 passed** · Coverage 96.95% (8,008/8,260, Gate 94.7%) | ~136 s |
-| รวม | **REGRESSION PASSED: 14 step(s)** | ~9 นาที |
+| Mobile | `flutter analyze` No issues · `dart format` 203 ไฟล์ไม่เปลี่ยน · **591 passed** · Coverage 97.09% (8,388/8,639, Gate 94.7%) | ~108 s |
+| รวม | **REGRESSION PASSED: 14 step(s)** | ~8 นาที |
 
-- รอบก่อน (2026-11-14): Backend 478 · ML 134 · CV 38 · Mobile 495 (Coverage 96.68%) · ~4.5 นาที · เวลารอบนี้นานขึ้นเพราะ Test เพิ่มและเครื่องเปิด VS Code + Docker ไว้ด้วย
-- แรมเครื่องไม่พอ (Emulator ~3.7 GB + Android Studio ~1 GB เปิดค้าง) ทำให้รอบ 2026-11-17 ถูกหยุดกลาง Backend pytest → ปิด Emulator/Android Studio ก่อนรัน
+- รอบก่อน (2026-11-18, Commit `52d8ab3`): Backend 504 · ML 134 · CV 38 · Mobile 571 (Coverage 96.95%) · ~9 นาที
+- รอบก่อนนั้น (2026-11-14): Backend 478 · ML 134 · CV 38 · Mobile 495 (Coverage 96.68%) · ~4.5 นาที · รอบ 2026-11-18 นานขึ้นเพราะ Test เพิ่มและเครื่องเปิด VS Code + Docker ไว้ด้วย
+- แรมเครื่องไม่พอ (Emulator ~3.7 GB + Android Studio ~1 GB เปิดค้าง) ทำให้รอบ 2026-11-17 ถูกหยุดกลาง Backend pytest → ปิด Emulator/Android Studio ก่อนรัน · รอบแรกของงาน Heatmap (2026-11-18) ก็ถูกหยุดแบบเดียวกันเพราะ Gradle daemon (`java` ~1.9 GB หลัง `flutter build apk`) ค้างอยู่ → `cd mobile\android; .\gradlew --stop` ก่อนรัน (แรมว่าง ≥ 5 GB)
 
 - ตรวจว่า Gate Fail ได้จริง: `-Skip backend,ml,cv -MobileCoverageGate 99` → ขั้น `coverage gate` FAIL + Exit code 1
 
