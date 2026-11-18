@@ -748,6 +748,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get recordSave => 'บันทึก';
 
   @override
+  String get recordSkip => 'ข้ามไปก่อน';
+
+  @override
   String get recordSaved => 'บันทึกแล้ว';
 
   @override
@@ -811,6 +814,11 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get incomeAdd => 'เพิ่มรายได้';
+
+  @override
+  String incomeForSession(String range) {
+    return 'บันทึกช่วงทำงาน $range แล้ว ใส่รายได้ของช่วงนี้ต่อได้เลย หรือข้ามไปก่อนแล้วค่อยใส่ทีหลัง';
+  }
 
   @override
   String get incomeEditTitle => 'แก้ไขรายได้';

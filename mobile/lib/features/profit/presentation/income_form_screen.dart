@@ -7,6 +7,7 @@ import '../../../core/utils/date_json.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/form_widgets.dart';
+import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_records.dart';
 import 'profit_labels.dart';
@@ -14,16 +15,20 @@ import 'profit_providers.dart';
 
 /// `/income/new` and `/income/:id`.
 class IncomeFormScreen extends ConsumerWidget {
-  const IncomeFormScreen({this.id, super.key});
+  const IncomeFormScreen({this.id, this.forSession, super.key});
 
   /// `null` = new record.
   final String? id;
+
+  /// The work session the Home timer just saved (new records only): the form
+  /// starts on its date, linked to it, and offers to skip.
+  final WorkSession? forSession;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final id = this.id;
-    if (id == null) return const _IncomeForm();
+    if (id == null) return _IncomeForm(forSession: forSession);
     return RecordLoader<Income>(
       provider: incomeDetailProvider(id),
       title: l10n.incomeEditTitle,
@@ -34,9 +39,10 @@ class IncomeFormScreen extends ConsumerWidget {
 }
 
 class _IncomeForm extends ConsumerStatefulWidget {
-  const _IncomeForm({this.initial});
+  const _IncomeForm({this.initial, this.forSession});
 
   final Income? initial;
+  final WorkSession? forSession;
 
   @override
   ConsumerState<_IncomeForm> createState() => _IncomeFormState();
@@ -45,6 +51,7 @@ class _IncomeForm extends ConsumerStatefulWidget {
 class _IncomeFormState extends ConsumerState<_IncomeForm> {
   final _formKey = GlobalKey<FormState>();
   late final Income? _initial = widget.initial;
+  late final WorkSession? _forSession = widget.forSession;
   late final _amount = TextEditingController(text: fieldText(_initial?.amount));
   late final _source = TextEditingController(text: _initial?.sourceLabel);
   late final _hours = TextEditingController(
@@ -58,8 +65,9 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
   );
   late final _notes = TextEditingController(text: _initial?.notes);
   late DateTime _date =
-      _initial?.occurredOn ?? dateOnly(ref.read(clockProvider)());
-  late String? _sessionId = _initial?.workSessionId;
+      _initial?.occurredOn ??
+      dateOnly(_forSession?.startedAt ?? ref.read(clockProvider)());
+  late String? _sessionId = _initial?.workSessionId ?? _forSession?.id;
 
   @override
   void dispose() {
@@ -74,7 +82,7 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
     if (!_formKey.currentState!.validate()) return;
     final l10n = AppLocalizations.of(context);
     final linked = _sessionId != null;
-    final ok = await ref
+    final saved = await ref
         .read(incomeFormProvider.notifier)
         .save(
           _initial?.id,
@@ -90,7 +98,7 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
             notes: optionalTextOf(_notes),
           ),
         );
-    if (ok && mounted) closeForm(context, l10n.recordSaved);
+    if (saved != null && mounted) closeForm(context, l10n.recordSaved);
   }
 
   Future<void> _delete() async {
@@ -107,6 +115,7 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
     final submit = ref.watch(incomeFormProvider);
     final busy = submit.isLoading;
     final today = dateOnly(ref.watch(clockProvider)());
+    final forSession = _forSession;
 
     return RecordFormScaffold(
       keyPrefix: 'income',
@@ -115,6 +124,17 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
       submit: submit,
       onSave: _save,
       onDelete: _initial == null ? null : _delete,
+      // Straight after the timer: say the session is stored; skipping is fine.
+      header: forSession == null
+          ? null
+          : AppBanner(
+              key: const Key('income.forSession'),
+              tone: BannerTone.success,
+              message: l10n.incomeForSession(
+                sessionTimeRange(l10n, forSession),
+              ),
+            ),
+      onSkip: forSession == null ? null : () => Navigator.of(context).pop(),
       fields: [
         DateField(
           key: const Key('income.date'),

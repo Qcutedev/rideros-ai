@@ -12,6 +12,7 @@ import 'package:rideros_ai/features/profile/domain/rider_profile.dart';
 import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
 import 'package:rideros_ai/features/profit/domain/shift_timer.dart';
+import 'package:rideros_ai/features/profit/presentation/income_form_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/work_session_form_screen.dart';
 
 import '../helpers/fakes.dart';
@@ -238,30 +239,61 @@ void main() {
       expect(find.text(t.timerStartedAt('09:58')), findsOneWidget);
     });
 
-    testWidgets('stop → session form filled in → saved → timer cleared', (
+    testWidgets(
+      'stop → session form → saved → income form linked to it → saved',
+      (tester) async {
+        seed(TimerRunning(start));
+        await _pumpApp(
+          tester,
+          fakeRepositories(auth, profiles, profit),
+          settle: false,
+        );
+        expect(find.byKey(const Key('timer.running')), findsOneWidget);
+        await tapKey(tester, 'timer.stop', settle: false);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WorkSessionFormScreen), findsOneWidget);
+        await enter(tester, 'session.orders', '12');
+        await tapKey(tester, 'session.submit');
+
+        final saved = profit.sessions.lastInput!;
+        expect(saved.startedAt, DateTime(2026, 11, 10, 9, 58));
+        expect(saved.endedAt, DateTime(2026, 11, 10, 14, 7));
+        expect(saved.orderCount, 12);
+        // The timer is cleared as soon as the session is stored.
+        expect(profit.timer.entries, isEmpty);
+
+        // Next: the income form for that session.
+        expect(find.byType(IncomeFormScreen), findsOneWidget);
+        expect(find.text(t.incomeForSession('09:58 – 14:07')), findsOneWidget);
+        expect(find.byKey(const Key('income.hours')), findsNothing);
+        await enter(tester, 'income.amount', '650');
+        await tapKey(tester, 'income.submit');
+
+        final income = profit.income.lastInput!;
+        expect(income.workSessionId, profit.sessions.items.single.id);
+        expect(income.occurredOn, DateTime.utc(2026, 11, 10));
+        expect(income.amount, Decimal.parse('650'));
+        expect(income.workingHours, isNull);
+        expect(find.byType(HomeScreen), findsOneWidget);
+        expect(find.byKey(const Key('timer.idle')), findsOneWidget);
+      },
+    );
+
+    testWidgets('skipping the income form goes home without income', (
       tester,
     ) async {
-      seed(TimerRunning(start));
-      await _pumpApp(
-        tester,
-        fakeRepositories(auth, profiles, profit),
-        settle: false,
-      );
-      expect(find.byKey(const Key('timer.running')), findsOneWidget);
-      await tapKey(tester, 'timer.stop', settle: false);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(WorkSessionFormScreen), findsOneWidget);
-      await enter(tester, 'session.orders', '12');
+      seed(TimerStopped(start, testNow()));
+      await _pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await tapKey(tester, 'timer.save');
       await tapKey(tester, 'session.submit');
+      expect(find.byType(IncomeFormScreen), findsOneWidget);
 
-      final saved = profit.sessions.lastInput!;
-      expect(saved.startedAt, DateTime(2026, 11, 10, 9, 58));
-      expect(saved.endedAt, DateTime(2026, 11, 10, 14, 7));
-      expect(saved.orderCount, 12);
+      await tapKey(tester, 'income.skip');
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(find.byKey(const Key('timer.idle')), findsOneWidget);
-      expect(profit.timer.entries, isEmpty);
+      expect(profit.sessions.items, hasLength(1));
+      expect(profit.income.calls, isEmpty);
     });
 
     testWidgets('leaving the form without saving keeps the stopped timer', (

@@ -1322,6 +1322,12 @@ abstract class AppLocalizations {
   /// **'บันทึก'**
   String get recordSave;
 
+  /// No description provided for @recordSkip.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้ามไปก่อน'**
+  String get recordSkip;
+
   /// No description provided for @recordSaved.
   ///
   /// In th, this message translates to:
@@ -1429,6 +1435,12 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'เพิ่มรายได้'**
   String get incomeAdd;
+
+  /// No description provided for @incomeForSession.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกช่วงทำงาน {range} แล้ว ใส่รายได้ของช่วงนี้ต่อได้เลย หรือข้ามไปก่อนแล้วค่อยใส่ทีหลัง'**
+  String incomeForSession(String range);
 
   /// No description provided for @incomeEditTitle.
   ///

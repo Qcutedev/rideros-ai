@@ -523,7 +523,7 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - **PR 4** — Android home-screen widget (`home_widget` + Kotlin): เริ่มงานโดยไม่ต้องเปิดแอป + แสดงเวลาที่ผ่านไป · หยุด → เปิดฟอร์มช่วงทำงานแล้วต่อรายได้ · "+ รายได้" เปิดฟอร์มรายได้ · ยังไม่ Login → "เข้าสู่ระบบก่อน"
 - ทุก PR: Test + Emulator + `scripts/regression.ps1` → รายงาน → รอผู้ใช้สั่ง Commit (กฎ Branch + PR)
 
-#### PR 1 `chore/remove-pickup` (แตกจาก `main` `3f71bf2`) — **โค้ด + Test เสร็จ 2026-11-18 · ยังไม่ Commit**
+#### PR 1 `chore/remove-pickup` (แตกจาก `main` `3f71bf2`) — **Commit `1928aae` → PR #3 CI 5/5 → Merge `1665855` (2026-11-18, ผู้ใช้สั่ง "ทำเลย")**
 - Backend: ลบ `app/modules/pickup/`, `app/ml/registry.py`, `app/ml/predictor.py`, `scripts/import_restaurant_stats.py` · ใหม่ `app/ml/models.py` (`ModelVersion`) + `app/ml/repository.py` (`activate_model_version`) · `road/classify.py` ชี้ไปที่ใหม่ · `main.py` ไม่โหลดโมเดล (Log `startup` มี `cv_service` แทน `model`) · `/ready` ตรวจแค่ DB + Limiter (ไม่มี `checks.model`) · Config ลบ `MODEL_DIR`, `ACTIVE_MODEL_NAME`, `ACTIVE_MODEL_VERSION` · Dependency ลบ `rideros-ml`, `xgboost(-cpu)`, `pandas`, `joblib` ตรง (ยังมีผ่าน scikit-learn) · `scikit-learn`/`numpy` เปลี่ยนจาก Pin `==` เป็น `>=` (ไม่ต้องตรงกับ Artifact แล้ว; `uv lock` คงเวอร์ชันเดิม) · Dockerfile ไม่ Copy `ml/` · `entrypoint.sh` เหลือ Migrate → uvicorn
 - Migration `0006_drop_pickup`: Drop `pickup_predictions`, `pickup_logs`, `restaurant_time_stats`, `restaurants` · ลบแถว `model_versions` ชื่อ `pickup_o2p` ยกเว้นที่ `shift_scenarios` ยังอ้างถึง (FK RESTRICT) · Downgrade สร้างตารางเปล่ากลับ (Schema ตาม 0003; ข้อมูลไม่กลับมา)
 - Tests Backend: ลบ `test_pickup.py`, `test_real_artifact.py`, `unit/test_registry.py`, `fake_artifact.py`, `pickup_data.py` · แก้ `conftest.py` (ไม่มี Fake artifact), `test_cross_user.py`, `test_platform.py` (`/ready`), `test_security_audit.py` (Route list) · เพิ่ม `test_migrations.py`: ตาราง Pickup หาย + `model_versions` ยังอยู่, 0006 ลบเฉพาะแถว `pickup_o2p`
@@ -534,10 +534,21 @@ Artifact อยู่นอก Git → Backend ต้องอ่านจาก
 - **DB dev อยู่ที่ Revision 0006 แล้ว:** ถ้าสลับไป Branch ที่ยังไม่มี 0006 (เช่น `main` ก่อน Merge) ต้อง `alembic downgrade 0005` ก่อน ไม่งั้น Backend Start ไม่ได้ (หา Revision ไม่เจอ)
 - Regression (หลัง `gradlew --stop` แรมว่าง 6.3 GB): **REGRESSION PASSED: 14 step(s)** ~8.5 นาที · Backend **463** Coverage 98.23% · ML 134 · CV 38 · Mobile **522** Coverage 96.86% (7,321/7,558) · รวม **1,157** · อัปเดตตัวเลข README (Tests, E2E 17 ค่า), `docs/PORTFOLIO.md`, `docs/TESTING.md` §1.3
 - gitleaks `dir` (472 ไฟล์) + `git` (54 Commits) → no leaks found
+- ~~ยังค้าง~~ ผู้ใช้สั่ง "ทำเลย" → Commit `1928aae` → Push → PR #3 → CI 5/5 (Runner คิวช้า ~20 นาที) → Merge `1665855`
+
+#### PR 2 `feat/timer-income-chain` (แตกจาก `main` `1665855`) — **โค้ด + Test + Emulator เสร็จ 2026-11-18 · ยังไม่ Commit**
+- Flow: Home กด "หยุดและบันทึก" → ฟอร์มช่วงทำงาน (เวลาจากตัวจับเวลา) → บันทึก → ล้างตัวจับเวลาทันที → เปิดฟอร์มรายได้ต่อ: วันที่ = วันที่ช่วงทำงานเริ่ม (กะข้ามเที่ยงคืนใช้วันเริ่ม), ผูกกับช่วงทำงานที่เพิ่งบันทึก (ช่องชั่วโมงซ่อนเหมือนเดิม), Banner สีเขียว "บันทึกช่วงทำงาน {เวลา} แล้ว ใส่รายได้ของช่วงนี้ต่อได้เลย หรือข้ามไปก่อนแล้วค่อยใส่ทีหลัง" · ปุ่ม "ข้ามไปก่อน" ใต้ปุ่มบันทึก (หรือกด Back) → กลับ Home ไม่สร้างรายได้ · ไม่แก้ Backend
+- โค้ด: `RecordFormController.save` คืน Record ที่บันทึก (`T?`, `null` = ล้มเหลว) แทน `bool` · ฟอร์มช่วงทำงาน Pop `WorkSession` (เดิม `true`) · `ShiftTimerCard._save` → `push<WorkSession>` → `reset()` → `push(Routes.incomeNew, extra: session)` · Route `/income/new` รับ `extra` เป็น `WorkSession?` (In-app เท่านั้น) · `IncomeFormScreen(forSession:)` · `RecordFormScaffold` เพิ่ม `header` + `onSkip` (ปุ่ม `<prefix>.skip`) · String ใหม่ `incomeForSession`, `recordSkip`
+- Test: `profit_providers_test` (save คืน Record/`null`) · `home_goal_timer_test` (หยุด → ช่วงทำงาน → รายได้ผูกช่วง + วันที่ + ไม่มีชั่วโมง; ข้าม → Home ไม่มีรายได้) · `income_form_test` กลุ่มใหม่ 3 Test (เริ่มผูกกับช่วงข้ามเที่ยงคืน → วันที่วันเริ่ม; ข้ามไม่บันทึก; ฟอร์มปกติไม่มีปุ่มข้าม/Banner)
+- Emulator (Debug, บัญชีทิ้ง `timer.chain.check@example.com` เพราะ Session เดโมหมดอายุ): เริ่มงาน → 1 นาที → หยุด → บันทึกช่วง 22:57–22:58 → ฟอร์มรายได้มี Banner + ผูกช่วง 22:57–22:58 + ปุ่ม "ข้ามไปก่อน" → ใส่ 120 → บันทึก → Home กำไร ฿120 ตัวจับเวลากลับเป็น "เริ่มงาน" · รอบ 2: หยุด → บันทึกช่วง 22:59–23:00 → "ข้ามไปก่อน" → Home กำไรยัง ฿120 · API: รายได้ 120 ผูกช่วงแรก `working_hours` null, ช่วงที่สองไม่มีรายได้ · ลบบัญชีแล้ว (`DELETE /me` 204)
+- Regression (หลังปิด Emulator + `gradlew --stop` แรมว่าง 6.3 GB): **REGRESSION PASSED: 14 step(s)** ~8 นาที · Backend 463 Coverage 98.23% · ML 134 · CV 38 · Mobile **526** (+4) Coverage 96.86% (7,339/7,577) · รวม **1,161** · อัปเดต README (Tests), `docs/PORTFOLIO.md`, `docs/TESTING.md` §1.3
+- gitleaks `dir` (472 ไฟล์) + `git` → no leaks found
 - ยังค้าง: รายงานแล้ว → รอสั่ง Commit → Push → PR → CI → Merge
 
 ### 4.2 Session ถัดไปเริ่มตรงนี้
-**2026-11-18 (ล่าสุด): PR #2 Heatmap Merge แล้ว (`3f71bf2`) · แผน §4.20 (เอา Pickup ออก + กลุ่ม A, 4 PR) ผู้ใช้ยืนยันแล้ว · PR 1 `chore/remove-pickup` โค้ด + Test + Emulator + Regression 14/14 (1,157 Tests) + gitleaks เสร็จ ยังไม่ Commit → รอสั่ง Commit → Push → PR → CI → Merge · จากนั้น PR 2–4 ตามลำดับ (แตกจาก `main` หลัง Merge PR ก่อนหน้า)**
+**2026-11-18 (ล่าสุด): แผน §4.20 · PR 1 Merge แล้ว (PR #3 → `1665855`) · PR 2 `feat/timer-income-chain` โค้ด + Test + Emulator + Regression 14/14 (1,161 Tests) + gitleaks เสร็จ ยังไม่ Commit → รอสั่ง Commit → Push → PR → CI → Merge · จากนั้น PR 3–4 ตามลำดับ (แตกจาก `main` หลัง Merge PR ก่อนหน้า)**
+
+(เดิม) **2026-11-18: PR #2 Heatmap Merge แล้ว (`3f71bf2`) · แผน §4.20 ผู้ใช้ยืนยันแล้ว · PR 1 Regression 14/14 (1,157 Tests) + gitleaks เสร็จ → ต่อมา Merge แล้ว**
 
 (เดิม) **2026-11-18 (Session ถัดมา): §4.19 Regression ผ่าน 14/14 (รวม 1,286 Tests) + อัปเดตตัวเลข README/PORTFOLIO/TESTING + gitleaks สะอาด · รายงานผู้ใช้แล้ว → ต่อมา Commit + PR #2 + Merge แล้ว**
 

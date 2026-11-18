@@ -158,6 +158,60 @@ void main() {
     expect(profit.income.lastInput!.workingHours, isNull);
   });
 
+  group('straight after the Home timer', () {
+    late WorkSession session;
+
+    setUp(() {
+      // Past midnight: the income belongs to the day the session started.
+      session = profit.sessions.add(
+        WorkSessionInput(
+          startedAt: DateTime(2026, 11, 9, 20),
+          endedAt: DateTime(2026, 11, 10, 1, 30),
+        ),
+      );
+    });
+
+    Future<void> openForSession(WidgetTester tester) => pushScreen(
+      tester,
+      pattern: Routes.incomeNew,
+      location: Routes.incomeNew,
+      screen: IncomeFormScreen(forSession: session),
+      overrides: fakeRepositories(FakeAuthRepository(), null, profit),
+    );
+
+    testWidgets('starts linked to the session, on its start date', (
+      tester,
+    ) async {
+      await openForSession(tester);
+      expect(
+        find.text(
+          t.incomeForSession('20:00 – ${t.sessionEndsNextDay('01:30')}'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('income.hours')), findsNothing);
+      await enter(tester, 'income.amount', '900');
+      await submit(tester);
+      final input = profit.income.lastInput!;
+      expect(input.workSessionId, session.id);
+      expect(input.occurredOn, DateTime.utc(2026, 11, 9));
+      expect(find.text('route:${Routes.home}'), findsOneWidget);
+    });
+
+    testWidgets('skip leaves without saving', (tester) async {
+      await openForSession(tester);
+      await tapKey(tester, 'income.skip');
+      expect(profit.income.calls, isEmpty);
+      expect(find.text('route:${Routes.home}'), findsOneWidget);
+    });
+
+    testWidgets('no skip button on a plain new income', (tester) async {
+      await openNew(tester);
+      expect(find.byKey(const Key('income.skip')), findsNothing);
+      expect(find.byKey(const Key('income.forSession')), findsNothing);
+    });
+  });
+
   testWidgets('session list failure offers a retry', (tester) async {
     profit.sessions.listError = const NetworkFailure();
     await openNew(tester);

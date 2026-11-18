@@ -147,6 +147,8 @@ class RecordFormScaffold extends StatelessWidget {
     required this.submit,
     required this.onSave,
     this.onDelete,
+    this.header,
+    this.onSkip,
     this.keyPrefix = 'record',
     super.key,
   });
@@ -159,6 +161,12 @@ class RecordFormScaffold extends StatelessWidget {
 
   /// `null` when creating.
   final VoidCallback? onDelete;
+
+  /// Shown above the fields.
+  final Widget? header;
+
+  /// When set, a "skip" button under save leaves without saving.
+  final VoidCallback? onSkip;
   final String keyPrefix;
 
   @override
@@ -180,6 +188,7 @@ class RecordFormScaffold extends StatelessWidget {
       ),
       body: FormLayout(
         children: [
+          if (header case final header?) ...[header, formGap],
           Form(
             key: formKey,
             child: Column(
@@ -203,6 +212,14 @@ class RecordFormScaffold extends StatelessWidget {
             isLoading: busy,
             onPressed: onSave,
           ),
+          if (onSkip != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              key: Key('$keyPrefix.skip'),
+              onPressed: busy ? null : onSkip,
+              child: Text(l10n.recordSkip),
+            ),
+          ],
         ],
       ),
     );

@@ -188,10 +188,10 @@ void main() {
         ..listen(incomeFormProvider, (_, _) {});
       expect((await container.read(incomeListProvider.future)).items, isEmpty);
 
-      final ok = await container
+      final saved = await container
           .read(incomeFormProvider.notifier)
           .save(null, income(10, '800'));
-      expect(ok, isTrue);
+      expect(saved!.amount, d('800'));
       expect(container.read(profitDataRevisionProvider), 1);
       final items = (await container.read(incomeListProvider.future)).items;
       expect(items.single.amount, d('800'));
@@ -201,7 +201,9 @@ void main() {
       final existing = fakes.income.add(income(9));
       container.listen(incomeFormProvider, (_, _) {});
       final form = container.read(incomeFormProvider.notifier);
-      expect(await form.save(existing.id, income(9, '50')), isTrue);
+      final updated = await form.save(existing.id, income(9, '50'));
+      expect(updated!.id, existing.id);
+      expect(updated.amount, d('50'));
       expect(await form.delete(existing.id), isTrue);
       expect(fakes.income.calls, [
         'update:${existing.id}',
@@ -218,7 +220,7 @@ void main() {
           code: ApiErrorCode.workSessionOverlap,
         );
         container.listen(workSessionFormProvider, (_, _) {});
-        final ok = await container
+        final saved = await container
             .read(workSessionFormProvider.notifier)
             .save(
               null,
@@ -227,7 +229,7 @@ void main() {
                 endedAt: DateTime(2026, 11, 10, 12),
               ),
             );
-        expect(ok, isFalse);
+        expect(saved, isNull);
         expect(
           container.read(workSessionFormProvider).error,
           isA<ApiFailure>().having(

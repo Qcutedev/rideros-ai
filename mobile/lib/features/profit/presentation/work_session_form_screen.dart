@@ -14,8 +14,9 @@ import '../domain/shift_timer.dart';
 import 'profit_labels.dart';
 import 'profit_providers.dart';
 
-/// `/work-sessions/new` and `/work-sessions/:id`. A save pops `true`, so the
-/// Home timer knows its session was stored.
+/// `/work-sessions/new` and `/work-sessions/:id`. A save pops the stored
+/// [WorkSession], so the Home timer can clear itself and open the income form
+/// linked to that session.
 class WorkSessionFormScreen extends ConsumerWidget {
   const WorkSessionFormScreen({this.id, this.draft, super.key});
 
@@ -117,7 +118,7 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
     if (times == null) setState(() => _showTimeError = true);
     if (!fieldsValid || times == null) return;
     final l10n = AppLocalizations.of(context);
-    final ok = await ref
+    final saved = await ref
         .read(workSessionFormProvider.notifier)
         .save(
           _initial?.id,
@@ -129,7 +130,9 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
             notes: optionalTextOf(_notes),
           ),
         );
-    if (ok && mounted) closeForm(context, l10n.recordSaved, result: true);
+    if (saved != null && mounted) {
+      closeForm(context, l10n.recordSaved, result: saved);
+    }
   }
 
   Future<void> _delete() async {

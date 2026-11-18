@@ -61,7 +61,7 @@ class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     final l10n = AppLocalizations.of(context);
-    final ok = await ref
+    final saved = await ref
         .read(expenseFormProvider.notifier)
         .save(
           _initial?.id,
@@ -72,7 +72,7 @@ class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
             description: optionalTextOf(_description),
           ),
         );
-    if (ok && mounted) closeForm(context, l10n.recordSaved);
+    if (saved != null && mounted) closeForm(context, l10n.recordSaved);
   }
 
   Future<void> _delete() async {
