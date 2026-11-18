@@ -6,24 +6,30 @@ import '../../../core/utils/date_json.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/form_widgets.dart';
+import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_records.dart';
 import '../domain/session_times.dart';
+import '../domain/shift_timer.dart';
 import 'profit_labels.dart';
 import 'profit_providers.dart';
 
-/// `/work-sessions/new` and `/work-sessions/:id`.
+/// `/work-sessions/new` and `/work-sessions/:id`. A save pops `true`, so the
+/// Home timer knows its session was stored.
 class WorkSessionFormScreen extends ConsumerWidget {
-  const WorkSessionFormScreen({this.id, super.key});
+  const WorkSessionFormScreen({this.id, this.draft, super.key});
 
   /// `null` = new record.
   final String? id;
+
+  /// Start and end from the Home timer (new records only).
+  final SessionDraft? draft;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final id = this.id;
-    if (id == null) return const _SessionForm();
+    if (id == null) return _SessionForm(draft: draft);
     return RecordLoader<WorkSession>(
       provider: workSessionDetailProvider(id),
       title: l10n.sessionEditTitle,
@@ -34,9 +40,10 @@ class WorkSessionFormScreen extends ConsumerWidget {
 }
 
 class _SessionForm extends ConsumerStatefulWidget {
-  const _SessionForm({this.initial});
+  const _SessionForm({this.initial, this.draft});
 
   final WorkSession? initial;
+  final SessionDraft? draft;
 
   @override
   ConsumerState<_SessionForm> createState() => _SessionFormState();
@@ -63,10 +70,15 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
   void initState() {
     super.initState();
     final initial = _initial;
+    final draft = widget.draft;
     if (initial != null) {
       _date = dateOnly(initial.startedAt);
       _start = TimeOfDay.fromDateTime(initial.startedAt);
       _end = TimeOfDay.fromDateTime(initial.endedAt);
+    } else if (draft != null) {
+      _date = dateOnly(draft.start);
+      _start = TimeOfDay.fromDateTime(draft.start);
+      _end = TimeOfDay.fromDateTime(draft.end);
     } else {
       // Default: the four hours up to now (5-minute steps).
       final now = ref.read(clockProvider)();
@@ -117,7 +129,7 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
             notes: optionalTextOf(_notes),
           ),
         );
-    if (ok && mounted) closeForm(context, l10n.recordSaved);
+    if (ok && mounted) closeForm(context, l10n.recordSaved, result: true);
   }
 
   Future<void> _delete() async {
@@ -138,6 +150,7 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
     final today = dateOnly(ref.watch(clockProvider)());
     final times = _times;
     final crossesMidnight = times != null && times.end.day != times.start.day;
+    final draft = widget.draft;
 
     return RecordFormScaffold(
       keyPrefix: 'session',
@@ -147,6 +160,14 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
       onSave: _save,
       onDelete: _initial == null ? null : _delete,
       fields: [
+        if (draft != null && draft.tooLong)
+          AppBanner(
+            key: const Key('session.timerTooLong'),
+            tone: BannerTone.warning,
+            message: l10n.sessionTimerTooLong(
+              durationLabel(l10n, draft.length),
+            ),
+          ),
         DateField(
           key: const Key('session.date'),
           label: l10n.sessionStartDate,

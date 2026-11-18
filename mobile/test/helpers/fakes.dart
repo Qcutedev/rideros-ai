@@ -143,6 +143,7 @@ class FakeRiderProfileRepository implements RiderProfileRepository {
       fuelKmPerLiter: input.fuelKmPerLiter,
       fuelPricePerLiter: input.fuelPricePerLiter,
       depreciationPerKm: input.depreciationPerKm,
+      dailyGoal: input.dailyGoal,
       timezone: input.timezone,
       currency: input.currency,
       isConfigured: true,

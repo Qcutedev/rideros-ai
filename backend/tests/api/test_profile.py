@@ -102,6 +102,7 @@ async def test_rider_profile_defaults_before_first_save(client: httpx.AsyncClien
         "fuel_km_per_liter": None,
         "fuel_price_per_liter": None,
         "depreciation_per_km": None,
+        "daily_goal": None,
         "timezone": "Asia/Bangkok",
         "currency": "THB",
         "is_configured": False,
@@ -116,6 +117,7 @@ async def test_put_rider_profile_creates_then_replaces(client: httpx.AsyncClient
         "fuel_km_per_liter": "45.5",
         "fuel_price_per_liter": 38.9,
         "depreciation_per_km": "0.3500",
+        "daily_goal": "750.5",
         "timezone": "Asia/Tokyo",
         "currency": "THB",
     }
@@ -125,12 +127,13 @@ async def test_put_rider_profile_creates_then_replaces(client: httpx.AsyncClient
     assert body["is_configured"] is True and body["updated_at"] is not None
     assert body["fuel_km_per_liter"] == "45.50" and body["fuel_price_per_liter"] == "38.90"
     assert body["depreciation_per_km"] == "0.3500" and body["timezone"] == "Asia/Tokyo"
+    assert body["daily_goal"] == "750.50"
 
     # PUT replaces: omitted fields go back to null / defaults.
     resp = await client.put("/me/rider-profile", json={"vehicle_type": "bicycle"}, headers=h)
     body = resp.json()
     assert body["vehicle_type"] == "bicycle" and body["fuel_km_per_liter"] is None
-    assert body["timezone"] == "Asia/Bangkok"
+    assert body["timezone"] == "Asia/Bangkok" and body["daily_goal"] is None
     assert (await client.get("/me/rider-profile", headers=h)).json() == body
 
 
@@ -149,6 +152,10 @@ async def test_put_rider_profile_unknown_timezone(client: httpx.AsyncClient) -> 
         {"fuel_km_per_liter": "10000.00"},  # numeric(6,2)
         {"fuel_price_per_liter": -1},
         {"depreciation_per_km": "0.12345"},  # numeric(8,4)
+        {"daily_goal": 0},
+        {"daily_goal": "-100"},
+        {"daily_goal": "10000000000.00"},  # numeric(12,2)
+        {"daily_goal": "500.005"},
         {"currency": "USD"},
         {"timezone": ""},
         {"user_id": str(uuid.uuid4())},
@@ -159,6 +166,10 @@ async def test_put_rider_profile_unknown_timezone(client: httpx.AsyncClient) -> 
         "km-too-big",
         "price-negative",
         "dep-precision",
+        "goal-zero",
+        "goal-negative",
+        "goal-too-big",
+        "goal-precision",
         "currency",
         "tz-blank",
         "extra",

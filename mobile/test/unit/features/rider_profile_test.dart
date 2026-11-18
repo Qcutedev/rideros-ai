@@ -36,9 +36,22 @@ void main() {
       'fuel_km_per_liter': '45.5',
       'fuel_price_per_liter': null,
       'depreciation_per_km': null,
+      'daily_goal': null,
       'timezone': 'Asia/Bangkok',
       'currency': 'THB',
     });
+  });
+
+  test('daily goal: parsed exactly, sent as a string', () {
+    final profile = RiderProfile.fromJson({
+      ...profileJson(configured: true),
+      'daily_goal': '750.50',
+    });
+    expect(profile.dailyGoal, Decimal.parse('750.5'));
+    final body = RiderProfileInput.from(profile).toJson();
+    expect(body['daily_goal'], '750.5');
+    expect(body['vehicle_type'], 'motorcycle');
+    expect(RiderProfile.fromJson(profileJson()).dailyGoal, isNull);
   });
 
   test('repository GETs and PUTs /me/rider-profile', () async {

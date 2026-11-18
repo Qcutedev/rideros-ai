@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/submit_notifier.dart';
@@ -24,6 +25,23 @@ class RiderProfileFormController extends SubmitNotifier {
 final riderProfileFormProvider =
     NotifierProvider.autoDispose<RiderProfileFormController, AsyncValue<void>>(
       RiderProfileFormController.new,
+    );
+
+/// Sets or clears the daily goal from Home. `PUT` replaces the whole profile, so
+/// the other fields are sent back unchanged. The day boundaries do not move, so
+/// the TrueProfit summaries are not reloaded.
+class DailyGoalController extends SubmitNotifier {
+  Future<bool> save(RiderProfile current, Decimal? goal) => run(() async {
+    await ref
+        .read(riderProfileRepositoryProvider)
+        .save(RiderProfileInput.from(current).copyWith(dailyGoal: goal));
+    ref.invalidate(riderProfileProvider);
+  });
+}
+
+final dailyGoalFormProvider =
+    NotifierProvider.autoDispose<DailyGoalController, AsyncValue<void>>(
+      DailyGoalController.new,
     );
 
 class DisplayNameController extends SubmitNotifier {

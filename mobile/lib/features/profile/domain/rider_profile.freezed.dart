@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RiderProfile {
 
- VehicleType? get vehicleType;@NullableDecimalConverter() Decimal? get fuelKmPerLiter;@NullableDecimalConverter() Decimal? get fuelPricePerLiter;@NullableDecimalConverter() Decimal? get depreciationPerKm; String get timezone; String get currency; bool get isConfigured; DateTime? get updatedAt;
+ VehicleType? get vehicleType;@NullableDecimalConverter() Decimal? get fuelKmPerLiter;@NullableDecimalConverter() Decimal? get fuelPricePerLiter;@NullableDecimalConverter() Decimal? get depreciationPerKm;/// Net-profit target for one day (Home progress ring); `null` = no goal.
+@NullableDecimalConverter() Decimal? get dailyGoal; String get timezone; String get currency; bool get isConfigured; DateTime? get updatedAt;
 /// Create a copy of RiderProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $RiderProfileCopyWith<RiderProfile> get copyWith => _$RiderProfileCopyWithImpl<R
 @override
 bool operator ==(Object other) {
   final _this = this as RiderProfile;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RiderProfile&&(identical(other.vehicleType, _this.vehicleType) || other.vehicleType == _this.vehicleType)&&(identical(other.fuelKmPerLiter, _this.fuelKmPerLiter) || other.fuelKmPerLiter == _this.fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, _this.fuelPricePerLiter) || other.fuelPricePerLiter == _this.fuelPricePerLiter)&&(identical(other.depreciationPerKm, _this.depreciationPerKm) || other.depreciationPerKm == _this.depreciationPerKm)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.isConfigured, _this.isConfigured) || other.isConfigured == _this.isConfigured)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RiderProfile&&(identical(other.vehicleType, _this.vehicleType) || other.vehicleType == _this.vehicleType)&&(identical(other.fuelKmPerLiter, _this.fuelKmPerLiter) || other.fuelKmPerLiter == _this.fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, _this.fuelPricePerLiter) || other.fuelPricePerLiter == _this.fuelPricePerLiter)&&(identical(other.depreciationPerKm, _this.depreciationPerKm) || other.depreciationPerKm == _this.depreciationPerKm)&&(identical(other.dailyGoal, _this.dailyGoal) || other.dailyGoal == _this.dailyGoal)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.isConfigured, _this.isConfigured) || other.isConfigured == _this.isConfigured)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RiderProfile;
-  return Object.hash(runtimeType,_this.vehicleType,_this.fuelKmPerLiter,_this.fuelPricePerLiter,_this.depreciationPerKm,_this.timezone,_this.currency,_this.isConfigured,_this.updatedAt);
+  return Object.hash(runtimeType,_this.vehicleType,_this.fuelKmPerLiter,_this.fuelPricePerLiter,_this.depreciationPerKm,_this.dailyGoal,_this.timezone,_this.currency,_this.isConfigured,_this.updatedAt);
 }
 
 @override
 String toString() {
   final _this = this as RiderProfile;
-  return 'RiderProfile(vehicleType: ${_this.vehicleType}, fuelKmPerLiter: ${_this.fuelKmPerLiter}, fuelPricePerLiter: ${_this.fuelPricePerLiter}, depreciationPerKm: ${_this.depreciationPerKm}, timezone: ${_this.timezone}, currency: ${_this.currency}, isConfigured: ${_this.isConfigured}, updatedAt: ${_this.updatedAt})';
+  return 'RiderProfile(vehicleType: ${_this.vehicleType}, fuelKmPerLiter: ${_this.fuelKmPerLiter}, fuelPricePerLiter: ${_this.fuelPricePerLiter}, depreciationPerKm: ${_this.depreciationPerKm}, dailyGoal: ${_this.dailyGoal}, timezone: ${_this.timezone}, currency: ${_this.currency}, isConfigured: ${_this.isConfigured}, updatedAt: ${_this.updatedAt})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $RiderProfileCopyWith<$Res>  {
   factory $RiderProfileCopyWith(RiderProfile value, $Res Function(RiderProfile) _then) = _$RiderProfileCopyWithImpl;
 @useResult
 $Res call({
- VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm, String timezone, String currency, bool isConfigured, DateTime? updatedAt
+ VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm,@NullableDecimalConverter() Decimal? dailyGoal, String timezone, String currency, bool isConfigured, DateTime? updatedAt
 });
 
 
@@ -71,12 +72,13 @@ class _$RiderProfileCopyWithImpl<$Res>
 
 /// Create a copy of RiderProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? timezone = null,Object? currency = null,Object? isConfigured = null,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? dailyGoal = freezed,Object? timezone = null,Object? currency = null,Object? isConfigured = null,Object? updatedAt = freezed,}) {
   return _then(RiderProfile(
 vehicleType: freezed == vehicleType ? _self.vehicleType : vehicleType // ignore: cast_nullable_to_non_nullable
 as VehicleType?,fuelKmPerLiter: freezed == fuelKmPerLiter ? _self.fuelKmPerLiter : fuelKmPerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,fuelPricePerLiter: freezed == fuelPricePerLiter ? _self.fuelPricePerLiter : fuelPricePerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,depreciationPerKm: freezed == depreciationPerKm ? _self.depreciationPerKm : depreciationPerKm // ignore: cast_nullable_to_non_nullable
+as Decimal?,dailyGoal: freezed == dailyGoal ? _self.dailyGoal : dailyGoal // ignore: cast_nullable_to_non_nullable
 as Decimal?,timezone: null == timezone ? _self.timezone : timezone // ignore: cast_nullable_to_non_nullable
 as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,isConfigured: null == isConfigured ? _self.isConfigured : isConfigured // ignore: cast_nullable_to_non_nullable
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RiderProfile() when $default != null:
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _RiderProfile():
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency,  bool isConfigured,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _RiderProfile() when $default != null:
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency,_that.isConfigured,_that.updatedAt);case _:
   return null;
 
 }
@@ -222,13 +224,15 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 @JsonSerializable()
 
 class _RiderProfile implements RiderProfile {
-  const _RiderProfile({this.vehicleType, @NullableDecimalConverter() this.fuelKmPerLiter, @NullableDecimalConverter() this.fuelPricePerLiter, @NullableDecimalConverter() this.depreciationPerKm, this.timezone = RiderProfileDefaults.timezone, this.currency = RiderProfileDefaults.currency, this.isConfigured = false, this.updatedAt});
+  const _RiderProfile({this.vehicleType, @NullableDecimalConverter() this.fuelKmPerLiter, @NullableDecimalConverter() this.fuelPricePerLiter, @NullableDecimalConverter() this.depreciationPerKm, @NullableDecimalConverter() this.dailyGoal, this.timezone = RiderProfileDefaults.timezone, this.currency = RiderProfileDefaults.currency, this.isConfigured = false, this.updatedAt});
   factory _RiderProfile.fromJson(Map<String, dynamic> json) => _$RiderProfileFromJson(json);
 
 @override final  VehicleType? vehicleType;
 @override@NullableDecimalConverter() final  Decimal? fuelKmPerLiter;
 @override@NullableDecimalConverter() final  Decimal? fuelPricePerLiter;
 @override@NullableDecimalConverter() final  Decimal? depreciationPerKm;
+/// Net-profit target for one day (Home progress ring); `null` = no goal.
+@override@NullableDecimalConverter() final  Decimal? dailyGoal;
 @override@JsonKey() final  String timezone;
 @override@JsonKey() final  String currency;
 @override@JsonKey() final  bool isConfigured;
@@ -247,18 +251,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RiderProfile&&(identical(other.vehicleType, vehicleType) || other.vehicleType == vehicleType)&&(identical(other.fuelKmPerLiter, fuelKmPerLiter) || other.fuelKmPerLiter == fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, fuelPricePerLiter) || other.fuelPricePerLiter == fuelPricePerLiter)&&(identical(other.depreciationPerKm, depreciationPerKm) || other.depreciationPerKm == depreciationPerKm)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.isConfigured, isConfigured) || other.isConfigured == isConfigured)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RiderProfile&&(identical(other.vehicleType, vehicleType) || other.vehicleType == vehicleType)&&(identical(other.fuelKmPerLiter, fuelKmPerLiter) || other.fuelKmPerLiter == fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, fuelPricePerLiter) || other.fuelPricePerLiter == fuelPricePerLiter)&&(identical(other.depreciationPerKm, depreciationPerKm) || other.depreciationPerKm == depreciationPerKm)&&(identical(other.dailyGoal, dailyGoal) || other.dailyGoal == dailyGoal)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.isConfigured, isConfigured) || other.isConfigured == isConfigured)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,vehicleType,fuelKmPerLiter,fuelPricePerLiter,depreciationPerKm,timezone,currency,isConfigured,updatedAt);
+    return Object.hash(runtimeType,vehicleType,fuelKmPerLiter,fuelPricePerLiter,depreciationPerKm,dailyGoal,timezone,currency,isConfigured,updatedAt);
 }
 
 @override
 String toString() {
-    return 'RiderProfile(vehicleType: $vehicleType, fuelKmPerLiter: $fuelKmPerLiter, fuelPricePerLiter: $fuelPricePerLiter, depreciationPerKm: $depreciationPerKm, timezone: $timezone, currency: $currency, isConfigured: $isConfigured, updatedAt: $updatedAt)';
+    return 'RiderProfile(vehicleType: $vehicleType, fuelKmPerLiter: $fuelKmPerLiter, fuelPricePerLiter: $fuelPricePerLiter, depreciationPerKm: $depreciationPerKm, dailyGoal: $dailyGoal, timezone: $timezone, currency: $currency, isConfigured: $isConfigured, updatedAt: $updatedAt)';
 }
 
 
@@ -269,7 +273,7 @@ abstract mixin class _$RiderProfileCopyWith<$Res> implements $RiderProfileCopyWi
   factory _$RiderProfileCopyWith(_RiderProfile value, $Res Function(_RiderProfile) _then) = __$RiderProfileCopyWithImpl;
 @override @useResult
 $Res call({
- VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm, String timezone, String currency, bool isConfigured, DateTime? updatedAt
+ VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm,@NullableDecimalConverter() Decimal? dailyGoal, String timezone, String currency, bool isConfigured, DateTime? updatedAt
 });
 
 
@@ -286,12 +290,13 @@ class __$RiderProfileCopyWithImpl<$Res>
 
 /// Create a copy of RiderProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? timezone = null,Object? currency = null,Object? isConfigured = null,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? dailyGoal = freezed,Object? timezone = null,Object? currency = null,Object? isConfigured = null,Object? updatedAt = freezed,}) {
   return _then(_RiderProfile(
 vehicleType: freezed == vehicleType ? _self.vehicleType : vehicleType // ignore: cast_nullable_to_non_nullable
 as VehicleType?,fuelKmPerLiter: freezed == fuelKmPerLiter ? _self.fuelKmPerLiter : fuelKmPerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,fuelPricePerLiter: freezed == fuelPricePerLiter ? _self.fuelPricePerLiter : fuelPricePerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,depreciationPerKm: freezed == depreciationPerKm ? _self.depreciationPerKm : depreciationPerKm // ignore: cast_nullable_to_non_nullable
+as Decimal?,dailyGoal: freezed == dailyGoal ? _self.dailyGoal : dailyGoal // ignore: cast_nullable_to_non_nullable
 as Decimal?,timezone: null == timezone ? _self.timezone : timezone // ignore: cast_nullable_to_non_nullable
 as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,isConfigured: null == isConfigured ? _self.isConfigured : isConfigured // ignore: cast_nullable_to_non_nullable
@@ -306,7 +311,7 @@ as DateTime?,
 /// @nodoc
 mixin _$RiderProfileInput {
 
- VehicleType? get vehicleType;@NullableDecimalConverter() Decimal? get fuelKmPerLiter;@NullableDecimalConverter() Decimal? get fuelPricePerLiter;@NullableDecimalConverter() Decimal? get depreciationPerKm; String get timezone; String get currency;
+ VehicleType? get vehicleType;@NullableDecimalConverter() Decimal? get fuelKmPerLiter;@NullableDecimalConverter() Decimal? get fuelPricePerLiter;@NullableDecimalConverter() Decimal? get depreciationPerKm;@NullableDecimalConverter() Decimal? get dailyGoal; String get timezone; String get currency;
 /// Create a copy of RiderProfileInput
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -320,20 +325,20 @@ $RiderProfileInputCopyWith<RiderProfileInput> get copyWith => _$RiderProfileInpu
 @override
 bool operator ==(Object other) {
   final _this = this as RiderProfileInput;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RiderProfileInput&&(identical(other.vehicleType, _this.vehicleType) || other.vehicleType == _this.vehicleType)&&(identical(other.fuelKmPerLiter, _this.fuelKmPerLiter) || other.fuelKmPerLiter == _this.fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, _this.fuelPricePerLiter) || other.fuelPricePerLiter == _this.fuelPricePerLiter)&&(identical(other.depreciationPerKm, _this.depreciationPerKm) || other.depreciationPerKm == _this.depreciationPerKm)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.currency, _this.currency) || other.currency == _this.currency));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RiderProfileInput&&(identical(other.vehicleType, _this.vehicleType) || other.vehicleType == _this.vehicleType)&&(identical(other.fuelKmPerLiter, _this.fuelKmPerLiter) || other.fuelKmPerLiter == _this.fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, _this.fuelPricePerLiter) || other.fuelPricePerLiter == _this.fuelPricePerLiter)&&(identical(other.depreciationPerKm, _this.depreciationPerKm) || other.depreciationPerKm == _this.depreciationPerKm)&&(identical(other.dailyGoal, _this.dailyGoal) || other.dailyGoal == _this.dailyGoal)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.currency, _this.currency) || other.currency == _this.currency));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RiderProfileInput;
-  return Object.hash(runtimeType,_this.vehicleType,_this.fuelKmPerLiter,_this.fuelPricePerLiter,_this.depreciationPerKm,_this.timezone,_this.currency);
+  return Object.hash(runtimeType,_this.vehicleType,_this.fuelKmPerLiter,_this.fuelPricePerLiter,_this.depreciationPerKm,_this.dailyGoal,_this.timezone,_this.currency);
 }
 
 @override
 String toString() {
   final _this = this as RiderProfileInput;
-  return 'RiderProfileInput(vehicleType: ${_this.vehicleType}, fuelKmPerLiter: ${_this.fuelKmPerLiter}, fuelPricePerLiter: ${_this.fuelPricePerLiter}, depreciationPerKm: ${_this.depreciationPerKm}, timezone: ${_this.timezone}, currency: ${_this.currency})';
+  return 'RiderProfileInput(vehicleType: ${_this.vehicleType}, fuelKmPerLiter: ${_this.fuelKmPerLiter}, fuelPricePerLiter: ${_this.fuelPricePerLiter}, depreciationPerKm: ${_this.depreciationPerKm}, dailyGoal: ${_this.dailyGoal}, timezone: ${_this.timezone}, currency: ${_this.currency})';
 }
 
 
@@ -344,7 +349,7 @@ abstract mixin class $RiderProfileInputCopyWith<$Res>  {
   factory $RiderProfileInputCopyWith(RiderProfileInput value, $Res Function(RiderProfileInput) _then) = _$RiderProfileInputCopyWithImpl;
 @useResult
 $Res call({
- VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm, String timezone, String currency
+ VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm,@NullableDecimalConverter() Decimal? dailyGoal, String timezone, String currency
 });
 
 
@@ -361,12 +366,13 @@ class _$RiderProfileInputCopyWithImpl<$Res>
 
 /// Create a copy of RiderProfileInput
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? timezone = null,Object? currency = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? dailyGoal = freezed,Object? timezone = null,Object? currency = null,}) {
   return _then(RiderProfileInput(
 vehicleType: freezed == vehicleType ? _self.vehicleType : vehicleType // ignore: cast_nullable_to_non_nullable
 as VehicleType?,fuelKmPerLiter: freezed == fuelKmPerLiter ? _self.fuelKmPerLiter : fuelKmPerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,fuelPricePerLiter: freezed == fuelPricePerLiter ? _self.fuelPricePerLiter : fuelPricePerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,depreciationPerKm: freezed == depreciationPerKm ? _self.depreciationPerKm : depreciationPerKm // ignore: cast_nullable_to_non_nullable
+as Decimal?,dailyGoal: freezed == dailyGoal ? _self.dailyGoal : dailyGoal // ignore: cast_nullable_to_non_nullable
 as Decimal?,timezone: null == timezone ? _self.timezone : timezone // ignore: cast_nullable_to_non_nullable
 as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,
@@ -454,10 +460,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RiderProfileInput() when $default != null:
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency);case _:
   return orElse();
 
 }
@@ -475,10 +481,10 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency)  $default,) {final _that = this;
 switch (_that) {
 case _RiderProfileInput():
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -495,10 +501,10 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm,  String timezone,  String currency)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VehicleType? vehicleType, @NullableDecimalConverter()  Decimal? fuelKmPerLiter, @NullableDecimalConverter()  Decimal? fuelPricePerLiter, @NullableDecimalConverter()  Decimal? depreciationPerKm, @NullableDecimalConverter()  Decimal? dailyGoal,  String timezone,  String currency)?  $default,) {final _that = this;
 switch (_that) {
 case _RiderProfileInput() when $default != null:
-return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.timezone,_that.currency);case _:
+return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_that.depreciationPerKm,_that.dailyGoal,_that.timezone,_that.currency);case _:
   return null;
 
 }
@@ -510,13 +516,14 @@ return $default(_that.vehicleType,_that.fuelKmPerLiter,_that.fuelPricePerLiter,_
 
 @JsonSerializable(includeIfNull: true)
 class _RiderProfileInput implements RiderProfileInput {
-  const _RiderProfileInput({this.vehicleType, @NullableDecimalConverter() this.fuelKmPerLiter, @NullableDecimalConverter() this.fuelPricePerLiter, @NullableDecimalConverter() this.depreciationPerKm, this.timezone = RiderProfileDefaults.timezone, this.currency = RiderProfileDefaults.currency});
+  const _RiderProfileInput({this.vehicleType, @NullableDecimalConverter() this.fuelKmPerLiter, @NullableDecimalConverter() this.fuelPricePerLiter, @NullableDecimalConverter() this.depreciationPerKm, @NullableDecimalConverter() this.dailyGoal, this.timezone = RiderProfileDefaults.timezone, this.currency = RiderProfileDefaults.currency});
   
 
 @override final  VehicleType? vehicleType;
 @override@NullableDecimalConverter() final  Decimal? fuelKmPerLiter;
 @override@NullableDecimalConverter() final  Decimal? fuelPricePerLiter;
 @override@NullableDecimalConverter() final  Decimal? depreciationPerKm;
+@override@NullableDecimalConverter() final  Decimal? dailyGoal;
 @override@JsonKey() final  String timezone;
 @override@JsonKey() final  String currency;
 
@@ -533,18 +540,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RiderProfileInput&&(identical(other.vehicleType, vehicleType) || other.vehicleType == vehicleType)&&(identical(other.fuelKmPerLiter, fuelKmPerLiter) || other.fuelKmPerLiter == fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, fuelPricePerLiter) || other.fuelPricePerLiter == fuelPricePerLiter)&&(identical(other.depreciationPerKm, depreciationPerKm) || other.depreciationPerKm == depreciationPerKm)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.currency, currency) || other.currency == currency));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RiderProfileInput&&(identical(other.vehicleType, vehicleType) || other.vehicleType == vehicleType)&&(identical(other.fuelKmPerLiter, fuelKmPerLiter) || other.fuelKmPerLiter == fuelKmPerLiter)&&(identical(other.fuelPricePerLiter, fuelPricePerLiter) || other.fuelPricePerLiter == fuelPricePerLiter)&&(identical(other.depreciationPerKm, depreciationPerKm) || other.depreciationPerKm == depreciationPerKm)&&(identical(other.dailyGoal, dailyGoal) || other.dailyGoal == dailyGoal)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.currency, currency) || other.currency == currency));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,vehicleType,fuelKmPerLiter,fuelPricePerLiter,depreciationPerKm,timezone,currency);
+    return Object.hash(runtimeType,vehicleType,fuelKmPerLiter,fuelPricePerLiter,depreciationPerKm,dailyGoal,timezone,currency);
 }
 
 @override
 String toString() {
-    return 'RiderProfileInput(vehicleType: $vehicleType, fuelKmPerLiter: $fuelKmPerLiter, fuelPricePerLiter: $fuelPricePerLiter, depreciationPerKm: $depreciationPerKm, timezone: $timezone, currency: $currency)';
+    return 'RiderProfileInput(vehicleType: $vehicleType, fuelKmPerLiter: $fuelKmPerLiter, fuelPricePerLiter: $fuelPricePerLiter, depreciationPerKm: $depreciationPerKm, dailyGoal: $dailyGoal, timezone: $timezone, currency: $currency)';
 }
 
 
@@ -555,7 +562,7 @@ abstract mixin class _$RiderProfileInputCopyWith<$Res> implements $RiderProfileI
   factory _$RiderProfileInputCopyWith(_RiderProfileInput value, $Res Function(_RiderProfileInput) _then) = __$RiderProfileInputCopyWithImpl;
 @override @useResult
 $Res call({
- VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm, String timezone, String currency
+ VehicleType? vehicleType,@NullableDecimalConverter() Decimal? fuelKmPerLiter,@NullableDecimalConverter() Decimal? fuelPricePerLiter,@NullableDecimalConverter() Decimal? depreciationPerKm,@NullableDecimalConverter() Decimal? dailyGoal, String timezone, String currency
 });
 
 
@@ -572,12 +579,13 @@ class __$RiderProfileInputCopyWithImpl<$Res>
 
 /// Create a copy of RiderProfileInput
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? timezone = null,Object? currency = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? vehicleType = freezed,Object? fuelKmPerLiter = freezed,Object? fuelPricePerLiter = freezed,Object? depreciationPerKm = freezed,Object? dailyGoal = freezed,Object? timezone = null,Object? currency = null,}) {
   return _then(_RiderProfileInput(
 vehicleType: freezed == vehicleType ? _self.vehicleType : vehicleType // ignore: cast_nullable_to_non_nullable
 as VehicleType?,fuelKmPerLiter: freezed == fuelKmPerLiter ? _self.fuelKmPerLiter : fuelKmPerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,fuelPricePerLiter: freezed == fuelPricePerLiter ? _self.fuelPricePerLiter : fuelPricePerLiter // ignore: cast_nullable_to_non_nullable
 as Decimal?,depreciationPerKm: freezed == depreciationPerKm ? _self.depreciationPerKm : depreciationPerKm // ignore: cast_nullable_to_non_nullable
+as Decimal?,dailyGoal: freezed == dailyGoal ? _self.dailyGoal : dailyGoal // ignore: cast_nullable_to_non_nullable
 as Decimal?,timezone: null == timezone ? _self.timezone : timezone // ignore: cast_nullable_to_non_nullable
 as String,currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,

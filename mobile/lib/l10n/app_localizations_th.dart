@@ -311,6 +311,134 @@ class AppLocalizationsTh extends AppLocalizations {
   String get homeOpen => 'เปิด';
 
   @override
+  String get goalSetTitle => 'ตั้งเป้ากำไรวันนี้';
+
+  @override
+  String get goalSetMessage => 'ดูว่าอีกเท่าไรจะถึงเป้า';
+
+  @override
+  String goalTarget(String amount) {
+    return 'เป้าวันนี้ $amount';
+  }
+
+  @override
+  String goalRemaining(String amount) {
+    return 'อีก $amount ถึงเป้า';
+  }
+
+  @override
+  String get goalReached => 'ถึงเป้าแล้ว!';
+
+  @override
+  String goalSurplus(String amount) {
+    return 'เกินเป้า $amount';
+  }
+
+  @override
+  String goalPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get goalEdit => 'แก้เป้า';
+
+  @override
+  String get goalSheetTitle => 'เป้ากำไรสุทธิต่อวัน';
+
+  @override
+  String get goalSheetMessage =>
+      'นับจากกำไรสุทธิของวันนี้ (รายได้ − ค่าใช้จ่าย) ตามเขตเวลาในโปรไฟล์';
+
+  @override
+  String get goalField => 'เป้ากำไรสุทธิ';
+
+  @override
+  String get goalRemove => 'ลบเป้า';
+
+  @override
+  String get goalSaved => 'บันทึกเป้าแล้ว';
+
+  @override
+  String get goalRemoved => 'ลบเป้าแล้ว';
+
+  @override
+  String get riderProfileDailyGoalHelper =>
+      'ไม่บังคับ · แสดงเป็นวงแหวนบนหน้าหลัก';
+
+  @override
+  String get timerIdleTitle => 'พร้อมออกวิ่งไหม?';
+
+  @override
+  String get timerIdleMessage =>
+      'กดเริ่มตอนออกวิ่ง กดหยุดตอนเลิก แอปจะกรอกเวลาช่วงทำงานให้';
+
+  @override
+  String get timerStart => 'เริ่มงาน';
+
+  @override
+  String get timerRunningTitle => 'กำลังทำงาน';
+
+  @override
+  String timerStartedAt(String time) {
+    return 'เริ่ม $time';
+  }
+
+  @override
+  String timerElapsed(String duration) {
+    return 'เวลาทำงาน $duration';
+  }
+
+  @override
+  String get timerStop => 'หยุดและบันทึก';
+
+  @override
+  String get timerDiscard => 'ทิ้ง';
+
+  @override
+  String get timerStoppedTitle => 'หยุดแล้ว · ยังไม่ได้บันทึก';
+
+  @override
+  String timerStoppedRange(String duration, String start, String end) {
+    return '$duration · $start–$end';
+  }
+
+  @override
+  String get timerSave => 'บันทึกช่วงทำงาน';
+
+  @override
+  String get timerResume => 'ทำต่อ';
+
+  @override
+  String get timerDiscardTitle => 'ทิ้งเวลาที่จับไว้?';
+
+  @override
+  String get timerDiscardMessage =>
+      'เวลานี้ยังไม่ได้บันทึก ทิ้งแล้วเอาคืนไม่ได้';
+
+  @override
+  String get timerTooShortTitle => 'ยังไม่ถึง 1 นาที';
+
+  @override
+  String get timerTooShortMessage =>
+      'ช่วงทำงานต้องยาวอย่างน้อย 1 นาที จะทำต่อหรือทิ้ง?';
+
+  @override
+  String get timerTooLongTitle => 'ลืมกดหยุดหรือเปล่า?';
+
+  @override
+  String timerTooLongMessage(String duration) {
+    return 'ตัวจับเวลาเดินมา $duration เกิน 24 ชม. ที่บันทึกได้ในช่วงเดียว ตรวจเวลาเลิกงานในหน้าถัดไป';
+  }
+
+  @override
+  String get timerTooLongContinue => 'ไปแก้เวลา';
+
+  @override
+  String sessionTimerTooLong(String duration) {
+    return 'ตัวจับเวลาเดินมา $duration · แก้เวลาเลิกงานให้ตรงจริง (ช่วงเดียวไม่เกิน 24 ชม.)';
+  }
+
+  @override
   String get trueProfitTitle => 'TrueProfit';
 
   @override

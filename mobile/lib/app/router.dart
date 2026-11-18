@@ -24,6 +24,7 @@ import '../features/profile/presentation/delete_account_screen.dart';
 import '../features/profile/presentation/display_name_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/rider_profile_form_screen.dart';
+import '../features/profit/domain/shift_timer.dart';
 import '../features/profit/presentation/expense_form_screen.dart';
 import '../features/profit/presentation/income_form_screen.dart';
 import '../features/profit/presentation/records_screen.dart';
@@ -304,7 +305,9 @@ List<GoRoute> formRoutes(GlobalKey<NavigatorState> root) => [
   GoRoute(
     parentNavigatorKey: root,
     path: Routes.workSessionNew,
-    builder: (context, state) => const WorkSessionFormScreen(),
+    // `extra`: start and end from the Home timer (in-app navigation only).
+    builder: (context, state) =>
+        WorkSessionFormScreen(draft: state.extra as SessionDraft?),
   ),
   GoRoute(
     parentNavigatorKey: root,

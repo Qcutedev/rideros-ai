@@ -43,6 +43,7 @@ class RiderProfileIn(StrictModel):
     fuel_km_per_liter: Annotated[Decimal, Field(gt=0, max_digits=6, decimal_places=2)] | None = None
     fuel_price_per_liter: Annotated[Decimal, Field(ge=0, max_digits=8, decimal_places=2)] | None = None
     depreciation_per_km: Annotated[Decimal, Field(ge=0, max_digits=8, decimal_places=4)] | None = None
+    daily_goal: Annotated[Decimal, Field(gt=0, max_digits=12, decimal_places=2)] | None = None
     timezone: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=64)] = (
         DEFAULT_TIMEZONE
     )
@@ -54,6 +55,7 @@ class RiderProfileOut(BaseModel):
     fuel_km_per_liter: Decimal | None
     fuel_price_per_liter: Decimal | None
     depreciation_per_km: Decimal | None
+    daily_goal: Decimal | None = Field(description="Net-profit target for one day; null = no goal")
     timezone: str
     currency: str
     is_configured: bool = Field(description="False until the rider saves the profile once (defaults shown)")

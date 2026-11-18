@@ -241,6 +241,38 @@ void main() {
       expect(profiles.lastSaved?.depreciationPerKm, isNull);
     });
 
+    testWidgets('daily goal: starts with the saved goal, sent or cleared', (
+      tester,
+    ) async {
+      profiles = FakeRiderProfileRepository(
+        configured: true,
+        profile: _configured.copyWith(dailyGoal: Decimal.parse('600')),
+      );
+      await pumpForm(tester);
+      expect(find.text('600'), findsOneWidget);
+
+      await enter(tester, 'riderProfile.dailyGoal', '750.5');
+      await tapKey(tester, 'riderProfile.submit');
+      expect(profiles.lastSaved?.dailyGoal, Decimal.parse('750.5'));
+      // The other fields go back unchanged.
+      expect(profiles.lastSaved?.fuelKmPerLiter, Decimal.parse('45.5'));
+    });
+
+    testWidgets('daily goal: empty sends null, zero is refused', (
+      tester,
+    ) async {
+      await pumpForm(tester);
+      await enter(tester, 'riderProfile.dailyGoal', '0');
+      await tapKey(tester, 'riderProfile.submit');
+      expect(find.text(t.validationNumberMustBePositive), findsOneWidget);
+      expect(profiles.saves, 0);
+
+      await enter(tester, 'riderProfile.dailyGoal', '');
+      await tapKey(tester, 'riderProfile.submit');
+      expect(profiles.saves, 1);
+      expect(profiles.lastSaved?.dailyGoal, isNull);
+    });
+
     testWidgets('validation runs before saving', (tester) async {
       await pumpForm(tester);
       await enter(tester, 'riderProfile.fuelKmPerLiter', '0');

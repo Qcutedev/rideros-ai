@@ -4,10 +4,12 @@ import 'package:decimal/decimal.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/network/paged_result.dart';
 import 'package:rideros_ai/core/utils/date_json.dart';
+import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
 import 'package:rideros_ai/features/profit/domain/profit_period.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_repositories.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
+import 'package:rideros_ai/features/profit/domain/shift_timer.dart';
 import 'package:rideros_ai/features/profit/domain/work_patterns.dart';
 
 Decimal d(String value) => Decimal.parse(value);
@@ -362,4 +364,27 @@ class ProfitFakes {
   final income = fakeIncomeRepository();
   final expenses = fakeExpenseRepository();
   final sessions = fakeSessionRepository();
+  final timer = MemoryShiftTimerStore();
+}
+
+/// The Home timer store without the device: entries per user id, as encoded on disk.
+class MemoryShiftTimerStore implements ShiftTimerStore {
+  final entries = <String, String>{};
+  Object? readError;
+  Object? writeError;
+  int writes = 0;
+
+  @override
+  Future<ShiftTimerState> read(String userId) async {
+    if (readError != null) throw readError!;
+    return decodeShiftTimer(entries[userId]);
+  }
+
+  @override
+  Future<void> write(String userId, ShiftTimerState state) async {
+    writes++;
+    if (writeError != null) throw writeError!;
+    final value = encodeShiftTimer(state);
+    value == null ? entries.remove(userId) : entries[userId] = value;
+  }
 }

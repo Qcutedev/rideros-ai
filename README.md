@@ -41,7 +41,7 @@ that other riders report.
 
 | Module | What it does | AI / analytics |
 |---|---|---|
-| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. |
+| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. Set a daily net-profit goal (progress ring on Home) and time a shift with a start/stop button that fills in the work session. | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. |
 | **Pickup Intelligence** | Estimate order-to-pickup minutes for a restaurant, with an 80% interval. Log your own waiting times. | XGBoost regressor + split-conformal interval. Per-restaurant statistics. |
 | **Shift Simulator** | Plan shifts as scenarios and compare estimated revenue, cost and profit. | Deterministic formulas. "From my history" mode uses the rider's own past sessions (P25–P75 range). |
 | **RoadContext** | Report floods, road damage, closures and obstacles on a map. Duplicate reports merge into one incident. | MobileNetV3 photo classifier. It only **suggests** a category with a confidence score; it never changes a report. |

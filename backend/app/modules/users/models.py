@@ -48,6 +48,7 @@ class RiderProfile(Base):
         CheckConstraint(
             "depreciation_per_km IS NULL OR depreciation_per_km >= 0", name="depreciation_per_km"
         ),
+        CheckConstraint("daily_goal IS NULL OR daily_goal > 0", name="daily_goal"),
         CheckConstraint("char_length(timezone) BETWEEN 1 AND 64", name="timezone_length"),
         CheckConstraint("currency ~ '^[A-Z]{3}$'", name="currency_format"),
     )
@@ -59,6 +60,8 @@ class RiderProfile(Base):
     fuel_km_per_liter: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     fuel_price_per_liter: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
     depreciation_per_km: Mapped[Decimal | None] = mapped_column(Numeric(8, 4))
+    # Net-profit target for one day (Home progress ring); NULL = no goal.
+    daily_goal: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
     # IANA name, validated against tzdata in the service (the DB only bounds the length).
     timezone: Mapped[str] = mapped_column(Text, nullable=False, server_default=text(f"'{DEFAULT_TIMEZONE}'"))
     currency: Mapped[str] = mapped_column(Text, nullable=False, server_default=text(f"'{DEFAULT_CURRENCY}'"))

@@ -92,12 +92,16 @@ class ProfitHeroCard extends StatelessWidget {
     required this.title,
     required this.metrics,
     required this.currency,
+    this.goal,
     super.key,
   });
 
   final String title;
   final ProfitMetrics metrics;
   final String currency;
+
+  /// Shown between the net profit and the tiles (Home's daily goal).
+  final Widget? goal;
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +193,10 @@ class ProfitHeroCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (goal case final goal?) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  goal,
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 ProfitTiles(metrics: metrics, currency: currency),
               ],

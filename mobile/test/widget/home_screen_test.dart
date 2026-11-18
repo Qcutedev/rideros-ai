@@ -39,6 +39,7 @@ void main() {
     await tester.pump();
     expect(find.byKey(const Key('skeleton')), findsOneWidget);
     // Shortcuts work while the numbers load.
+    await scrollIntoView(tester, find.byKey(const Key('home.addIncome')));
     expect(find.byKey(const Key('home.addIncome')), findsOneWidget);
     profit.profit.gate!.complete();
     await tester.pumpAndSettle();
@@ -51,8 +52,16 @@ void main() {
     expect(find.text(t.failureNetwork), findsOneWidget);
 
     profit.profit.summaryError = null;
+    await tester.ensureVisible(find.text(t.commonRetry));
+    await tester.pump();
     await tester.tap(find.text(t.commonRetry));
     await tester.pumpAndSettle();
+    // The shorter empty card now sits above the scrolled-to position.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('home.empty')),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byKey(const Key('home.empty')), findsOneWidget);
   });
 
@@ -125,7 +134,7 @@ void main() {
   ]) {
     testWidgets('$key opens $route', (tester) async {
       await pumpHome(tester);
-      await tapKey(tester, key);
+      await scrollAndTap(tester, key);
       expect(find.text('route:$route'), findsOneWidget);
     });
   }
