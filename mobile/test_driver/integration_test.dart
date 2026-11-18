@@ -42,25 +42,6 @@ Future<void> _verify(Map<String, dynamic>? data) async {
     '0.6000',
   ]);
 
-  // Pickup: the app widens the interval to whole minutes and rounds the
-  // midpoint to one decimal without trailing zeros.
-  final prediction = data['prediction'] as Map<String, dynamic>;
-  final p = await _row(
-    'select floor(p.interval_low)::int, ceil(p.interval_high)::int, '
-    'trim_scale(round(p.predicted_minutes, 1)), r.name, count(*) over () '
-    'from pickup_predictions p join restaurants r on r.id = p.restaurant_id '
-    "where p.user_id = '$userId'",
-  );
-  checks
-    ..equal('pickup_predictions rows', p[4], '1')
-    ..equal('prediction restaurant', p[3], prediction['restaurant'])
-    ..equal('prediction range', prediction['range'], '${p[0]}–${p[1]} นาที')
-    ..equal(
-      'prediction midpoint',
-      prediction['midpoint'],
-      'ค่ากลางประมาณ ${p[2]} นาที',
-    );
-
   // TrueProfit day view and the home card: today in the rider's timezone.
   const today = "(now() at time zone 'Asia/Bangkok')::date";
   final money = await _row(
@@ -129,11 +110,8 @@ Future<void> _verify(Map<String, dynamic>? data) async {
     "(select count(*) from income_records where user_id = '$userId') + "
     "(select count(*) from expense_records where user_id = '$userId') + "
     "(select count(*) from work_sessions where user_id = '$userId') + "
-    "(select count(*) from pickup_predictions where user_id = '$userId') + "
-    "(select count(*) from pickup_logs where user_id = '$userId') + "
     "(select count(*) from shift_scenarios where user_id = '$userId') + "
-    "(select count(*) from refresh_tokens where user_id = '$userId') + "
-    "(select count(*) from restaurants where owner_user_id = '$userId')",
+    "(select count(*) from refresh_tokens where user_id = '$userId')",
   );
   if (left[0] != '0') _fail('${left[0]} rows left after DELETE /me');
   stdout.writeln('E2E: deleted $email, no rows left.');

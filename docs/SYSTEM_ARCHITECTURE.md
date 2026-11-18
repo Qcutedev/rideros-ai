@@ -1,5 +1,7 @@
 # SYSTEM_ARCHITECTURE.md — RiderOS AI (Phase 0)
 
+> **อัปเดต 2026-11-18:** เอา Pickup Intelligence ออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20): ไม่มี Module `pickup`, ไม่มี `/pickup/*` และ Backend ไม่โหลดโมเดลเอง (รูปถนนจัดประเภทใน `cv_service`). ส่วนที่พูดถึง Pickup ด้านล่างคือแบบเดิม เก็บไว้เป็นบันทึก `ml/` ยังอยู่เป็น Case study ที่แอปไม่ได้ใช้
+
 > สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · ปรับปรุงตาม Decision D5/D6
 > Diagram ทั้งหมดเขียนด้วย Mermaid (GitHub แสดงผลได้)
 

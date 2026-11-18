@@ -378,12 +378,12 @@ class _AiTools extends StatelessWidget {
             children: [
               Expanded(
                 child: _AiToolCard(
-                  key: const Key('home.pickup'),
+                  key: const Key('home.road'),
                   tone: AppTone.obsidian,
-                  icon: Icons.storefront_rounded,
-                  title: l10n.homePickupCardTitle,
-                  message: l10n.homePickupCardMessage,
-                  onTap: () => context.go(Routes.pickup),
+                  icon: Icons.alt_route_rounded,
+                  title: l10n.homeRoadTitle,
+                  message: l10n.homeRoadMessage,
+                  onTap: () => context.go(Routes.road),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -400,8 +400,6 @@ class _AiTools extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
-        const _RoadCard(),
       ],
     );
   }
@@ -460,54 +458,6 @@ class _AiToolCard extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Entry to RoadContext (no tab of its own). Asks for nothing until opened.
-class _RoadCard extends StatelessWidget {
-  const _RoadCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return ToneCard(
-      key: const Key('home.road'),
-      tone: AppTone.sage,
-      onTap: () => context.push(Routes.road),
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Row(
-            children: [
-              const IconWell(icon: Icons.alt_route_rounded, square: true),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.homeRoadTitle,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      l10n.homeRoadMessage,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.chevron_right_rounded),
             ],
           );
         },

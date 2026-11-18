@@ -20,8 +20,7 @@ async def test_health(client: httpx.AsyncClient) -> None:
 async def test_ready_when_database_answers(client: httpx.AsyncClient) -> None:
     resp = await client.get("/ready")
     assert resp.status_code == 200
-    assert resp.json()["checks"]["database"] == "ok"
-    assert resp.json()["checks"]["model"] == "ok (pickup_o2p/0.0.0-test)"
+    assert resp.json() == {"status": "ok", "checks": {"database": "ok"}}
 
 
 @pytest.fixture
@@ -37,11 +36,7 @@ async def broken_db_client(database_url: str) -> AsyncIterator[httpx.AsyncClient
 async def test_ready_reports_unavailable_database(broken_db_client: httpx.AsyncClient) -> None:
     resp = await broken_db_client.get("/ready")
     assert resp.status_code == 503
-    # This app also has no MODEL_DIR, so the model check fails too.
-    assert resp.json() == {
-        "status": "unavailable",
-        "checks": {"database": "unavailable", "model": "not_loaded"},
-    }
+    assert resp.json() == {"status": "unavailable", "checks": {"database": "unavailable"}}
 
 
 async def test_unknown_route_uses_error_envelope(client: httpx.AsyncClient) -> None:

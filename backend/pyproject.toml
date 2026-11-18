@@ -21,16 +21,9 @@ dependencies = [
     "limits>=5.0",
     # Shared rate-limit store (RATE_LIMIT_STORAGE_URL=redis://…); talks to Valkey in production.
     "redis>=6.4",
-    # ML serving (P2c). rideros-ml provides the classes pipeline.joblib references plus the feature
-    # builder. The libraries below must equal the versions in the artifact's metadata.json
-    # ("libraries"); app/ml/registry.py refuses to load the model otherwise.
-    "rideros-ml",
-    "scikit-learn==1.9.1",
-    "xgboost==3.4.1; sys_platform != 'linux'",
-    "xgboost-cpu==3.4.1; sys_platform == 'linux'",
-    "pandas==3.1.1",
-    "numpy==2.5.4",
-    "joblib==1.6.0",
+    # Work Patterns (profit/patterns.py: K-Means, silhouette, ARI).
+    "scikit-learn>=1.9.1",
+    "numpy>=2.5.4",
     "pillow>=12.0",
     # Trend significance test (profit/trend_analysis.py); already installed with scikit-learn.
     "scipy>=1.18",
@@ -47,9 +40,6 @@ dev = [
     "ruff>=0.14",
     "python-dotenv>=1.2.4",
 ]
-
-[tool.uv.sources]
-rideros-ml = { path = "../ml" }
 
 [build-system]
 requires = ["hatchling>=1.25"]

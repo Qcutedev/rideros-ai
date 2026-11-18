@@ -22,7 +22,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
 from app.main import create_app
-from tests import fake_artifact
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 load_dotenv(BACKEND_DIR.parent / ".env", override=False)
@@ -96,26 +95,13 @@ def make_settings(database_url: str, **overrides: object) -> Settings:
 
 
 @pytest.fixture(scope="session")
-def model_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    root = tmp_path_factory.mktemp("artifacts")
-    fake_artifact.build(root)
-    return root
-
-
-@pytest.fixture(scope="session")
 def road_image_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return tmp_path_factory.mktemp("road_images")
 
 
 @pytest.fixture(scope="session")
-def settings(database_url: str, model_dir: Path, road_image_dir: Path) -> Settings:
-    return make_settings(
-        database_url,
-        model_dir=model_dir,
-        road_image_dir=road_image_dir,
-        active_model_name=fake_artifact.NAME,
-        active_model_version=fake_artifact.VERSION,
-    )
+def settings(database_url: str, road_image_dir: Path) -> Settings:
+    return make_settings(database_url, road_image_dir=road_image_dir)
 
 
 @pytest.fixture(scope="session")

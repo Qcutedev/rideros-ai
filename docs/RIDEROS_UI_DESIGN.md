@@ -1,5 +1,7 @@
 # RiderOS AI --- UI/UX Design Specification
 
+> **อัปเดต 2026-11-18:** เอา Pickup Intelligence ออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20). แท็บที่ 2 เป็น **ถนน** และการ์ด RoadContext ย้ายไปอยู่ในแถว "เครื่องมือ AI" ของ Home แทนการ์ด Pickup ส่วนที่พูดถึง Pickup ด้านล่างคือแบบเดิม
+
 **เวอร์ชัน:** 2.0 (Lime Obsidian)\
 **วันที่:** 10 พฤศจิกายน 2026 · ปรับ Visual identity 16 พฤศจิกายน 2026\
 **แพลตฟอร์ม:** Flutter (Android) · Material 3 · ภาษาไทย\

@@ -31,7 +31,6 @@ void main() {
     FakeAuthRepository(),
     FakeRiderProfileRepository(configured: true),
     profit,
-    null,
     shifts,
   );
 

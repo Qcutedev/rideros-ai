@@ -378,7 +378,7 @@ void main() {
   });
 
   group('about', () {
-    testWidgets('shows the data licence and the required acknowledgement', (
+    testWidgets('credits the photo classifier data and its licences', (
       tester,
     ) async {
       await pumpScreen(
@@ -387,11 +387,10 @@ void main() {
         screen: const AboutScreen(),
         overrides: fakeRepositories(auth, profiles),
       );
-      expect(
-        find.text('This research was supported by data provided by Meituan.'),
-        findsOneWidget,
-      );
+      expect(find.text(t.aboutDataTitle), findsOneWidget);
+      expect(find.textContaining('RDD2022'), findsOneWidget);
       expect(find.textContaining('CC BY-NC 4.0'), findsOneWidget);
+      expect(find.textContaining('Meituan'), findsNothing);
       await tapKey(tester, 'about.licenses');
       expect(find.byType(LicensePage), findsOneWidget);
     });

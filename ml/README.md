@@ -1,8 +1,13 @@
-# rideros-ml — Pickup Intelligence ML pipeline
+# rideros-ml — order-to-pickup ML pipeline (case study)
 
-This is the offline ML pipeline behind RiderOS AI's *Pickup Intelligence* module. It downloads and validates the
-Meituan INFORMS TSL dataset, builds a leakage-safe order table, trains and compares models, and exports a
-versioned artifact that the Phase 2 backend will serve.
+This is the offline ML pipeline that was behind RiderOS AI's *Pickup Intelligence* module. It downloads and
+validates the Meituan INFORMS TSL dataset, builds a leakage-safe order table, trains and compares models, and
+exports a versioned artifact.
+
+> **Not used by the app since 2026-11-18.** Pickup Intelligence was removed from the app and the backend
+> (`docs/HANDOFF.md` §4.20): the data is from one Chinese city, there is no Thai data to retrain on, and the
+> delivery platforms already show their own preparation-time estimates. The pipeline, its tests and reports stay
+> here as a case study; nothing in `backend/` installs or loads this package any more.
 
 > **What the model predicts:** **order-to-pickup minutes**, i.e. the minutes from order creation
 > (`platform_order_time`) to rider pickup (`fetch_time`) for non-prebook orders at restaurants in the dataset.

@@ -25,15 +25,12 @@ final t = AppLocalizationsTh();
 /// delete the account afterwards).
 const e2ePassword = 'e2e journey pass 2026';
 
-/// A dataset restaurant with "sufficient" data in the shipped import.
-const restaurantName = 'POI-203';
-
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   // A tap that lands on something else (e.g. a closing menu) fails at once.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  testWidgets('Register → Login → Dashboard → Pickup → Income → Expense → Profit → '
+  testWidgets('Register → Login → Dashboard → Income → Expense → Profit → '
       'Scenarios → Compare', (tester) async {
     final report = <String, Object?>{};
     final email = 'e2e+${DateTime.now().millisecondsSinceEpoch}@example.com';
@@ -73,46 +70,7 @@ void main() {
     await pumpUntil(tester, byKey('home.empty'));
     report['home_empty_shown'] = true;
 
-    // 4. Pickup prediction for a dataset restaurant.
-    await tapOn(tester, byKey('nav.pickup'));
-    await type(tester, 'pickup.search', restaurantName);
-    // The result row (`restaurant.<id>`), not the search field's own text.
-    final row = find.ancestor(
-      of: find.text(restaurantName),
-      matching: find.byWidgetPredicate(
-        (w) =>
-            w.key is ValueKey<String> &&
-            RegExp(r'^restaurant\.[0-9a-f-]{36}$')
-                .hasMatch((w.key! as ValueKey<String>).value),
-      ),
-    );
-    await tapOn(tester, row.first);
-    await tapOn(tester, byKey('restaurant.predict'));
-    await pumpUntil(tester, byKey('prediction.range'));
-    report['prediction'] = {
-      'restaurant': restaurantName,
-      'range': textOf(tester, byKey('prediction.range')),
-      'midpoint': textOf(tester, byKey('prediction.midpoint')),
-      'warnings': [
-        for (final e
-            in find
-                .byWidgetPredicate(
-                  (w) =>
-                      w.key is ValueKey<String> &&
-                      (w.key! as ValueKey<String>).value.startsWith(
-                        'prediction.warning.',
-                      ),
-                )
-                .evaluate())
-          (e.widget.key! as ValueKey<String>).value.substring(
-            'prediction.warning.'.length,
-          ),
-      ],
-    };
-    await backTo(tester, byKey('nav.home'));
-    await tapOn(tester, byKey('nav.home'));
-
-    // 5. Add income (today, 5 hours).
+    // 4. Add income (today, 5 hours).
     await tapOn(tester, byKey('home.addIncome'));
     await type(tester, 'income.amount', '850.50');
     await type(tester, 'income.source', 'E2E Food');
@@ -122,7 +80,7 @@ void main() {
     await tapOn(tester, byKey('income.submit'));
     await pumpUntil(tester, byKey('home.today'));
 
-    // 6. Add expense (today, fuel).
+    // 5. Add expense (today, fuel).
     await tapOn(tester, byKey('home.addExpense'));
     await pickDropdown(tester, 'expense.category', t.expenseCategoryFuel);
     await type(tester, 'expense.amount', '120.25');
@@ -140,7 +98,7 @@ void main() {
       find.descendant(of: today, matching: byKey('metrics.net')),
     );
 
-    // 7. View profit (day view).
+    // 6. View profit (day view).
     await tapOn(tester, byKey('home.openProfit'));
     final profit = find.byType(TrueProfitScreen);
     await pumpUntil(
@@ -160,7 +118,7 @@ void main() {
       'net_per_hour': valueAfter(tester, profit, t.profitNetPerHour),
     };
 
-    // 8. Create two scenarios (assumption method, default 17:00–22:00).
+    // 7. Create two scenarios (assumption method, default 17:00–22:00).
     await tapOn(tester, byKey('nav.shifts'));
     final a = await createScenario(
       tester,
@@ -178,7 +136,7 @@ void main() {
       otherCosts: '20',
     );
 
-    // 9. Compare both.
+    // 8. Compare both.
     await tapOn(tester, byKey('shift.$a.select'));
     await tapOn(tester, byKey('shift.$b.select'));
     await tapOn(tester, byKey('shifts.compare'));

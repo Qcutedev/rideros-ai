@@ -23,7 +23,7 @@ services:
 
   backend:
     build:
-      context: .  # the image also installs ml/ (rideros-ml) for model loading
+      context: .
       dockerfile: backend/Dockerfile
     depends_on:
       db:
@@ -35,17 +35,11 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-rideros}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-rideros}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
-      # ml/artifacts is mounted read-only. Set MODEL_DIR= (empty) in .env to run without the model.
-      MODEL_DIR: ${MODEL_DIR-/artifacts}
-      ACTIVE_MODEL_NAME: ${ACTIVE_MODEL_NAME:-pickup_o2p}
-      ACTIVE_MODEL_VERSION: ${ACTIVE_MODEL_VERSION:-1.0.0}
-      RESTAURANT_STATS_DIR: ${RESTAURANT_STATS_DIR-/artifacts/restaurant_stats/1.0.0}
       # RoadContext report photos (re-encoded JPEGs, no EXIF). Set ROAD_IMAGE_DIR= to turn uploads off.
       ROAD_IMAGE_DIR: ${ROAD_IMAGE_DIR-/data/road_images}
       # Photo classifier (background, suggestion only). Set CV_SERVICE_URL= to turn it off.
       CV_SERVICE_URL: ${CV_SERVICE_URL-http://cv:8100}
     volumes:
-      - ./ml/artifacts:/artifacts:ro
       - road-images:/data/road_images
     ports:
       - "127.0.0.1:${API_HOST_PORT:-8000}:8000"

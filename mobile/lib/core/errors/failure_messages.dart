@@ -31,10 +31,6 @@ String _apiMessage(
   ApiErrorCode.invalidTimeRange => l10n.failureInvalidTimeRange,
   ApiErrorCode.workSessionTooLong => l10n.failureWorkSessionTooLong,
   ApiErrorCode.invalidWorkSession => l10n.failureInvalidWorkSession,
-  ApiErrorCode.modelUnavailable => l10n.failureModelUnavailable,
-  ApiErrorCode.restaurantNotSupported => l10n.failureRestaurantNotSupported,
-  ApiErrorCode.invalidPickupTimes => l10n.failureInvalidPickupTimes,
-  ApiErrorCode.pickupWaitTooLong => l10n.failurePickupWaitTooLong,
   ApiErrorCode.invalidShiftLength => l10n.failureInvalidShiftLength,
   ApiErrorCode.missingAssumption => l10n.failureMissingAssumption,
   ApiErrorCode.insufficientHistory => l10n.failureInsufficientHistory,
@@ -48,7 +44,6 @@ String _apiMessage(
   ApiErrorCode.invalidBbox => l10n.failureInvalidBbox,
   // `incident_not_found`, `image_not_found`, `income_not_found`,
   // `expense_not_found`, `work_session_not_found`,
-  // `restaurant_not_found`, `pickup_log_not_found`,
   // `shift_scenario_not_found`, `not_found`.
   _ when failure.statusCode == 404 => l10n.failureNotFound,
   _ when failure.statusCode >= 500 => l10n.failureServer,

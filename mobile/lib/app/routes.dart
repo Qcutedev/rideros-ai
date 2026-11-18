@@ -11,35 +11,11 @@ abstract final class Routes {
   // Bottom-navigation tabs (signed in).
   static const home = '/home';
   static const profit = '/profit';
-  static const pickup = '/pickup';
-
+  static const road = '/road';
   static const profile = '/profile';
 
   /// TrueProfit records: `?tab=` one of [RecordsTab] names.
   static const records = '/profit/records';
-
-  // Pickup screens inside the Pickup tab.
-  static const restaurantPattern = '/pickup/restaurants/:id';
-  static const predictionPattern = '/pickup/restaurants/:id/prediction';
-  static const predictionHistory = '/pickup/predictions';
-  static const pickupLogs = '/pickup/logs';
-
-  // Pickup forms and pages, shown over the tabs.
-  static const pickupLogNew = '/pickup/logs/new';
-  static const ownRestaurantNew = '/pickup/own-restaurant';
-  static const restaurantPicker = '/pickup/select-restaurant';
-  static const modelInfo = '/pickup/model';
-
-  static String restaurant(String id) => '/pickup/restaurants/$id';
-  static String prediction(String id) => '/pickup/restaurants/$id/prediction';
-
-  /// The log form, optionally with the restaurant already chosen.
-  static String pickupLogNewFor({String? restaurantId, String? name}) => Uri(
-    path: pickupLogNew,
-    queryParameters: restaurantId == null
-        ? null
-        : {'restaurant_id': restaurantId, 'restaurant_name': ?name},
-  ).toString();
 
   // Shift Simulator. Details and the comparison are inside the tab; the form and
   // the work-session picker cover the tabs. `new`, `edit` and `select-session`
@@ -60,8 +36,7 @@ abstract final class Routes {
     queryParameters: {'ids': ids.join(',')},
   ).toString();
 
-  // RoadContext, shown over the tabs (opened from the home card, no tab).
-  static const road = '/road';
+  // RoadContext: the map is the Road tab; these cover the tabs.
   static const roadReportNew = '/road/report';
   static const roadPickLocation = '/road/pick-location';
   static const roadMyReports = '/road/my-reports';

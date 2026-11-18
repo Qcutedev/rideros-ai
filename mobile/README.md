@@ -6,7 +6,7 @@ API contract: `backend/README.md`.
 Status: **P3a** (design system, router + auth guard, API client with token refresh, splash, login,
 register, forgot/reset password, onboarding) and **P3b** (bottom navigation, home dashboard, TrueProfit
 dashboard with trend chart, income / expense / work-session lists and forms), **P3c** (Pickup Intelligence,
-Shift Simulator, Profile) and **Phase 4** (end-to-end journey against the real API, reset deep link).
+Shift Simulator, Profile; Pickup was removed on 2026-11-18 and its tab is now the Road map) and **Phase 4** (end-to-end journey against the real API, reset deep link).
 
 ## Run
 
@@ -51,10 +51,9 @@ flutter drive --driver=test_driver/integration_test.dart --target=integration_te
 ```
 
 - Journey (`integration_test/app_journey_test.dart`): Register (signs in) → Onboarding → Logout → Login →
-  Dashboard → Pickup prediction for `POI-203` → add income → add expense → TrueProfit → two scenarios →
-  Compare. It clears the stored refresh token first; the ride intro plays as in the real app.
+  Dashboard → add income → add expense → TrueProfit → two scenarios → Compare. It clears the stored refresh token first; the ride intro plays as in the real app.
 - Host driver (`test_driver/integration_test.dart`): compares what the screens showed with SQL through
-  `docker compose exec db psql` (profile, prediction range/midpoint, today's revenue/expenses/net/hours/
+  `docker compose exec db psql` (profile, today's revenue/expenses/net/hours/
   net per hour, each compared scenario, best net), prints every check, then deletes the throwaway
   `e2e+<timestamp>@example.com` account with `DELETE /me` and checks that no rows are left.
 - `$env:E2E_KEEP = "1"` keeps the account. When a check fails the account is kept for a look.

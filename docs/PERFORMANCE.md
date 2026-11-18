@@ -1,5 +1,7 @@
 # Performance — RiderOS AI (Phase 6 · P6b)
 
+> **อัปเดต 2026-11-18:** Endpoint `/pickup/*` ถูกลบแล้ว (`docs/HANDOFF.md` §4.20) และ `backend/perf/run.py` ไม่วัดแล้ว ผลด้านล่างเป็นผลของ Phase 6 ที่ยังมี Pickup
+
 - วันที่วัด: 2026-11-14 · Commit ฐาน `8641bcc` + การแก้ใน P6b (ยังไม่ Commit)
 - การตัดสินใจที่ใช้: HANDOFF §4.13 ข้อ 4–5 (สคริปต์ `httpx` async, 200 req/Endpoint ที่ Concurrency 1 และ 10, เป้า p95)
 - ตัวเลขทั้งหมดมาจากการรันจริงบนเครื่องด้านล่าง ไม่ใช่ค่าประมาณ · ผลดิบ: `backend/reports/perf_p6b.json`

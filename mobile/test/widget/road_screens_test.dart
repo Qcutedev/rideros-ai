@@ -28,7 +28,7 @@ void main() {
   setUp(() => road = RoadFakes());
 
   List<Override> overrides() =>
-      fakeRepositories(FakeAuthRepository(), null, null, null, null, road);
+      fakeRepositories(FakeAuthRepository(), null, null, null, road);
 
   /// Lets the map's bounds debounce fire and the incidents load.
   Future<void> settleMap(WidgetTester tester) async {
