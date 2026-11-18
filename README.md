@@ -258,10 +258,10 @@ All settings are environment variables. [`.env.example`](.env.example) lists the
 
 | Suite | Tests | Gate |
 |---|---|---|
-| Backend (pytest, real PostGIS + Valkey) | 500 | coverage of `app/modules` + `app/core`: **98.17%** (gate 96%) |
+| Backend (pytest, real PostGIS + Valkey) | 504 | coverage of `app/modules` + `app/core`: **98.18%** (gate 96%) |
 | ML pipeline | 134 | ruff + pytest |
 | CV service | 38 | ruff + pytest |
-| Mobile (unit + widget) | 534 | coverage of `lib/` without generated code: **96.8%** (gate 94.7%) |
+| Mobile (unit + widget) | 571 | coverage of `lib/` without generated code: **96.95%** (gate 94.7%) |
 | E2E (`flutter drive` on the emulator) | 1 journey | checks 21 database rows through SQL, then deletes the test account |
 
 The tests include cross-user access checks on every endpoint, token expiry, reuse and forgery, a check that
