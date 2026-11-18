@@ -29,7 +29,6 @@ class AppShell extends ConsumerWidget {
         // their copies would share a tag when a form over the tabs closes.
         child: HeroMode(enabled: false, child: shell),
       ),
-      // RoadContext (Phase 5) gets no tab until the feature works (§3).
       // Floating Obsidian bar: a lime pill slides to the selected tab.
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(
@@ -63,10 +62,10 @@ class AppShell extends ConsumerWidget {
                   label: l10n.navHome,
                 ),
                 NavigationDestination(
-                  key: const Key('nav.pickup'),
-                  icon: const Icon(Icons.storefront_outlined),
-                  selectedIcon: const Icon(Icons.storefront_rounded),
-                  label: l10n.navPickup,
+                  key: const Key('nav.road'),
+                  icon: const Icon(Icons.alt_route_outlined),
+                  selectedIcon: const Icon(Icons.alt_route_rounded),
+                  label: l10n.navRoad,
                 ),
                 NavigationDestination(
                   key: const Key('nav.profit'),

@@ -18,8 +18,8 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
-from app.modules.pickup import repository as model_repo
-from app.modules.pickup.models import ModelVersion
+from app.ml import repository as model_repo
+from app.ml.models import ModelVersion
 from app.modules.road.images import ImageStore
 from app.modules.road.models import IncidentReport
 

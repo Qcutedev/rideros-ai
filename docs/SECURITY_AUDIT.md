@@ -1,5 +1,7 @@
 # Security Audit — RiderOS AI (Phase 6 · P6a)
 
+> **อัปเดต 2026-11-18:** Endpoint `/pickup/*` ถูกลบแล้ว (`docs/HANDOFF.md` §4.20) ผล Audit ด้านล่างเป็นของตอนที่ยังมี Pickup
+
 - วันที่ตรวจ: 2026-11-14 · Commit ฐาน `c15d8a6` + การแก้ใน P6a (ยังไม่ Commit)
 - ขอบเขต: Backend (`backend/`), CV Service (`cv_service/`), ML Pipeline (`ml/`), Mobile (`mobile/`), Docker Compose, Git History
 - เกณฑ์: Checklist ใน `SYSTEM_ARCHITECTURE.md` §5 + OWASP API Security Top 10 (2023)

@@ -45,13 +45,6 @@ class Settings(BaseSettings):
     email_provider: Literal["none"] = "none"
     password_reset_url_base: str = "rideros://reset-password"
 
-    # ---- ML (P2c) ----
-    # Root that holds <model>/<version>/ artifact folders (ml/artifacts; mounted read-only in docker).
-    # Unset -> the API starts without a model: predictions answer 503 and /ready reports not ready.
-    model_dir: Path | None = None
-    active_model_name: str = "pickup_o2p"
-    active_model_version: str = "1.0.0"
-
     # ---- RoadContext (Phase 5) ----
     # Per-category duplicate radius / window and TTL. ROAD_RULES (JSON) overrides single categories.
     road_rules: dict[Category, RoadRule] = Field(default_factory=default_road_rules)
@@ -83,7 +76,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=list)
     docs_enabled: bool | None = None  # None -> enabled everywhere except production
 
-    @field_validator("model_dir", "road_image_dir", "cv_service_url", mode="before")
+    @field_validator("road_image_dir", "cv_service_url", mode="before")
     @classmethod
     def _empty_path_is_none(cls, value: object) -> object:
         return None if isinstance(value, str) and not value.strip() else value

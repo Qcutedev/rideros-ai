@@ -1,5 +1,7 @@
 # DATABASE_DESIGN.md — RiderOS AI (Phase 0)
 
+> **อัปเดต 2026-11-18:** เอา Pickup Intelligence ออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20). Migration `0006` ลบตาราง `restaurants`, `restaurant_time_stats`, `pickup_logs`, `pickup_predictions` และแถว `pickup_o2p` ใน `model_versions`. ตาราง `model_versions` ยังอยู่ (RoadContext ใช้) ส่วนที่พูดถึงตาราง Pickup ด้านล่างคือแบบเดิม เก็บไว้เป็นบันทึก
+
 > สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05)
 > DBMS: PostgreSQL + PostGIS (Pin เวอร์ชันใน Phase 2) · Migration: Alembic เท่านั้น
 
@@ -308,7 +310,7 @@ Net Profit / Hour  = Net Profit / Working Hours      → null ถ้า Working 
 Index: `(user_id, created_at DESC)`
 ค่าที่ขึ้นต้นด้วย **estimated_*** ไม่ถูกนำไปรวมกับข้อมูล Actual ของ TrueProfit (แยก Actual กับ Estimated ตาม Requirement)
 
-### 3.9 `restaurants`
+### 3.9 `restaurants` (ลบแล้ว 2026-11-18, Migration 0006)
 | Column | Type | Constraint |
 |---|---|---|
 | source | text | CHECK IN ('dataset_meituan','dataset_skip','user') |
@@ -324,13 +326,13 @@ Constraints:
 การเข้าถึง: Dataset restaurants ทุกคนอ่านได้; User restaurants อ่านได้เฉพาะเจ้าของ
 Index: `(owner_user_id)`, GiST `(location)`, trigram `(name)` สำหรับค้นหา (`pg_trgm`)
 
-### 3.10 `restaurant_time_stats`
+### 3.10 `restaurant_time_stats` (ลบแล้ว 2026-11-18, Migration 0006)
 - สถิติรวม (Aggregate) ต่อร้าน × ประเภทวัน × ชั่วโมง ส่งออกจาก ML Pipeline แล้ว Import ด้วยสคริปต์ — **ไม่นำ Raw Dataset เข้า DB ของ Production**
 - PK: `(restaurant_id, day_type, hour)`; `CHECK (hour BETWEEN 0 AND 23)`; `n_orders ≥ 0`
 - ใช้กับ Restaurant Analytics (Distribution, Peak Hour, Comparison)
 - ถ้า `n_orders` < เกณฑ์ UI ต้องแสดงคำเตือน
 
-### 3.11 `pickup_logs` (Personal Pickup Log)
+### 3.11 `pickup_logs` (Personal Pickup Log, ลบแล้ว 2026-11-18, Migration 0006)
 | Column | Type | Constraint |
 |---|---|---|
 | arrived_at | timestamptz | NOT NULL (Rider มาถึงร้าน) |
@@ -345,7 +347,7 @@ Wait-stats แสดงเมื่อ n ≥ 5 (Label "Low confidence" จนก
 - `UNIQUE (name, version)`; `is_active` ต่อ `name` มีได้แค่ 1 (Partial Unique Index `WHERE is_active`)
 - `metrics` = ผลการประเมินบน Test Set จริงจาก `metrics.json` (ห้ามกรอกด้วยมือ)
 
-### 3.13 `pickup_predictions` (เป็น Prediction History ด้วย)
+### 3.13 `pickup_predictions` (เป็น Prediction History ด้วย, ลบแล้ว 2026-11-18, Migration 0006)
 - Prompt ระบุทั้ง `pickup_predictions` และ `prediction_history` แต่ทั้งสองเก็บข้อมูลเดียวกัน (Input, Output, เวลา, Model Version) จึง **รวมเป็นตารางเดียว** เพื่อไม่ให้ข้อมูลซ้ำซ้อน Endpoint History จะ Query จากตารางนี้
 - `data_availability` CHECK IN ('sufficient','limited','insufficient')
 - Index: `(user_id, created_at DESC)`, `(model_version_id)`

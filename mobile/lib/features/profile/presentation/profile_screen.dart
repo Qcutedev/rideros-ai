@@ -93,13 +93,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 tone: AppTone.teal,
                 children: [
                   ListTile(
-                    key: const Key('profile.modelInfo'),
-                    leading: const Icon(Icons.insights_outlined),
-                    title: Text(l10n.profileModelInfo),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => context.push(Routes.modelInfo),
-                  ),
-                  ListTile(
                     key: const Key('profile.about'),
                     leading: const Icon(Icons.info_outline_rounded),
                     title: Text(l10n.profileAbout),

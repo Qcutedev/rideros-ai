@@ -2,7 +2,7 @@
 # (flutter drive needs a device; run `.\scripts\regression.ps1 -E2E` locally for that).
 #
 # Datasets and trained model artifacts are never in the repository (D1/D4), so tests that need
-# them skip themselves here (backend tests/api/test_real_artifact.py, ml tests/test_artifact.py).
+# them skip themselves here (ml tests/test_artifact.py).
 name: CI
 
 on:

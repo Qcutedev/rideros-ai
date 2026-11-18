@@ -47,7 +47,6 @@ COLD_PATTERN_SAMPLES = 5
 TARGET_MS: dict[str, float | None] = {
     "crud": 300,
     "summary": 300,
-    "prediction": 500,
     "patterns": 500,
     "auth": None,
 }
@@ -69,9 +68,6 @@ class Seeded:
     email: str
     password: str
     counts: Counter[str] = field(default_factory=Counter)
-    dataset_restaurant_id: str = ""
-    dataset_query: str = ""
-    own_restaurant_id: str = ""
     scenario_ids: list[str] = field(default_factory=list)
     historical_scenario_id: str = ""
     incident_id: str = ""
@@ -192,30 +188,6 @@ async def seed(api: Api, rng: random.Random) -> Seeded:
         )
         data.counts["expenses"] += 1
 
-    own = (await api.call("POST", "/pickup/restaurants", expect=201, json={"name": "Perf Kitchen"})).json()
-    data.own_restaurant_id = own["id"]
-    for i in range(30):
-        arrived = datetime.now(UTC) - timedelta(days=2 * i + 1, hours=rng.uniform(0, 6))
-        await api.call(
-            "POST",
-            "/pickup/logs",
-            expect=201,
-            json={
-                "restaurant_id": own["id"],
-                "arrived_at": arrived.isoformat(),
-                "picked_up_at": (arrived + timedelta(minutes=rng.uniform(2, 18))).isoformat(),
-            },
-        )
-        data.counts["pickup_logs"] += 1
-
-    page = (await api.call("GET", "/pickup/restaurants", params={"source": "dataset", "limit": 50})).json()
-    restaurant = next(r for r in page["items"] if r["supports_prediction"])
-    data.dataset_restaurant_id = restaurant["id"]
-    data.dataset_query = restaurant["name"][:4]
-    for _ in range(20):
-        await api.call("POST", "/pickup/predictions", expect=201, json={"restaurant_id": restaurant["id"]})
-        data.counts["pickup_predictions"] += 1
-
     for name, start, end in (("Evening", "17:00", "21:00"), ("Lunch", "10:30", "14:30")):
         scenario = (
             await api.call(
@@ -276,21 +248,6 @@ def cases(s: Seeded) -> list[Case]:
         Case("GET /work-sessions", "crud", "GET", "/work-sessions?limit=50"),
         Case("GET /income", "crud", "GET", "/income?limit=50"),
         Case("GET /expenses", "crud", "GET", "/expenses?limit=50"),
-        Case("GET /pickup/restaurants?q=", "crud", "GET", f"/pickup/restaurants?q={s.dataset_query}"),
-        Case(
-            "GET /pickup/restaurants/{id}/analytics",
-            "crud",
-            "GET",
-            f"/pickup/restaurants/{s.dataset_restaurant_id}/analytics",
-        ),
-        Case(
-            "GET /pickup/restaurants/{id}/wait-stats",
-            "crud",
-            "GET",
-            f"/pickup/restaurants/{s.own_restaurant_id}/wait-stats",
-        ),
-        Case("GET /pickup/predictions", "crud", "GET", "/pickup/predictions?limit=50"),
-        Case("GET /pickup/logs", "crud", "GET", "/pickup/logs?limit=50"),
         Case("GET /shift-scenarios", "crud", "GET", "/shift-scenarios"),
         Case("GET /road/incidents?bbox=", "crud", "GET", f"/road/incidents?bbox={bbox}"),
         Case("GET /road/incidents/nearby", "crud", "GET", f"/road/incidents/nearby?lat={lat}&lng={lng}"),
@@ -324,14 +281,6 @@ def cases(s: Seeded) -> list[Case]:
             body=lambda _i: {"ids": s.scenario_ids},
         ),
         Case("GET /profit/patterns (cached)", "patterns", "GET", "/profit/patterns"),
-        Case(
-            "POST /pickup/predictions",
-            "prediction",
-            "POST",
-            "/pickup/predictions",
-            body=lambda _i: {"restaurant_id": s.dataset_restaurant_id},
-            expect=201,
-        ),
         Case(
             "POST /income",
             "crud",

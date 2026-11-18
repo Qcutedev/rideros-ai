@@ -3,17 +3,13 @@
 Every user-owned endpoint answers 404 for another user's id, and the row stays unchanged.
 """
 
-from pathlib import Path
-
 import httpx
 import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import PickupLog, Restaurant, ShiftScenario
-from app.modules.pickup.importer import import_restaurant_stats
+from app.db.models import ShiftScenario
 from tests.helpers import PASSWORD, auth_headers
-from tests.pickup_data import write_stats
 
 SESSION = {"started_at": "2026-11-09T10:00:00+07:00", "ended_at": "2026-11-09T14:00:00+07:00"}
 RESOURCES = {
@@ -121,7 +117,7 @@ async def test_patch_me_only_changes_the_caller(client: httpx.AsyncClient, users
     assert (await client.get("/me", headers=alice)).json()["display_name"] == "alice"
 
 
-# ---- P2c: pickup + shift simulator ----
+# ---- P2c: shift simulator ----
 
 DINNER = {
     "name": "Dinner",
@@ -129,55 +125,6 @@ DINNER = {
     "end_time": "21:00",
     "assumptions": {"orders_per_hour": 2, "income_per_order": 40},
 }
-
-
-def pickup_log(restaurant_id: str, day: int = 9, wait: int = 5) -> dict:
-    return {
-        "restaurant_id": restaurant_id,
-        "arrived_at": f"2026-11-{day:02d}T12:00:00+07:00",
-        "picked_up_at": f"2026-11-{day:02d}T12:{wait:02d}:00+07:00",
-    }
-
-
-async def test_private_restaurants_and_their_data(
-    client: httpx.AsyncClient, users: tuple[dict, dict]
-) -> None:
-    alice, bob = users
-    shop = (await client.post("/pickup/restaurants", json={"name": "Alice's shop"}, headers=alice)).json()
-    alice_log = (await client.post("/pickup/logs", json=pickup_log(shop["id"]), headers=alice)).json()
-
-    assert (await client.get("/pickup/restaurants", headers=bob)).json()["items"] == []
-    assert (await client.get("/pickup/restaurants?q=Alice", headers=bob)).json()["items"] == []
-    for path in ("analytics", "wait-stats"):
-        resp = await client.get(f"/pickup/restaurants/{shop['id']}/{path}", headers=bob)
-        assert resp.status_code == 404 and resp.json()["error"]["code"] == "restaurant_not_found"
-    assert (await client.post("/pickup/logs", json=pickup_log(shop["id"]), headers=bob)).status_code == 404
-    resp = await client.post("/pickup/predictions", json={"restaurant_id": shop["id"]}, headers=bob)
-    assert resp.status_code == 404
-
-    assert (await client.get("/pickup/logs", headers=bob)).json()["items"] == []
-    assert (await client.delete(f"/pickup/logs/{alice_log['id']}", headers=bob)).status_code == 404
-    assert len((await client.get("/pickup/logs", headers=alice)).json()["items"]) == 1
-
-
-async def test_dataset_restaurants_are_shared_but_logs_and_predictions_are_not(
-    client: httpx.AsyncClient, users: tuple[dict, dict], db: AsyncSession, tmp_path: Path
-) -> None:
-    alice, bob = users
-    await import_restaurant_stats(db, write_stats(tmp_path / "1.0.0"))
-    poi = (await client.get("/pickup/restaurants?q=POI-0", headers=alice)).json()["items"][0]
-    assert (await client.get("/pickup/restaurants?q=POI-0", headers=bob)).json()["items"][0]["id"] == poi[
-        "id"
-    ]
-
-    await client.post("/pickup/predictions", json={"restaurant_id": poi["id"]}, headers=alice)
-    for day in range(1, 6):
-        await client.post("/pickup/logs", json=pickup_log(poi["id"], day=day, wait=day), headers=alice)
-    assert (await client.get("/pickup/predictions", headers=bob)).json()["items"] == []
-    bob_wait = (await client.get(f"/pickup/restaurants/{poi['id']}/wait-stats", headers=bob)).json()
-    assert bob_wait["n"] == 0 and bob_wait["confidence"] == "insufficient"
-    alice_wait = (await client.get(f"/pickup/restaurants/{poi['id']}/wait-stats", headers=alice)).json()
-    assert alice_wait["n"] == 5
 
 
 async def test_shift_scenarios_are_private(client: httpx.AsyncClient, users: tuple[dict, dict]) -> None:
@@ -206,11 +153,8 @@ async def test_shift_scenarios_are_private(client: httpx.AsyncClient, users: tup
     assert (await client.get(url, headers=alice)).json() == mine
 
 
-async def test_delete_me_removes_pickup_and_shift_data(client: httpx.AsyncClient, db: AsyncSession) -> None:
+async def test_delete_me_removes_shift_data(client: httpx.AsyncClient, db: AsyncSession) -> None:
     h = await auth_headers(client, "leaver@example.com")
-    shop = (await client.post("/pickup/restaurants", json={"name": "Mine"}, headers=h)).json()
-    await client.post("/pickup/logs", json=pickup_log(shop["id"]), headers=h)
     await client.post("/shift-scenarios", json=DINNER, headers=h)
     assert (await client.request("DELETE", "/me", json={"password": PASSWORD}, headers=h)).status_code == 204
-    for model in (Restaurant, PickupLog, ShiftScenario):
-        assert await db.scalar(select(func.count()).select_from(model)) == 0, model.__tablename__
+    assert await db.scalar(select(func.count()).select_from(ShiftScenario)) == 0

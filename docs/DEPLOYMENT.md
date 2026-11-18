@@ -19,7 +19,7 @@ Internet ──443/80──► caddy (172.30.0.10, TLS อัตโนมัต�
 
 - มีแค่ Caddy ที่เปิด Port · DB, Valkey, CV ไม่มี Port ออกนอก Docker
 - Model artifacts ส่งด้วย `scp` และ Mount แบบอ่านอย่างเดียว ไม่อยู่ใน Repo, Image หรือ Registry (D4)
-- Meituan (CC BY-NC 4.0) และ Flood10k (CC BY-NC 4.0) → ระบบนี้ใช้แบบไม่แสวงหากำไรเท่านั้น: ไม่มีโฆษณา ไม่มีส่วนที่เก็บเงิน
+- Flood10k (CC BY-NC 4.0) ในโมเดลจัดประเภทรูป → ระบบนี้ใช้แบบไม่แสวงหากำไรเท่านั้น: ไม่มีโฆษณา ไม่มีส่วนที่เก็บเงิน
 
 | Service | Image | หมายเหตุ |
 |---|---|---|
@@ -53,12 +53,11 @@ Internet ──443/80──► caddy (172.30.0.10, TLS อัตโนมัต�
 sudo mkdir -p /opt/rideros && sudo chown $USER /opt/rideros
 ssh-keygen -t ed25519 -f ~/.ssh/rideros_deploy -N ""      # แล้วใส่ .pub เป็น Deploy key (Read-only) ของ GitHub Repo
 GIT_SSH_COMMAND="ssh -i ~/.ssh/rideros_deploy" git clone git@github.com:<owner>/<repo>.git /opt/rideros/app
-mkdir -p /opt/rideros/artifacts/ml /opt/rideros/artifacts/cv /opt/rideros/backups
+mkdir -p /opt/rideros/artifacts/cv /opt/rideros/backups
 ```
 
 ```powershell
 # บนเครื่อง Dev (PowerShell): ส่ง Artifact ไปตรงๆ ห้ามผ่าน Git
-scp -r "C:\dev\RiderOS AI\ml\artifacts\pickup_o2p" "C:\dev\RiderOS AI\ml\artifacts\restaurant_stats" <user>@<ip>:/opt/rideros/artifacts/ml/
 scp -r "C:\dev\RiderOS AI\cv_service\artifacts\road_cv" <user>@<ip>:/opt/rideros/artifacts/cv/
 ```
 
@@ -72,7 +71,7 @@ docker compose -f deploy/compose.prod.yml up -d --build --wait
 python3 deploy/smoke_test.py https://$API_DOMAIN       # ต้องได้ SMOKE TEST PASSED
 ```
 
-- ครั้งแรก Backend รัน Migration และ Import ร้านจาก `restaurant_stats` เอง (`backend/scripts/entrypoint.sh`)
+- Backend รัน Migration เองทุกครั้งที่เริ่ม (`backend/scripts/entrypoint.sh`)
 - Caddy ขอใบรับรอง Let's Encrypt ตอนมี Request แรก (Port 80 ต้องเปิดจาก Internet)
 
 ## 4. อัปเดตเวอร์ชัน
@@ -131,7 +130,7 @@ sh deploy/restore.sh --yes /opt/rideros/backups/db-<ts>.dump /opt/rideros/backup
 | `/api/v1/ready` ผ่าน Caddy | `database ok`, `model ok (pickup_o2p/1.0.0)`, `rate_limit ok` |
 | Production switches | `/docs`, `/openapi.json`, `/` → 404 · HTTP → 308 HTTPS · มี HSTS, `nosniff` |
 | `X-Forwarded-For` ปลอม | Login 7 ครั้งด้วย XFF ต่างกัน → 401 ×5 แล้ว 429 ×2 · Key ใน Valkey เป็น IP จริงของ Peer ไม่ใช่ค่าปลอม · นับรวมทั้ง 2 Worker |
-| `deploy/smoke_test.py` | **15/15 PASSED** (รวม Pickup prediction ด้วยโมเดลจริง และรูปที่ CV จัดประเภทเสร็จ) |
+| `deploy/smoke_test.py` | **15/15 PASSED** (รวม Pickup prediction ด้วยโมเดลจริง และรูปที่ CV จัดประเภทเสร็จ) · ผลตอนนั้น: Pickup ถูกเอาออกเมื่อ 2026-11-18 (§4.20 ใน HANDOFF) Smoke test เหลือ 13 ข้อ และ `/ready` ไม่มี `model` แล้ว |
 | `backup.sh` | Dump 1.49 MB + รูป · `BACKUP_KEEP=2` เหลือ 2 ชุดถูกต้อง |
 | `restore_test.sh` | **PASSED** 17 ตาราง + Migration `0004` + PostGIS 3.7.0 + รูป 1 ไฟล์ · Restore 1 s · ทดสอบกลับด้าน: เพิ่ม 1 แถวใน DB จริง → FAILED ชี้ `income_records 6 vs 5` |
 | Disaster drill | ลบ Volume DB + รูป → `restore.sh --yes` → Login บัญชีเดิมได้, รายได้ 5 รายการ, รูปเปิดได้ (`image/jpeg`), AI label ยังอยู่ |

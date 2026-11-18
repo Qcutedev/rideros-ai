@@ -100,12 +100,6 @@ abstract final class ApiErrorCode {
   static const workSessionTooLong = 'work_session_too_long';
   static const invalidWorkSession = 'invalid_work_session';
 
-  // Pickup.
-  static const modelUnavailable = 'model_unavailable';
-  static const restaurantNotSupported = 'restaurant_not_supported';
-  static const invalidPickupTimes = 'invalid_pickup_times';
-  static const pickupWaitTooLong = 'pickup_wait_too_long';
-
   // Shift simulator.
   static const invalidShiftLength = 'invalid_shift_length';
   static const missingAssumption = 'missing_assumption';

@@ -1,8 +1,8 @@
 # RiderOS AI production stack (Phase 7, docs/DEPLOYMENT.md).
 #   cp deploy/prod.env.example deploy/.env      # then replace every CHANGE-ME
 #   docker compose -f deploy/compose.prod.yml up -d --build
-# Only Caddy publishes ports (80/443). The model artifacts are copied to the server with scp and
-# mounted read-only; they are never part of the repository or an image (D4).
+# Only Caddy publishes ports (80/443). The photo classifier's artifacts are copied to the server with
+# scp and mounted read-only; they are never part of the repository or an image (D4).
 name: rideros-prod
 
 services:
@@ -48,14 +48,9 @@ services:
       RATE_LIMIT_STORAGE_URL: redis://valkey:6379/0
       # uvicorn applies X-Forwarded-For only from Caddy; other peers keep their own address.
       FORWARDED_ALLOW_IPS: 172.30.0.10
-      MODEL_DIR: /artifacts
-      ACTIVE_MODEL_NAME: ${ACTIVE_MODEL_NAME:-pickup_o2p}
-      ACTIVE_MODEL_VERSION: ${ACTIVE_MODEL_VERSION:-1.0.0}
-      RESTAURANT_STATS_DIR: /artifacts/restaurant_stats/${ACTIVE_MODEL_VERSION:-1.0.0}
       ROAD_IMAGE_DIR: /data/road_images
       CV_SERVICE_URL: http://cv:8100
     volumes:
-      - ${ARTIFACTS_DIR:?set ARTIFACTS_DIR}/ml:/artifacts:ro
       - road-images:/data/road_images
     networks:
       edge:

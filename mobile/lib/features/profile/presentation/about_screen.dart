@@ -6,7 +6,7 @@ import '../../../core/widgets/app_cards.dart';
 import '../../../core/widgets/form_layout.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// `/profile/about`: what the app is, the data behind the Pickup model, licences.
+/// `/profile/about`: what the app is, the data behind the photo classifier, licences.
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -27,20 +27,8 @@ class AboutScreen extends StatelessWidget {
             tone: AppTone.sage,
             title: l10n.aboutDataTitle,
             child: Builder(
-              builder: (context) => Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+              builder: (context) =>
                   Text(l10n.aboutDataBody, style: _muted(context)),
-                  const SizedBox(height: AppSpacing.md),
-                  // Required wording, kept in English (Meituan licence terms).
-                  Text(
-                    l10n.meituanAcknowledgement,
-                    key: const Key('about.acknowledgement'),
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(fontStyle: FontStyle.italic),
-                  ),
-                ],
-              ),
             ),
           ),
           const SizedBox(height: AppSpacing.cardGap),

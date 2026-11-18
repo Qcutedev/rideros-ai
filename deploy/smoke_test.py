@@ -147,12 +147,6 @@ def run(api: Api, production: bool) -> int:
         status, body = api.call("GET", "/profit/summary?period=week")
         c.expect("GET /profit/summary", status == 200, body)
 
-        status, body = api.call("GET", "/pickup/restaurants?source=dataset&limit=1")
-        items = body.get("items", []) if isinstance(body, dict) else []
-        if c.expect("dataset restaurants are imported", status == 200 and len(items) == 1, body):
-            status, body = api.call("POST", "/pickup/predictions", {"restaurant_id": items[0]["id"]})
-            c.expect("pickup prediction (model)", status == 201, body)
-
         status, body = api.call(
             "POST",
             "/road/reports",

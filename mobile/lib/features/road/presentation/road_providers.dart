@@ -111,7 +111,7 @@ final myReportsProvider =
 class ReportFormController extends SubmitNotifier {
   ReportCreated? created;
 
-  /// Reads what it needs before awaiting (see `PickupFormController._save`).
+  /// Reads what it needs before awaiting: the provider may be disposed by then.
   Future<bool> submit(NewReport report) {
     final repo = ref.read(roadRepositoryProvider);
     final revision = ref.read(roadDataRevisionProvider.notifier);

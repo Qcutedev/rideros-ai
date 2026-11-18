@@ -1,5 +1,7 @@
 # DATASET_ANALYSIS.md — RiderOS AI (Phase 0)
 
+> **อัปเดต 2026-11-18:** แอปไม่ได้ใช้โมเดล Pickup แล้ว (`docs/HANDOFF.md` §4.20). ข้อมูล Meituan ใช้เฉพาะ Case study ใน `ml/`
+
 > วันที่ตรวจสอบ: 2026-11-05
 > สถานะ: **D1 อนุมัติแล้ว (2026-11-05): ใช้ Meituan INFORMS TSL + Personal Pickup Log** — SkipTheDishes ไม่ถูกใช้ในโปรเจกต์ (เก็บผลการวิเคราะห์ไว้เป็นหลักฐานการตัดสินใจ)
 > ตัวเลขทั้งหมดในเอกสารนี้ได้จากการรันสคริปต์ใน `docs/phase0/` กับไฟล์จริง ไม่ได้ยกมาจาก README ของ Repository ต้นทาง (ยกเว้นที่ระบุว่าเป็น "คำอ้างของผู้เขียน Repository")

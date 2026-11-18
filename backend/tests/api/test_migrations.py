@@ -73,3 +73,39 @@ def test_downgrade_to_base_and_upgrade_again(scratch_db_url: str) -> None:
     assert not (set(Base.metadata.tables) & asyncio.run(_tables()))
     command.upgrade(cfg, "head")
     assert set(Base.metadata.tables) <= asyncio.run(_tables())
+
+
+PICKUP_TABLES = {"restaurants", "restaurant_time_stats", "pickup_logs", "pickup_predictions"}
+
+
+async def _run(url: str, sql: str) -> list[tuple]:
+    engine = create_async_engine(url)
+    async with engine.begin() as conn:
+        result = await conn.execute(text(sql))
+        rows = [tuple(r) for r in result] if result.returns_rows else []
+    await engine.dispose()
+    return rows
+
+
+async def test_pickup_tables_are_gone(app: FastAPI) -> None:
+    async with app.state.engine.connect() as conn:
+        rows = await conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
+        names = {r[0] for r in rows}
+    assert not PICKUP_TABLES & names
+    assert "model_versions" in names  # RoadContext keeps using it
+
+
+def test_0006_removes_only_the_pickup_model_rows(scratch_db_url: str) -> None:
+    cfg = alembic_config(scratch_db_url)
+    command.upgrade(cfg, "0005")
+    for name in ("pickup_o2p", "road_cv"):
+        asyncio.run(
+            _run(
+                scratch_db_url,
+                "INSERT INTO model_versions "
+                "(name, version, task, dataset, metrics, feature_schema, artifact_uri) "
+                f"VALUES ('{name}', '1.0.0', 't', 'd', '{{}}'::jsonb, '{{}}'::jsonb, 'u')",
+            )
+        )
+    command.upgrade(cfg, "head")
+    assert asyncio.run(_run(scratch_db_url, "SELECT name FROM model_versions")) == [("road_cv",)]

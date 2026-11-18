@@ -11,14 +11,6 @@ import '../features/auth/presentation/session_controller.dart';
 import '../features/auth/presentation/splash_screen.dart';
 import '../features/dashboard/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
-import '../features/pickup/presentation/model_info_screen.dart';
-import '../features/pickup/presentation/own_restaurant_form_screen.dart';
-import '../features/pickup/presentation/pickup_log_form_screen.dart';
-import '../features/pickup/presentation/pickup_logs_screen.dart';
-import '../features/pickup/presentation/pickup_search_screen.dart';
-import '../features/pickup/presentation/prediction_history_screen.dart';
-import '../features/pickup/presentation/prediction_result_screen.dart';
-import '../features/pickup/presentation/restaurant_screen.dart';
 import '../features/profile/presentation/about_screen.dart';
 import '../features/profile/presentation/delete_account_screen.dart';
 import '../features/profile/presentation/display_name_screen.dart';
@@ -184,32 +176,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.pickup,
-                builder: (context, state) => const PickupSearchScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'restaurants/:id',
-                    builder: (context, state) =>
-                        RestaurantScreen(id: state.pathParameters['id']!),
-                    routes: [
-                      GoRoute(
-                        path: 'prediction',
-                        builder: (context, state) => PredictionResultScreen(
-                          restaurantId: state.pathParameters['id']!,
-                        ),
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'predictions',
-                    builder: (context, state) =>
-                        const PredictionHistoryScreen(),
-                  ),
-                  GoRoute(
-                    path: 'logs',
-                    builder: (context, state) => const PickupLogsScreen(),
-                  ),
-                ],
+                path: Routes.road,
+                builder: (context, state) => const RoadScreen(),
               ),
             ],
           ),
@@ -264,7 +232,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       ...formRoutes(rootKey),
-      ...pickupRoutes(rootKey),
       ...shiftRoutes(rootKey),
       ...profileRoutes(rootKey),
       ...roadRoutes(rootKey),
@@ -317,38 +284,6 @@ List<GoRoute> formRoutes(GlobalKey<NavigatorState> root) => [
   ),
 ];
 
-/// Pickup forms and pages on the [root] navigator (they cover the tabs). The model
-/// card is here so the Profile tab can open it too.
-List<GoRoute> pickupRoutes(GlobalKey<NavigatorState> root) => [
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.pickupLogNew,
-    builder: (context, state) {
-      final id = state.uri.queryParameters['restaurant_id'];
-      final name = state.uri.queryParameters['restaurant_name'];
-      return PickupLogFormScreen(
-        restaurant: id == null ? null : (id: id, name: name ?? id),
-      );
-    },
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.ownRestaurantNew,
-    builder: (context, state) => const OwnRestaurantFormScreen(),
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.restaurantPicker,
-    builder: (context, state) =>
-        PickupSearchScreen(onSelect: (restaurant) => context.pop(restaurant)),
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.modelInfo,
-    builder: (context, state) => const ModelInfoScreen(),
-  ),
-];
-
 /// Shift forms and the work-session picker on the [root] navigator.
 List<GoRoute> shiftRoutes(GlobalKey<NavigatorState> root) => [
   GoRoute(
@@ -369,14 +304,10 @@ List<GoRoute> shiftRoutes(GlobalKey<NavigatorState> root) => [
   ),
 ];
 
-/// RoadContext on the [root] navigator. The location picker takes the start
-/// point as `extra` and pops the chosen one.
+/// RoadContext forms and pages on the [root] navigator (the map is the Road
+/// tab). The location picker takes the start point as `extra` and pops the
+/// chosen one.
 List<GoRoute> roadRoutes(GlobalKey<NavigatorState> root) => [
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.road,
-    builder: (context, state) => const RoadScreen(),
-  ),
   GoRoute(
     parentNavigatorKey: root,
     path: Routes.roadReportNew,

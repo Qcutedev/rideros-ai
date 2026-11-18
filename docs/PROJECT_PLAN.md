@@ -1,5 +1,7 @@
 # PROJECT_PLAN.md — RiderOS AI
 
+> **อัปเดต 2026-11-18:** Pickup Intelligence ถูกเอาออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20) เอกสารนี้คือแผนเดิม เก็บไว้เป็นบันทึก
+
 > Phase 0: Project Analysis & Architecture · วันที่ 2026-11-05
 > สถานะ: **Phase 0 อนุมัติแล้ว (2026-11-05)** — Decisions D1–D7 อยู่ใน §4
 

@@ -15,12 +15,6 @@ import 'package:rideros_ai/features/auth/presentation/register_screen.dart';
 import 'package:rideros_ai/features/auth/presentation/splash_screen.dart';
 import 'package:rideros_ai/features/dashboard/presentation/home_screen.dart';
 import 'package:rideros_ai/features/onboarding/presentation/onboarding_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/model_info_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/pickup_log_form_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/pickup_logs_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/pickup_search_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/prediction_result_screen.dart';
-import 'package:rideros_ai/features/pickup/presentation/restaurant_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/delete_account_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/display_name_screen.dart';
 import 'package:rideros_ai/features/profile/presentation/profile_screen.dart';
@@ -41,7 +35,6 @@ import 'package:rideros_ai/features/shifts/presentation/shifts_screen.dart';
 import '../helpers/fake_http_adapter.dart';
 import '../helpers/fakes.dart';
 import '../helpers/file_bundle.dart';
-import '../helpers/pickup_fakes.dart';
 import '../helpers/profit_fakes.dart';
 import '../helpers/pump.dart';
 import '../helpers/road_fakes.dart';
@@ -354,14 +347,14 @@ void main() {
       expect(profit.expenses.calls, isEmpty);
     });
 
-    testWidgets('tabs in order: home, pickup, profit, shifts, profile', (
+    testWidgets('tabs in order: home, road, profit, shifts, profile', (
       tester,
     ) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
       final xs = [
         for (final key in [
           'nav.home',
-          'nav.pickup',
+          'nav.road',
           'nav.profit',
           'nav.shifts',
           'nav.profile',
@@ -371,71 +364,11 @@ void main() {
       expect(xs, orderedEquals([...xs]..sort()));
     });
 
-    testWidgets('pickup: search → restaurant → prediction → log saved', (
-      tester,
-    ) async {
-      final pickup = FakePickupRepository();
-      await pumpApp(tester, fakeRepositories(auth, profiles, profit, pickup));
-      await tapKey(tester, 'nav.pickup');
-      expect(find.byType(PickupSearchScreen), findsOneWidget);
-
-      await tapKey(tester, 'restaurant.r-1');
-      expect(find.byType(RestaurantScreen), findsOneWidget);
-      // Details stay inside the tab.
-      expect(find.byType(NavigationBar), findsOneWidget);
-
-      await tapKey(tester, 'restaurant.predict');
-      expect(find.byType(PredictionResultScreen), findsOneWidget);
-      expect(pickup.calls, contains('predict:r-1'));
-
-      await scrollAndTap(tester, 'prediction.log');
-      expect(find.byType(PickupLogFormScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
-      expect(find.text('POI-1'), findsOneWidget);
-      await tapKey(tester, 'logForm.submit');
-      expect(find.byType(PredictionResultScreen), findsOneWidget);
-      expect(pickup.lastLog!.restaurantId, 'r-1');
-
-      // Back to the restaurant, back to the search.
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
-      expect(find.byType(RestaurantScreen), findsOneWidget);
-    });
-
-    testWidgets('pickup: logs → new log → picker → saved in the list', (
-      tester,
-    ) async {
-      final pickup = FakePickupRepository();
-      await pumpApp(tester, fakeRepositories(auth, profiles, profit, pickup));
-      await tapKey(tester, 'nav.pickup');
-      await tapKey(tester, 'pickup.logs');
-      expect(find.byType(PickupLogsScreen), findsOneWidget);
-      await tapKey(tester, 'logs.add');
-      expect(find.byType(PickupLogFormScreen), findsOneWidget);
-
-      await tapKey(tester, 'logForm.restaurant');
-      expect(find.text(t.pickerTitle), findsOneWidget);
-      await tapKey(tester, 'restaurant.r-2');
-      expect(find.byType(PickupLogFormScreen), findsOneWidget);
-      expect(find.text('POI-2'), findsOneWidget);
-
-      await tapKey(tester, 'logForm.submit');
-      expect(find.byType(PickupLogsScreen), findsOneWidget);
-      expect(pickup.lastLog!.restaurantId, 'r-2');
-      expect(
-        find.byKey(Key('log.${pickup.logItems.single.id}')),
-        findsOneWidget,
-      );
-    });
-
     testWidgets('shifts: new over the tabs → details in the tab → compare', (
       tester,
     ) async {
       final shifts = FakeShiftRepository(items: [scenario(id: 'old')]);
-      await pumpApp(
-        tester,
-        fakeRepositories(auth, profiles, profit, null, shifts),
-      );
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit, shifts));
       await tapKey(tester, 'nav.shifts');
       expect(find.byType(ShiftsScreen), findsOneWidget);
 
@@ -475,33 +408,35 @@ void main() {
       expect(find.byKey(const Key('shifts.compare')), findsNothing);
     });
 
-    testWidgets('profile → Pickup model card over the tabs → back', (
-      tester,
-    ) async {
-      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
-      await tapKey(tester, 'nav.profile');
-      await scrollAndTap(tester, 'profile.modelInfo');
-      expect(find.byType(ModelInfoScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
-      await tester.binding.handlePopRoute();
+    testWidgets('home card → the Road tab', (tester) async {
+      await pumpApp(
+        tester,
+        fakeRepositories(auth, profiles, profit, null, RoadFakes()),
+      );
+      await scrollAndTap(tester, 'home.road');
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
-      expect(find.byType(ProfileScreen), findsOneWidget);
+      expect(find.byType(RoadScreen), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        1,
+      );
     });
 
-    testWidgets('home card → road map over the tabs → report → its incident', (
+    testWidgets('road tab → report over the tabs → its incident → back', (
       tester,
     ) async {
       final road = RoadFakes();
       road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
       await pumpApp(
         tester,
-        fakeRepositories(auth, profiles, profit, null, null, road),
+        fakeRepositories(auth, profiles, profit, null, road),
       );
-      await scrollAndTap(tester, 'home.road');
+      await tapKey(tester, 'nav.road');
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
       expect(find.byType(RoadScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.byKey(const Key('marker.i-1')), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('road.report')));
@@ -521,12 +456,11 @@ void main() {
       await tester.tap(find.byKey(const Key('road.viewReported')));
       await tester.pumpAndSettle();
       expect(find.byType(IncidentDetailScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
 
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(RoadScreen), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
     });
 
@@ -537,9 +471,9 @@ void main() {
       road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
       await pumpApp(
         tester,
-        fakeRepositories(auth, profiles, profit, null, null, road),
+        fakeRepositories(auth, profiles, profit, null, road),
       );
-      await scrollAndTap(tester, 'home.road');
+      await tapKey(tester, 'nav.road');
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('road.report')));
