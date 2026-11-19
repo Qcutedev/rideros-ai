@@ -24,12 +24,8 @@ dependencies = [
     # Work Patterns (profit/patterns.py: K-Means, silhouette, ARI).
     "scikit-learn>=1.9.1",
     "numpy>=2.5.4",
-    "pillow>=12.0",
     # Trend significance test (profit/trend_analysis.py); already installed with scikit-learn.
     "scipy>=1.18",
-    "python-multipart>=0.0.20",
-    # Calls the photo classifier (cv_service) from a background task.
-    "httpx>=0.28",
 ]
 
 [dependency-groups]
@@ -37,6 +33,8 @@ dev = [
     "pytest>=8.4",
     "pytest-asyncio>=1.2",
     "pytest-cov>=7.0",
+    # Test client (ASGITransport) and the perf script (perf/run.py).
+    "httpx>=0.28",
     "ruff>=0.14",
     "python-dotenv>=1.2.4",
 ]

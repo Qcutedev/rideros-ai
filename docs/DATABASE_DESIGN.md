@@ -1,5 +1,7 @@
 # DATABASE_DESIGN.md — RiderOS AI (Phase 0)
 
+> **อัปเดต 2026-11-19:** เอา RoadContext ออกแล้ว (`docs/HANDOFF.md` §4.21). Migration `0007` ลบตาราง `road_incidents`, `incident_reports`, `model_versions` และคอลัมน์ `shift_scenarios.model_version_id` · `estimation_method` เหลือ `assumption`, `historical` · ส่วนที่พูดถึงตารางเหล่านี้ด้านล่างคือแบบเดิม เก็บไว้เป็นบันทึก
+>
 > **อัปเดต 2026-11-18:** เอา Pickup Intelligence ออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20). Migration `0006` ลบตาราง `restaurants`, `restaurant_time_stats`, `pickup_logs`, `pickup_predictions` และแถว `pickup_o2p` ใน `model_versions`. ตาราง `model_versions` ยังอยู่ (RoadContext ใช้) ส่วนที่พูดถึงตาราง Pickup ด้านล่างคือแบบเดิม เก็บไว้เป็นบันทึก
 
 > สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05)

@@ -1,5 +1,7 @@
 # RiderOS AI --- UI/UX Design Specification
 
+> **อัปเดต 2026-11-19:** เอา RoadContext ออกแล้ว (`docs/HANDOFF.md` §4.21): ไม่มีแท็บถนน · แถว "เครื่องมือ AI" ของ Home กลายเป็นหัวข้อ "วางแผนกะงาน" กับการ์ด Shift Simulator เต็มแถว · ส่วนที่พูดถึง RoadContext ด้านล่างคือแบบเดิม
+>
 > **อัปเดต 2026-11-18:** เอา Pickup Intelligence ออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20). แท็บที่ 2 เป็น **ถนน** และการ์ด RoadContext ย้ายไปอยู่ในแถว "เครื่องมือ AI" ของ Home แทนการ์ด Pickup ส่วนที่พูดถึง Pickup ด้านล่างคือแบบเดิม
 
 **เวอร์ชัน:** 2.0 (Lime Obsidian)\

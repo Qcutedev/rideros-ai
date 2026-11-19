@@ -14,13 +14,10 @@ import datetime as dt
 import json
 import secrets
 import ssl
-import struct
 import sys
 import time
 import urllib.error
 import urllib.request
-import uuid
-import zlib
 from typing import Any
 
 
@@ -31,23 +28,11 @@ class Api:
         self.ctx = ssl._create_unverified_context() if insecure else ssl.create_default_context()  # noqa: S323
         self.token: str | None = None
 
-    def call(
-        self,
-        method: str,
-        path: str,
-        body: Any = None,
-        *,
-        multipart: dict[str, Any] | None = None,
-        absolute: bool = False,
-    ) -> tuple[int, Any]:
+    def call(self, method: str, path: str, body: Any = None, *, absolute: bool = False) -> tuple[int, Any]:
         url = (self.root if absolute else self.base) + path
         headers = {"Accept": "application/json", "User-Agent": "rideros-smoke-test"}
         data: bytes | None = None
-        if multipart is not None:
-            boundary = uuid.uuid4().hex
-            data = _multipart(multipart, boundary)
-            headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
-        elif body is not None:
+        if body is not None:
             data = json.dumps(body).encode()
             headers["Content-Type"] = "application/json"
         if self.token:
@@ -70,38 +55,6 @@ def _json(raw: bytes) -> Any:
         return json.loads(raw) if raw else None
     except ValueError:
         return raw.decode(errors="replace")[:200]
-
-
-def _multipart(fields: dict[str, Any], boundary: str) -> bytes:
-    out = b""
-    for name, value in fields.items():
-        out += f"--{boundary}\r\n".encode()
-        if isinstance(value, bytes):  # the photo
-            out += f'Content-Disposition: form-data; name="{name}"; filename="smoke.png"\r\n'.encode()
-            out += b"Content-Type: image/png\r\n\r\n" + value + b"\r\n"
-        else:
-            out += f'Content-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode()
-    return out + f"--{boundary}--\r\n".encode()
-
-
-def _png(width: int = 64, height: int = 64) -> bytes:
-    """A small grey gradient PNG (no image library on the server)."""
-    rows = b"".join(
-        b"\x00" + bytes((x * 4 + y) % 256 for x in range(width) for _ in range(3)) for y in range(height)
-    )
-
-    def chunk(kind: bytes, payload: bytes) -> bytes:
-        return (
-            struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", zlib.crc32(kind + payload))
-        )
-
-    header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    return (
-        b"\x89PNG\r\n\x1a\n"
-        + chunk(b"IHDR", header)
-        + chunk(b"IDAT", zlib.compress(rows))
-        + chunk(b"IEND", b"")
-    )
 
 
 class Checks:
@@ -146,22 +99,8 @@ def run(api: Api, production: bool) -> int:
         c.expect("POST /income", status == 201, body)
         status, body = api.call("GET", "/profit/summary?period=week")
         c.expect("GET /profit/summary", status == 200, body)
-
-        status, body = api.call(
-            "POST",
-            "/road/reports",
-            multipart={"category": "road_obstacle", "lat": "13.7563", "lng": "100.5018", "image": _png()},
-        )
-        if c.expect("road report with photo", status == 201, body):
-            report_id = body["report_id"]
-            ai_status = "pending"
-            deadline = time.monotonic() + 90
-            while ai_status == "pending" and time.monotonic() < deadline:
-                time.sleep(2)
-                _, reports = api.call("GET", "/road/reports")
-                mine = [r for r in (reports or {}).get("items", []) if r.get("id") == report_id]
-                ai_status = mine[0]["ai_status"] if mine else "missing"
-            c.expect("photo classified by cv_service", ai_status == "done", ai_status)
+        status, body = api.call("GET", "/profit/heatmap")
+        c.expect("GET /profit/heatmap", status == 200, body)
     finally:
         status, body = api.call("DELETE", "/me", {"password": password})
         c.expect("DELETE /me (clean-up)", status == 204, body)

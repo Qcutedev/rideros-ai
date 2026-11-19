@@ -1,7 +1,0 @@
-# Allow-list: only what the service image needs. Datasets, weights, reports and .venv never enter it.
-**
-!pyproject.toml
-!uv.lock
-!README.md
-!app/
-**/__pycache__/

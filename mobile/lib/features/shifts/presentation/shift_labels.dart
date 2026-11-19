@@ -11,7 +11,6 @@ String methodLabel(AppLocalizations l10n, EstimationMethod method) =>
     switch (method) {
       EstimationMethod.assumption => l10n.shiftMethodAssumption,
       EstimationMethod.historical => l10n.shiftMethodHistorical,
-      EstimationMethod.ml => l10n.shiftMethodUnavailable,
     };
 
 /// `วันจันทร์` for 0 (Monday) ... `วันอาทิตย์` for 6.

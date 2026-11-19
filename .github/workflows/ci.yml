@@ -1,8 +1,5 @@
 # Continuous integration: the same gates as scripts/regression.ps1, minus the emulator E2E run
 # (flutter drive needs a device; run `.\scripts\regression.ps1 -E2E` locally for that).
-#
-# Datasets and trained model artifacts are never in the repository (D1/D4), so tests that need
-# them skip themselves here (ml tests/test_artifact.py).
 name: CI
 
 on:
@@ -68,29 +65,6 @@ jobs:
           uv run --locked pytest
           --cov=app/modules --cov=app/core --cov-report=term:skip-covered
           --cov-fail-under=${{ env.BACKEND_COVERAGE_GATE }}
-
-  python-ml:
-    name: ${{ matrix.project }} (ruff + pytest)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [ml, cv_service]
-    defaults:
-      run:
-        working-directory: ${{ matrix.project }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          enable-cache: true
-          cache-dependency-glob: ${{ matrix.project }}/uv.lock
-      - run: uv sync --locked
-      - run: uv run --locked ruff check .
-      - run: uv run --locked ruff format --check .
-      - run: uv run --locked pytest
 
   mobile:
     name: mobile (analyze + test)

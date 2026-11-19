@@ -38,7 +38,6 @@ import httpx
 
 API = "/api/v1"
 ZONE = ZoneInfo("Asia/Bangkok")
-CENTER = (13.7563, 100.5018)  # lat, lng (Bangkok)
 DAYS = 180
 WARMUP = 10
 COLD_PATTERN_SAMPLES = 5
@@ -70,7 +69,6 @@ class Seeded:
     counts: Counter[str] = field(default_factory=Counter)
     scenario_ids: list[str] = field(default_factory=list)
     historical_scenario_id: str = ""
-    incident_id: str = ""
     session_spans: list[tuple[datetime, datetime]] = field(default_factory=list)
 
 
@@ -219,40 +217,17 @@ async def seed(api: Api, rng: random.Random) -> Seeded:
     data.historical_scenario_id = historical["id"]
     data.scenario_ids.append(historical["id"])
     data.counts["shift_scenarios"] = len(data.scenario_ids)
-
-    categories = ("flooding", "road_damage", "road_closure", "road_obstacle", "traffic_incident")
-    for i, category in enumerate(categories):
-        report = (
-            await api.call(
-                "POST",
-                "/road/reports",
-                expect=201,
-                data={
-                    "category": category,
-                    "lat": str(CENTER[0] + 0.004 * i),
-                    "lng": str(CENTER[1] - 0.003 * i),
-                },
-            )
-        ).json()
-        data.incident_id = data.incident_id or report["incident_id"]
-        data.counts["road_reports"] += 1
     return data
 
 
 def cases(s: Seeded) -> list[Case]:
     today = datetime.now(ZONE).date()
-    lat, lng = CENTER
-    bbox = f"{lng - 0.1},{lat - 0.1},{lng + 0.1},{lat + 0.1}"
     return [
         Case("GET /me", "crud", "GET", "/me"),
         Case("GET /work-sessions", "crud", "GET", "/work-sessions?limit=50"),
         Case("GET /income", "crud", "GET", "/income?limit=50"),
         Case("GET /expenses", "crud", "GET", "/expenses?limit=50"),
         Case("GET /shift-scenarios", "crud", "GET", "/shift-scenarios"),
-        Case("GET /road/incidents?bbox=", "crud", "GET", f"/road/incidents?bbox={bbox}"),
-        Case("GET /road/incidents/nearby", "crud", "GET", f"/road/incidents/nearby?lat={lat}&lng={lng}"),
-        Case("GET /road/incidents/{id}", "crud", "GET", f"/road/incidents/{s.incident_id}"),
-        Case("GET /road/reports", "crud", "GET", "/road/reports"),
         Case("GET /profit/summary?period=week", "summary", "GET", "/profit/summary?period=week"),
         Case("GET /profit/summary?period=month", "summary", "GET", "/profit/summary?period=month"),
         Case(

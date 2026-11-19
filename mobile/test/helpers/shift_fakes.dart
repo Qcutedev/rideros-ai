@@ -60,7 +60,6 @@ Map<String, Object?> scenarioJson({
         },
         'warnings': <String>[],
       },
-  'model_version_id': null,
   'actual_work_session_id': sessionId,
   'created_at': '2026-11-10T03:00:00Z',
   'updated_at': '2026-11-10T07:07:00Z',

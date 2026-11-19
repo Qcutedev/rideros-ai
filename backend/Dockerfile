@@ -13,13 +13,11 @@ RUN uv sync --locked --no-dev --no-install-project --no-editable
 
 FROM python:3.14.10-slim-trixie AS runtime
 # libgomp1: OpenMP runtime used by scikit-learn (Work Patterns K-Means).
-# /data/road_images: RoadContext photos; a new named volume takes this owner, so `app` can write.
 # upgrade: Debian security fixes newer than the base image (docs/SECURITY_AUDIT.md). The system pip
 # is removed because the app runs from /opt/venv and pip's vendored packages carry known CVEs.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/* && python -m pip uninstall -y pip \
-    && useradd --system --uid 10001 --no-create-home app \
-    && mkdir -p /data/road_images && chown app:app /data/road_images
+    && useradd --system --uid 10001 --no-create-home app
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \

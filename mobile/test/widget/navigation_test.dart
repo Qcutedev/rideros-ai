@@ -24,9 +24,6 @@ import 'package:rideros_ai/features/profit/presentation/income_form_screen.dart'
 import 'package:rideros_ai/features/profit/presentation/records_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/true_profit_screen.dart';
 import 'package:rideros_ai/features/profit/presentation/work_session_form_screen.dart';
-import 'package:rideros_ai/features/road/presentation/incident_detail_screen.dart';
-import 'package:rideros_ai/features/road/presentation/report_form_screen.dart';
-import 'package:rideros_ai/features/road/presentation/road_screen.dart';
 import 'package:rideros_ai/features/shifts/presentation/shift_compare_screen.dart';
 import 'package:rideros_ai/features/shifts/presentation/shift_detail_screen.dart';
 import 'package:rideros_ai/features/shifts/presentation/shift_form_screen.dart';
@@ -37,7 +34,6 @@ import '../helpers/fakes.dart';
 import '../helpers/file_bundle.dart';
 import '../helpers/profit_fakes.dart';
 import '../helpers/pump.dart';
-import '../helpers/road_fakes.dart';
 import '../helpers/shift_fakes.dart';
 
 /// The real app (router, guard, theme) with fake repositories. The brand intro
@@ -347,14 +343,14 @@ void main() {
       expect(profit.expenses.calls, isEmpty);
     });
 
-    testWidgets('tabs in order: home, road, profit, shifts, profile', (
+    testWidgets('four tabs in order: home, profit, shifts, profile', (
       tester,
     ) async {
       await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      expect(find.byType(NavigationDestination), findsNWidgets(4));
       final xs = [
         for (final key in [
           'nav.home',
-          'nav.road',
           'nav.profit',
           'nav.shifts',
           'nav.profile',
@@ -408,84 +404,14 @@ void main() {
       expect(find.byKey(const Key('shifts.compare')), findsNothing);
     });
 
-    testWidgets('home card → the Road tab', (tester) async {
-      await pumpApp(
-        tester,
-        fakeRepositories(auth, profiles, profit, null, RoadFakes()),
-      );
-      await scrollAndTap(tester, 'home.road');
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
-      expect(find.byType(RoadScreen), findsOneWidget);
+    testWidgets('home plan card → the Shifts tab', (tester) async {
+      await pumpApp(tester, fakeRepositories(auth, profiles, profit));
+      await scrollAndTap(tester, 'home.shifts');
+      expect(find.byType(ShiftsScreen), findsOneWidget);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-        1,
+        2,
       );
-    });
-
-    testWidgets('road tab → report over the tabs → its incident → back', (
-      tester,
-    ) async {
-      final road = RoadFakes();
-      road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
-      await pumpApp(
-        tester,
-        fakeRepositories(auth, profiles, profit, null, road),
-      );
-      await tapKey(tester, 'nav.road');
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
-      expect(find.byType(RoadScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.byKey(const Key('marker.i-1')), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('road.report')));
-      await tester.pumpAndSettle();
-      expect(find.byType(ReportFormScreen), findsOneWidget);
-      await tapKey(tester, 'reportForm.category.flooding');
-      await tapKey(tester, 'reportForm.submit');
-      expect(find.byType(RoadScreen), findsOneWidget);
-      // The snackbar sits on the road screen, not on the tabs underneath.
-      expect(
-        find.descendant(
-          of: find.byType(RoadScreen),
-          matching: find.text(t.roadReportSent),
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(find.byKey(const Key('road.viewReported')));
-      await tester.pumpAndSettle();
-      expect(find.byType(IncidentDetailScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
-
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
-      expect(find.byType(RoadScreen), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
-    });
-
-    testWidgets('report snackbar stays on the map when a marker is opened', (
-      tester,
-    ) async {
-      final road = RoadFakes();
-      road.repo.incidents.add(testIncident(id: 'i-new', lat: 13.7663));
-      await pumpApp(
-        tester,
-        fakeRepositories(auth, profiles, profit, null, road),
-      );
-      await tapKey(tester, 'nav.road');
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('road.report')));
-      await tester.pumpAndSettle();
-      await tapKey(tester, 'reportForm.category.flooding');
-      await tapKey(tester, 'reportForm.submit');
-      expect(find.text(t.roadReportSent), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('marker.i-1')));
-      await tester.pumpAndSettle();
-      expect(find.byType(IncidentDetailScreen), findsOneWidget);
-      expect(find.text(t.roadReportSent), findsNothing);
     });
 
     testWidgets('home shortcut → work session saved → home', (tester) async {

@@ -6,7 +6,9 @@ API contract: `backend/README.md`.
 Status: **P3a** (design system, router + auth guard, API client with token refresh, splash, login,
 register, forgot/reset password, onboarding) and **P3b** (bottom navigation, home dashboard, TrueProfit
 dashboard with trend chart, income / expense / work-session lists and forms), **P3c** (Pickup Intelligence,
-Shift Simulator, Profile; Pickup was removed on 2026-11-18 and its tab is now the Road map) and **Phase 4** (end-to-end journey against the real API, reset deep link).
+Shift Simulator, Profile) and **Phase 4** (end-to-end journey against the real API, reset deep link). Pickup was
+removed on 2026-11-18 and the Road map that replaced its tab on 2026-11-19 (`docs/HANDOFF.md` §4.21): the app has 4 tabs,
+Home, TrueProfit, Shifts and Profile, and asks for no location or camera permission.
 
 ## Run
 

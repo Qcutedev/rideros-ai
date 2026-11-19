@@ -12,16 +12,12 @@ import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
 import 'package:rideros_ai/features/profile/data/rider_profile_repository_impl.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
 import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
-import 'package:rideros_ai/features/road/data/device_services.dart';
-import 'package:rideros_ai/features/road/data/road_repository_impl.dart';
-import 'package:rideros_ai/features/road/presentation/widgets/road_map.dart';
 import 'package:rideros_ai/features/shifts/data/shift_repository_impl.dart';
 import 'package:rideros_ai/l10n/app_localizations.dart';
 import 'package:rideros_ai/l10n/app_localizations_th.dart';
 
 import 'fakes.dart';
 import 'profit_fakes.dart';
-import 'road_fakes.dart';
 import 'shift_fakes.dart';
 
 /// Overrides that replace the network layer with fakes and fix "now" to [testNow].
@@ -30,16 +26,9 @@ List<Override> fakeRepositories(
   FakeRiderProfileRepository? profiles,
   ProfitFakes? profit,
   FakeShiftRepository? shifts,
-  RoadFakes? road,
 ]) {
   final p = profit ?? ProfitFakes();
-  final r = road ?? RoadFakes();
   return [
-    roadRepositoryProvider.overrideWithValue(r.repo),
-    locationServiceProvider.overrideWithValue(r.location),
-    photoPickerProvider.overrideWithValue(r.photos),
-    // No network tiles in widget tests.
-    mapTilesEnabledProvider.overrideWithValue(false),
     shiftRepositoryProvider.overrideWithValue(shifts ?? FakeShiftRepository()),
     authRepositoryProvider.overrideWithValue(auth),
     riderProfileRepositoryProvider.overrideWithValue(
@@ -79,11 +68,6 @@ const allRoutePatterns = [
   Routes.riderProfile,
   Routes.deleteAccount,
   Routes.about,
-  Routes.road,
-  Routes.roadReportNew,
-  Routes.roadPickLocation,
-  Routes.roadMyReports,
-  Routes.incidentPattern,
 ];
 
 /// Pumps one screen at [path] inside a router. Every other route renders

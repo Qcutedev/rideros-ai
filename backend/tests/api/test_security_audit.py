@@ -13,7 +13,7 @@ import httpx
 import pytest
 from fastapi import FastAPI
 
-from app.core.config import MULTIPART_OVERHEAD_BYTES, Settings
+from app.core.config import Settings
 from app.core.logging import configure_logging
 from app.main import create_app
 from tests.conftest import make_settings
@@ -65,14 +65,6 @@ AUTHENTICATED = {
     ("PATCH", "/shift-scenarios/{scenario_id}"),
     ("DELETE", "/shift-scenarios/{scenario_id}"),
     ("POST", "/shift-scenarios/{scenario_id}/estimate"),
-    ("POST", "/road/reports"),
-    ("GET", "/road/reports"),
-    ("GET", "/road/reports/{report_id}/image"),
-    ("GET", "/road/incidents"),
-    ("GET", "/road/incidents/nearby"),
-    ("GET", "/road/incidents/{incident_id}"),
-    ("POST", "/road/incidents/{incident_id}/confirmations"),
-    ("PATCH", "/road/incidents/{incident_id}/status"),
 }
 
 
@@ -131,20 +123,19 @@ async def test_streamed_json_body_over_cap_is_413(client: httpx.AsyncClient, set
     assert resp.json()["error"]["code"] == "payload_too_large"
 
 
-async def test_streamed_upload_over_cap_is_413_before_authentication(
+async def test_streamed_multipart_body_over_cap_is_413_before_authentication(
     client: httpx.AsyncClient, settings: Settings
 ) -> None:
-    # FastAPI reads a form before it runs the auth dependency, so without the cap an anonymous
-    # client could make the server spool any amount of data to disk.
-    cap = settings.road_image_max_bytes + MULTIPART_OVERHEAD_BYTES
+    # No endpoint takes uploads, so a multipart body gets the same cap as JSON, and an anonymous
+    # client is cut off before the auth dependency runs.
     part = (
         b"--x\r\n"
-        b'Content-Disposition: form-data; name="image"; filename="a.jpg"\r\n'
-        b"Content-Type: image/jpeg\r\n\r\n"
+        b'Content-Disposition: form-data; name="file"; filename="a.bin"\r\n'
+        b"Content-Type: application/octet-stream\r\n\r\n"
     )
-    resp = await client.post(
-        "/road/reports",
-        content=_chunks(cap + 1, head=part),
+    resp = await client.put(
+        "/me/rider-profile",
+        content=_chunks(settings.max_json_body_bytes + 1, head=part),
         headers={"Content-Type": "multipart/form-data; boundary=x"},
     )
     assert resp.status_code == 413
@@ -163,7 +154,7 @@ async def test_normal_bodies_pass(client: httpx.AsyncClient) -> None:
     assert resp.status_code == 401
 
 
-# ---- logs (SYSTEM_ARCHITECTURE §5 "Privacy"): no password, token or precise position ----
+# ---- logs (SYSTEM_ARCHITECTURE §5 "Privacy"): no password or token ----
 
 
 @pytest.fixture
@@ -178,7 +169,7 @@ async def info_log_client(database_url: str) -> AsyncIterator[httpx.AsyncClient]
         configure_logging("WARNING", True)  # back to the level the other tests use
 
 
-async def test_logs_hold_no_password_token_or_position(
+async def test_logs_hold_no_password_or_token(
     info_log_client: httpx.AsyncClient, capfd: pytest.CaptureFixture[str]
 ) -> None:
     secret_password = "Unusual Passphrase 4417"
@@ -192,13 +183,11 @@ async def test_logs_hold_no_password_token_or_position(
         )
     ).json()
     headers = bearer(pair["access_token"])
-    nearby = await info_log_client.get(
-        "/road/incidents/nearby", params={"lat": "13.7563309", "lng": "100.5017651"}, headers=headers
-    )
-    assert nearby.status_code == 200, nearby.text
+    me = await info_log_client.get("/me", headers=headers)
+    assert me.status_code == 200, me.text
     await info_log_client.post("/auth/refresh", json={"refresh_token": pair["refresh_token"]})
 
     out = capfd.readouterr().out
-    assert '"event": "request"' in out and "/road/incidents/nearby" in out  # the access log ran
-    for leaked in (secret_password, pair["access_token"], pair["refresh_token"], "13.7563309", "100.5017651"):
+    assert '"event": "request"' in out and '"/api/v1/me"' in out  # the access log ran
+    for leaked in (secret_password, pair["access_token"], pair["refresh_token"]):
         assert leaked not in out

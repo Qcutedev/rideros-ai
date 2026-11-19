@@ -10,15 +10,10 @@ key.properties
 service-account*.json
 
 # ---- Datasets & model artifacts (D1/D4: no redistribution) ----
-ml/data/**
-!ml/data/SOURCES.md
-!ml/data/.gitkeep
-ml/artifacts/
-ml/reports/**/quick-smoke/
-# Phase 5 CV: RDD2022 / Flood10k / AlleyFloodNet images and the trained weights stay local
-cv_service/data/**
-!cv_service/data/SOURCES.md
-cv_service/artifacts/
+# ml/ (Meituan pickup model) and cv_service/ (road photo classifier) left the repository
+# (docs/HANDOFF.md 4.21). Local copies may still hold datasets and weights: never commit them.
+ml/
+cv_service/
 *.csv
 *.csv.zip
 *.parquet

@@ -49,33 +49,3 @@ def test_password_reset_enabled_only_outside_production_without_provider(env: st
 )
 def test_docs_visibility(env: str, override: bool | None, shown: bool) -> None:
     assert make(env=env, docs_enabled=override).show_docs is shown
-
-
-def test_road_rules_default_to_the_design_table() -> None:
-    rules = make().road_rules
-    assert set(rules) == {"flooding", "road_damage", "road_closure", "road_obstacle", "traffic_incident"}
-    assert (rules["flooding"].radius_m, rules["flooding"].window_minutes, rules["flooding"].ttl_minutes) == (
-        300,
-        360,
-        720,
-    )
-
-
-def test_partial_road_rules_override_only_named_categories(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv(
-        "ROAD_RULES", '{"flooding": {"radius_m": 500, "window_minutes": 60, "ttl_minutes": 120}}'
-    )
-    rules = make().road_rules
-    assert rules["flooding"].radius_m == 500
-    assert rules["road_damage"].radius_m == 50
-
-
-def test_bad_road_rules_are_rejected() -> None:
-    with pytest.raises(ValidationError):
-        make(road_rules={"flooding": {"radius_m": 0, "window_minutes": 1, "ttl_minutes": 1}})
-    with pytest.raises(ValidationError):
-        make(road_rules={"volcano": {"radius_m": 10, "window_minutes": 1, "ttl_minutes": 1}})
-
-
-def test_empty_road_image_dir_means_disabled() -> None:
-    assert make(road_image_dir="").road_image_dir is None

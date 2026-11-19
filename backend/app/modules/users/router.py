@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, status
 
-from app.core.deps import CurrentUser, SessionDep, SettingsDep
+from app.core.deps import CurrentUser, SessionDep
 from app.modules.users import service
 from app.modules.users.schemas import (
     DeleteAccountRequest,
@@ -28,11 +28,9 @@ async def update_me(body: UserUpdate, user: CurrentUser, session: SessionDep) ->
     status_code=status.HTTP_204_NO_CONTENT,
     responses={403: {"description": "Password is incorrect (`invalid_password`)"}},
 )
-async def delete_me(
-    body: DeleteAccountRequest, user: CurrentUser, session: SessionDep, settings: SettingsDep
-) -> Response:
+async def delete_me(body: DeleteAccountRequest, user: CurrentUser, session: SessionDep) -> Response:
     """Deletes the account and all of the rider's data (PDPA). Requires the current password."""
-    await service.delete_me(session, settings, user, body.password)
+    await service.delete_me(session, user, body.password)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

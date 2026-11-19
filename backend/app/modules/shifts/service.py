@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import AppError, NotFoundError
+from app.core.errors import NotFoundError
 from app.core.pagination import InvalidCursorError, Page, decode_cursor, encode_cursor
 from app.core.timezones import today_in
 from app.modules.profit import repository as profit_repo
@@ -27,11 +27,6 @@ from app.modules.users.service import get_locale, get_rider_profile
 _ESTIMATE_INPUTS = {"start_time", "end_time", "planned_weekday", "estimation_method", "assumptions"}
 
 
-class MethodUnavailableError(AppError):
-    code = "estimation_method_unavailable"
-    message = "No trained model exists for shift earnings yet; use 'assumption' or 'historical'"
-
-
 def _not_found() -> NotFoundError:
     return NotFoundError("Shift scenario not found", code="shift_scenario_not_found")
 
@@ -43,8 +38,6 @@ def to_out(row: ShiftScenario) -> ShiftScenarioOut:
 async def _estimate(session: AsyncSession, user_id: uuid.UUID, values: dict[str, Any]) -> dict[str, Any]:
     """Compute duration + estimate for the scenario inputs in `values`; returns the columns to store."""
     method = values["estimation_method"]
-    if method == "ml":
-        raise MethodUnavailableError()
     minutes = estimator.duration_minutes(values["start_time"], values["end_time"])
     assumptions: dict[str, Any] = values["assumptions"]
     if method == "assumption":
@@ -71,7 +64,6 @@ async def _estimate(session: AsyncSession, user_id: uuid.UUID, values: dict[str,
         "estimate_low": result.low,
         "estimate_high": result.high,
         "estimate_details": result.details,
-        "model_version_id": None,
     }
 
 

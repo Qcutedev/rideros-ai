@@ -38,7 +38,7 @@ async def test_create_estimates_immediately_with_profile_costs(client: httpx.Asy
     assert body["estimated_revenue"] == "506.25"  # 4.5 h x 2.5 x 45
     assert body["estimated_expenses"] == "65.25"  # 45 km: fuel 42.75 + depreciation 22.50
     assert body["estimated_net_profit"] == "441.00" and body["estimated_net_profit_per_hour"] == "98.00"
-    assert body["estimate_low"] is None and body["model_version_id"] is None
+    assert body["estimate_low"] is None and "model_version_id" not in body
     assert body["estimate_details"]["sources"]["fuel_km_per_liter"] == "rider_profile"
     assert body["assumptions"] == {"orders_per_hour": "2.5", "income_per_order": "45", "km_per_order": "4"}
     assert body["start_time"] == "17:00:00"
@@ -56,7 +56,7 @@ async def test_overnight_shift(client: httpx.AsyncClient, h: dict) -> None:
     [
         ({"end_time": "17:00"}, 400, "invalid_shift_length"),
         ({"end_time": "17:20"}, 400, "invalid_shift_length"),
-        ({"estimation_method": "ml"}, 400, "estimation_method_unavailable"),
+        ({"estimation_method": "ml"}, 422, "validation_error"),
         ({"assumptions": {"orders_per_hour": 2}}, 400, "missing_assumption"),
         ({"name": ""}, 422, "validation_error"),
         ({"start_time": "17:00+07:00"}, 422, "validation_error"),

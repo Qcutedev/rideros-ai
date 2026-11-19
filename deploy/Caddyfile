@@ -25,8 +25,9 @@
 
 	# The API lives under /api/v1; anything else is not served.
 	handle /api/v1/* {
+		# Above the backend's own 256 KB JSON cap, so the backend answers with its JSON 413.
 		request_body {
-			max_size 6MB
+			max_size 1MB
 		}
 		reverse_proxy backend:8000 {
 			health_uri /api/v1/health

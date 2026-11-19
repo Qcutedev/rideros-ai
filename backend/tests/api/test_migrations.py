@@ -76,6 +76,7 @@ def test_downgrade_to_base_and_upgrade_again(scratch_db_url: str) -> None:
 
 
 PICKUP_TABLES = {"restaurants", "restaurant_time_stats", "pickup_logs", "pickup_predictions"}
+ROAD_AND_MODEL_TABLES = {"road_incidents", "incident_reports", "model_versions"}
 
 
 async def _run(url: str, sql: str) -> list[tuple]:
@@ -87,12 +88,23 @@ async def _run(url: str, sql: str) -> list[tuple]:
     return rows
 
 
-async def test_pickup_tables_are_gone(app: FastAPI) -> None:
+async def test_removed_feature_tables_are_gone(app: FastAPI) -> None:
     async with app.state.engine.connect() as conn:
         rows = await conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname = 'public'"))
         names = {r[0] for r in rows}
-    assert not PICKUP_TABLES & names
-    assert "model_versions" in names  # RoadContext keeps using it
+        column = await conn.scalar(
+            text(
+                "SELECT count(*) FROM information_schema.columns "
+                "WHERE table_name = 'shift_scenarios' AND column_name = 'model_version_id'"
+            )
+        )
+        method_check = await conn.scalar(
+            text("SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = :name"),
+            {"name": "ck_shift_scenarios_estimation_method"},
+        )
+    assert not (PICKUP_TABLES | ROAD_AND_MODEL_TABLES) & names
+    assert column == 0
+    assert "'historical'" in method_check and "'ml'" not in method_check
 
 
 def test_0006_removes_only_the_pickup_model_rows(scratch_db_url: str) -> None:
@@ -107,5 +119,5 @@ def test_0006_removes_only_the_pickup_model_rows(scratch_db_url: str) -> None:
                 f"VALUES ('{name}', '1.0.0', 't', 'd', '{{}}'::jsonb, '{{}}'::jsonb, 'u')",
             )
         )
-    command.upgrade(cfg, "head")
+    command.upgrade(cfg, "0006")
     assert asyncio.run(_run(scratch_db_url, "SELECT name FROM model_versions")) == [("road_cv",)]
