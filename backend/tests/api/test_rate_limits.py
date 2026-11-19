@@ -109,39 +109,3 @@ async def test_health_is_not_limited(client_from: ClientFactory) -> None:
     async with client_from("10.5.0.1") as c:
         for _ in range(10):
             assert (await c.get("/health")).status_code == 200
-
-
-async def test_road_reports_and_confirmations_share_a_per_user_limit(database_url: str) -> None:
-    app = create_app(
-        make_settings(
-            database_url,
-            rate_limit_enabled=True,
-            rate_limit_default="100/minute",
-            rate_limit_road_report="2/minute",
-        )
-    )
-    async with app.router.lifespan_context(app):
-        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False, client=("10.5.0.1", 50000))
-        async with httpx.AsyncClient(transport=transport, base_url="http://test/api/v1") as c:
-            await c.post(
-                "/auth/register",
-                json={"email": "road@example.com", "password": PASSWORD, "display_name": "r"},
-            )
-            login = await c.post("/auth/login", json={"email": "road@example.com", "password": PASSWORD})
-            headers = bearer(login.json()["access_token"])
-            form = {"category": "flooding", "lat": "13.75", "lng": "100.5"}
-            created = await c.post("/road/reports", data=form, headers=headers)
-            assert created.status_code == 201
-            incident = created.json()["incident_id"]
-            confirm = await c.post(
-                f"/road/incidents/{incident}/confirmations", json={"still_present": True}, headers=headers
-            )
-            assert confirm.status_code == 200
-            assert_limited(
-                await c.post("/road/reports", data=form | {"category": "road_damage"}, headers=headers)
-            )
-            # Reading the map is not part of this limit.
-            nearby = await c.get(
-                "/road/incidents/nearby", params={"lat": 13.75, "lng": 100.5}, headers=headers
-            )
-            assert nearby.status_code == 200

@@ -23,12 +23,6 @@ import '../features/profit/presentation/income_form_screen.dart';
 import '../features/profit/presentation/records_screen.dart';
 import '../features/profit/presentation/true_profit_screen.dart';
 import '../features/profit/presentation/work_session_form_screen.dart';
-import '../features/road/domain/road_models.dart';
-import '../features/road/presentation/incident_detail_screen.dart';
-import '../features/road/presentation/location_picker_screen.dart';
-import '../features/road/presentation/my_reports_screen.dart';
-import '../features/road/presentation/report_form_screen.dart';
-import '../features/road/presentation/road_screen.dart';
 import '../features/shifts/presentation/shift_compare_screen.dart';
 import '../features/shifts/presentation/shift_detail_screen.dart';
 import '../features/shifts/presentation/shift_form_screen.dart';
@@ -177,14 +171,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.road,
-                builder: (context, state) => const RoadScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: Routes.profit,
                 builder: (context, state) => const TrueProfitScreen(),
                 routes: [
@@ -235,7 +221,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ...formRoutes(rootKey),
       ...shiftRoutes(rootKey),
       ...profileRoutes(rootKey),
-      ...roadRoutes(rootKey),
     ],
   );
   ref.onDispose(() {
@@ -304,34 +289,6 @@ List<GoRoute> shiftRoutes(GlobalKey<NavigatorState> root) => [
     parentNavigatorKey: root,
     path: Routes.shiftSessionPicker,
     builder: (context, state) => const WorkSessionPickerScreen(),
-  ),
-];
-
-/// RoadContext forms and pages on the [root] navigator (the map is the Road
-/// tab). The location picker takes the start point as `extra` and pops the
-/// chosen one.
-List<GoRoute> roadRoutes(GlobalKey<NavigatorState> root) => [
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.roadReportNew,
-    builder: (context, state) => const ReportFormScreen(),
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.roadPickLocation,
-    builder: (context, state) =>
-        LocationPickerScreen(initial: state.extra as RoadPoint?),
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.roadMyReports,
-    builder: (context, state) => const MyReportsScreen(),
-  ),
-  GoRoute(
-    parentNavigatorKey: root,
-    path: Routes.incidentPattern,
-    builder: (context, state) =>
-        IncidentDetailScreen(id: state.pathParameters['id']!),
   ),
 ];
 

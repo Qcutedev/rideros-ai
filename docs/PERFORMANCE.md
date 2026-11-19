@@ -1,5 +1,7 @@
 # Performance — RiderOS AI (Phase 6 · P6b)
 
+> **อัปเดต 2026-11-19:** Endpoint `/road/*` ถูกลบแล้ว (`docs/HANDOFF.md` §4.21) และ `backend/perf/run.py` ไม่ Seed/วัดแล้ว · ผลด้านล่างเป็นผลของ Phase 6
+>
 > **อัปเดต 2026-11-18:** Endpoint `/pickup/*` ถูกลบแล้ว (`docs/HANDOFF.md` §4.20) และ `backend/perf/run.py` ไม่วัดแล้ว ผลด้านล่างเป็นผลของ Phase 6 ที่ยังมี Pickup
 
 - วันที่วัด: 2026-11-14 · Commit ฐาน `8641bcc` + การแก้ใน P6b (ยังไม่ Commit)

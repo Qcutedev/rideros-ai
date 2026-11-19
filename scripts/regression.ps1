@@ -6,8 +6,6 @@
   Runs every automated check of the repository and prints one summary table:
 
     backend  ruff check, ruff format --check, pytest + coverage gate (app/modules + app/core)
-    ml       ruff check, ruff format --check, pytest
-    cv       ruff check, ruff format --check, pytest
     mobile   flutter analyze, dart format check, flutter test --coverage + coverage gate on lib/
              (generated *.g.dart / *.freezed.dart and lib/l10n excluded)
     e2e      (only with -E2E) flutter drive journey on emulator-5554 with SQL checks
@@ -19,19 +17,19 @@
   Exit code: 0 when every step passed, 1 otherwise.
 
   Needs: Docker Desktop (the backend tests use the compose "db" service; -E2E needs the whole stack),
-  uv (on PATH or as "python -m uv"), Flutter on PATH. Python suites run with "uv run --locked", so an
-  out-of-date uv.lock fails the run instead of being rewritten.
+  uv (on PATH or as "python -m uv"), Flutter on PATH. The backend suite runs with "uv run --locked", so
+  an out-of-date uv.lock fails the run instead of being rewritten.
 
 .EXAMPLE
   .\scripts\regression.ps1
 .EXAMPLE
-  .\scripts\regression.ps1 -Skip ml,cv
+  .\scripts\regression.ps1 -Skip mobile
 .EXAMPLE
   .\scripts\regression.ps1 -E2E
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('backend', 'ml', 'cv', 'mobile')]
+    [ValidateSet('backend', 'mobile')]
     [string[]]$Skip = @(),
     [switch]$E2E,
     [switch]$FailFast,
@@ -143,10 +141,6 @@ try {
             if ($last.Step -eq 'pytest') { $last.Note = "coverage gate $BackendCoverageGate%" + $(if ($last.Note) { "; $($last.Note)" } else { '' }) }
         }
     }
-
-    # --- ml / cv ----------------------------------------------------------------------------------
-    if ($Skip -notcontains 'ml') { Test-PythonSuite 'ml' (Join-Path $Root 'ml') @() }
-    if ($Skip -notcontains 'cv') { Test-PythonSuite 'cv' (Join-Path $Root 'cv_service') @() }
 
     # --- mobile -----------------------------------------------------------------------------------
     if ($Skip -notcontains 'mobile') {

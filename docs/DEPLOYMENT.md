@@ -12,14 +12,13 @@ Internet ──443/80──► caddy (172.30.0.10, TLS อัตโนมัต�
                        ▼
                     backend (uvicorn 2 workers, ENV=production, เชื่อ X-Forwarded-For จาก Caddy เท่านั้น)
                        │  internal network (ไม่มีทางออก Internet)
-          ┌────────────┼──────────────┐
-          ▼            ▼              ▼
-     db (PostGIS)  valkey (rate limit) cv (photo classifier)
+               ┌───────┴───────┐
+               ▼               ▼
+          db (PostGIS)   valkey (rate limit)
 ```
 
-- มีแค่ Caddy ที่เปิด Port · DB, Valkey, CV ไม่มี Port ออกนอก Docker
-- Model artifacts ส่งด้วย `scp` และ Mount แบบอ่านอย่างเดียว ไม่อยู่ใน Repo, Image หรือ Registry (D4)
-- Flood10k (CC BY-NC 4.0) ในโมเดลจัดประเภทรูป → ระบบนี้ใช้แบบไม่แสวงหากำไรเท่านั้น: ไม่มีโฆษณา ไม่มีส่วนที่เก็บเงิน
+- มีแค่ Caddy ที่เปิด Port · DB, Valkey ไม่มี Port ออกนอก Docker
+- 2026-11-19: ไม่มี Service `cv` และไม่ต้องส่ง Model artifact แล้ว (RoadContext ถูกเอาออก · HANDOFF §4.21) · ไม่มีรูปให้ Backup
 
 | Service | Image | หมายเหตุ |
 |---|---|---|
@@ -27,7 +26,6 @@ Internet ──443/80──► caddy (172.30.0.10, TLS อัตโนมัต�
 | backend | Build จาก `backend/Dockerfile` | `WEB_CONCURRENCY=2` · `RATE_LIMIT_STORAGE_URL=redis://valkey:6379/0` · Settings ไม่ยอมให้หลาย Worker กับ `memory://` |
 | db | Build จาก `deploy/db/Dockerfile` (`postgres:18.7-trixie` + PGDG PostGIS 3) | `postgis/postgis` มีแค่ amd64 · PGDG มีแค่ PostGIS ตัวล่าสุด (3.7.0) ส่วน Dev ใช้ 3.6.4 (Dump 3.6 Restore ลง 3.7 ได้) |
 | valkey | `valkey/valkey:8.1.4-alpine` (BSD-3) | ไม่เก็บลง Disk · `maxmemory 64mb` |
-| cv | Build จาก `cv_service/Dockerfile` | `CV_THREADS=2` |
 
 ## 2. เตรียม Server (ครั้งเดียว)
 
@@ -53,12 +51,7 @@ Internet ──443/80──► caddy (172.30.0.10, TLS อัตโนมัต�
 sudo mkdir -p /opt/rideros && sudo chown $USER /opt/rideros
 ssh-keygen -t ed25519 -f ~/.ssh/rideros_deploy -N ""      # แล้วใส่ .pub เป็น Deploy key (Read-only) ของ GitHub Repo
 GIT_SSH_COMMAND="ssh -i ~/.ssh/rideros_deploy" git clone git@github.com:<owner>/<repo>.git /opt/rideros/app
-mkdir -p /opt/rideros/artifacts/cv /opt/rideros/backups
-```
-
-```powershell
-# บนเครื่อง Dev (PowerShell): ส่ง Artifact ไปตรงๆ ห้ามผ่าน Git
-scp -r "C:\dev\RiderOS AI\cv_service\artifacts\road_cv" <user>@<ip>:/opt/rideros/artifacts/cv/
+mkdir -p /opt/rideros/backups
 ```
 
 ```sh
@@ -86,7 +79,7 @@ python3 deploy/smoke_test.py https://$API_DOMAIN
 
 ## 5. Backup
 
-- `deploy/backup.sh`: `pg_dump --format=custom` + tar ของรูป RoadContext → `BACKUP_DIR` (ค่าเริ่มต้น `/opt/rideros/backups`) · เก็บใหม่สุด `BACKUP_KEEP` ชุด (7) · เขียนเป็น `.part` ก่อนแล้วค่อยเปลี่ยนชื่อ จึงไม่มีไฟล์ที่ดูครบแต่เสีย · ไฟล์ Mode 600 (มีข้อมูลส่วนบุคคล)
+- `deploy/backup.sh`: `pg_dump --format=custom` → `BACKUP_DIR` (ค่าเริ่มต้น `/opt/rideros/backups`) · เก็บใหม่สุด `BACKUP_KEEP` ชุด (7) · เขียนเป็น `.part` ก่อนแล้วค่อยเปลี่ยนชื่อ จึงไม่มีไฟล์ที่ดูครบแต่เสีย · ไฟล์ Mode 600 (มีข้อมูลส่วนบุคคล)
 - Cron รายวัน (`crontab -e`):
   ```
   15 3 * * * /opt/rideros/app/deploy/backup.sh >> /opt/rideros/backups/backup.log 2>&1
@@ -97,15 +90,15 @@ python3 deploy/smoke_test.py https://$API_DOMAIN
 
 **ทดสอบ Backup (ไม่แตะระบบจริง):**
 ```sh
-sh deploy/restore_test.sh /opt/rideros/backups/db-<ts>.dump /opt/rideros/backups/images-<ts>.tar.gz
+sh deploy/restore_test.sh /opt/rideros/backups/db-<ts>.dump
 ```
-Restore ลง Container ชั่วคราว (`--network none`) จาก Image ของ db ตัวเดียวกัน แล้วเทียบกับ DB จริง: จำนวนแถวทุกตาราง, Migration revision, PostGIS version, จำนวนไฟล์รูป → `RESTORE TEST PASSED` / Exit 0 · ควรรันทันทีหลัง Backup (แถวที่เขียนระหว่างนั้นจะขึ้นเป็นความต่าง)
+Restore ลง Container ชั่วคราว (`--network none`) จาก Image ของ db ตัวเดียวกัน แล้วเทียบกับ DB จริง: จำนวนแถวทุกตาราง, Migration revision, PostGIS version → `RESTORE TEST PASSED` / Exit 0 · ควรรันทันทีหลัง Backup (แถวที่เขียนระหว่างนั้นจะขึ้นเป็นความต่าง)
 
 **กู้ระบบจริง (ลบข้อมูลปัจจุบัน):**
 ```sh
-sh deploy/restore.sh --yes /opt/rideros/backups/db-<ts>.dump /opt/rideros/backups/images-<ts>.tar.gz
+sh deploy/restore.sh --yes /opt/rideros/backups/db-<ts>.dump
 ```
-หยุด Backend → DROP + CREATE Database → `pg_restore` → แทนที่รูป → เปิด Backend จน Healthy
+หยุด Backend → DROP + CREATE Database → `pg_restore` → เปิด Backend จน Healthy
 
 ## 7. Release APK
 
@@ -123,6 +116,8 @@ sh deploy/restore.sh --yes /opt/rideros/backups/db-<ts>.dump /opt/rideros/backup
 ## 8. ผลทดสอบ
 
 ### 8.1 P7a — ในเครื่อง (2026-11-15, Docker Desktop, `API_DOMAIN=localhost` → Caddy ใช้ CA ภายใน)
+
+ผลด้านล่างเป็นของตอนนั้นที่ยังมี Pickup และ RoadContext · ตั้งแต่ 2026-11-19 Smoke test มี 12 ข้อ (ไม่มีรูป/CV แต่เพิ่ม `GET /profit/heatmap`) และ Backup/Restore ไม่มีไฟล์รูป
 
 | ตรวจ | ผล |
 |---|---|

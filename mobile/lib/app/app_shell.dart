@@ -62,12 +62,6 @@ class AppShell extends ConsumerWidget {
                   label: l10n.navHome,
                 ),
                 NavigationDestination(
-                  key: const Key('nav.road'),
-                  icon: const Icon(Icons.alt_route_outlined),
-                  selectedIcon: const Icon(Icons.alt_route_rounded),
-                  label: l10n.navRoad,
-                ),
-                NavigationDestination(
                   key: const Key('nav.profit'),
                   icon: const Icon(Icons.account_balance_wallet_outlined),
                   selectedIcon: const Icon(

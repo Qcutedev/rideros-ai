@@ -142,8 +142,11 @@ void main() {
       expect(plannedDayLabel(t, null), t.shiftAnyDay);
     });
 
-    test('ML is never named as an available method', () {
-      expect(methodLabel(t, EstimationMethod.ml), t.shiftMethodUnavailable);
+    test('only the two estimation methods exist', () {
+      expect(EstimationMethod.values, [
+        EstimationMethod.assumption,
+        EstimationMethod.historical,
+      ]);
     });
 
     test('warnings and failures have Thai text', () {
@@ -156,7 +159,6 @@ void main() {
         ('invalid_shift_length', t.failureInvalidShiftLength),
         ('missing_assumption', t.failureMissingAssumption),
         ('insufficient_history', t.failureInsufficientHistory),
-        ('estimation_method_unavailable', t.failureEstimationMethodUnavailable),
       ]) {
         expect(
           failureMessage(t, ApiFailure(statusCode: 400, code: code)),

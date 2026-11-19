@@ -60,10 +60,9 @@ abstract final class ShiftLimits {
   );
 }
 
-/// `estimation_method`. [ml] is reserved by the API (400
-/// `estimation_method_unavailable`); the app never offers it.
+/// `estimation_method`.
 @JsonEnum(fieldRename: FieldRename.snake)
-enum EstimationMethod { assumption, historical, ml }
+enum EstimationMethod { assumption, historical }
 
 /// A local wall-clock time without a zone (`17:00`, sent as `HH:MM`).
 @immutable

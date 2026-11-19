@@ -104,15 +104,6 @@ abstract final class ApiErrorCode {
   static const invalidShiftLength = 'invalid_shift_length';
   static const missingAssumption = 'missing_assumption';
   static const insufficientHistory = 'insufficient_history';
-  static const estimationMethodUnavailable = 'estimation_method_unavailable';
-
-  // RoadContext.
-  static const alreadyReported = 'already_reported';
-  static const incidentClosed = 'incident_closed';
-  static const unsupportedImage = 'unsupported_image';
-  static const imageTooLarge = 'image_too_large';
-  static const imageStorageUnavailable = 'image_storage_unavailable';
-  static const invalidBbox = 'invalid_bbox';
 
   // Access-token problems: the client refreshes once and retries.
   static const tokenExpired = 'token_expired';

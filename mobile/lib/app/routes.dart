@@ -11,7 +11,6 @@ abstract final class Routes {
   // Bottom-navigation tabs (signed in).
   static const home = '/home';
   static const profit = '/profit';
-  static const road = '/road';
   static const profile = '/profile';
 
   /// TrueProfit records: `?tab=` one of [RecordsTab] names.
@@ -35,14 +34,6 @@ abstract final class Routes {
     path: shiftCompare,
     queryParameters: {'ids': ids.join(',')},
   ).toString();
-
-  // RoadContext: the map is the Road tab; these cover the tabs.
-  static const roadReportNew = '/road/report';
-  static const roadPickLocation = '/road/pick-location';
-  static const roadMyReports = '/road/my-reports';
-  static const incidentPattern = '/road/incidents/:id';
-
-  static String incident(String id) => '/road/incidents/$id';
 
   // Profile screens, shown over the tabs.
   static const profileDisplayName = '/profile/display-name';

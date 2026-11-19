@@ -1,5 +1,7 @@
 # Security Audit — RiderOS AI (Phase 6 · P6a)
 
+> **อัปเดต 2026-11-19:** Endpoint `/road/*` และการอัปโหลดรูปถูกลบแล้ว (`docs/HANDOFF.md` §4.21) · Body ทุกชนิดใช้เพดานเดียว 256 KB (ไม่มี Multipart แล้ว) · ไม่มี `cv_service` image · ผล Audit ด้านล่างเป็นของตอนที่ยังมี RoadContext
+>
 > **อัปเดต 2026-11-18:** Endpoint `/pickup/*` ถูกลบแล้ว (`docs/HANDOFF.md` §4.20) ผล Audit ด้านล่างเป็นของตอนที่ยังมี Pickup
 
 - วันที่ตรวจ: 2026-11-14 · Commit ฐาน `c15d8a6` + การแก้ใน P6a (ยังไม่ Commit)

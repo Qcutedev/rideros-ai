@@ -95,13 +95,8 @@ def make_settings(database_url: str, **overrides: object) -> Settings:
 
 
 @pytest.fixture(scope="session")
-def road_image_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return tmp_path_factory.mktemp("road_images")
-
-
-@pytest.fixture(scope="session")
-def settings(database_url: str, road_image_dir: Path) -> Settings:
-    return make_settings(database_url, road_image_dir=road_image_dir)
+def settings(database_url: str) -> Settings:
+    return make_settings(database_url)
 
 
 @pytest.fixture(scope="session")

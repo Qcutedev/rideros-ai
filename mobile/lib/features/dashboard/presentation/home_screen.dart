@@ -98,7 +98,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
               const RevealIn(index: 2, child: _QuickActions()),
               const SizedBox(height: AppSpacing.xl),
-              const RevealIn(index: 3, child: _AiTools()),
+              const RevealIn(index: 3, child: _PlanShift()),
             ],
           ),
         ),
@@ -359,10 +359,10 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-/// Entry cards to the AI modules. Descriptions only: every figure the rider
-/// sees comes from the module itself.
-class _AiTools extends StatelessWidget {
-  const _AiTools();
+/// Entry card to the Shift Simulator. Description only: every figure the
+/// rider sees comes from the simulator itself.
+class _PlanShift extends StatelessWidget {
+  const _PlanShift();
 
   @override
   Widget build(BuildContext context) {
@@ -370,35 +370,15 @@ class _AiTools extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionHeader(title: l10n.homeAiTools),
+        SectionHeader(title: l10n.homePlanTitle),
         const SizedBox(height: AppSpacing.md),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _AiToolCard(
-                  key: const Key('home.road'),
-                  tone: AppTone.obsidian,
-                  icon: Icons.alt_route_rounded,
-                  title: l10n.homeRoadTitle,
-                  message: l10n.homeRoadMessage,
-                  onTap: () => context.go(Routes.road),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _AiToolCard(
-                  key: const Key('home.shifts'),
-                  tone: AppTone.teal,
-                  icon: Icons.auto_graph_rounded,
-                  title: l10n.homeShiftCardTitle,
-                  message: l10n.homeShiftCardMessage,
-                  onTap: () => context.go(Routes.shifts),
-                ),
-              ),
-            ],
-          ),
+        _AiToolCard(
+          key: const Key('home.shifts'),
+          tone: AppTone.teal,
+          icon: Icons.auto_graph_rounded,
+          title: l10n.homeShiftCardTitle,
+          message: l10n.homeShiftCardMessage,
+          onTap: () => context.go(Routes.shifts),
         ),
       ],
     );

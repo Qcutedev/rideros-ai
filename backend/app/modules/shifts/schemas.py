@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, computed_f
 from app.core.schemas import PatchModel, StrictModel
 from app.modules.shifts.models import SCENARIO_NAME_MAX_LENGTH
 
-EstimationMethod = Literal["assumption", "historical", "ml"]
+EstimationMethod = Literal["assumption", "historical"]
 ScenarioName = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=SCENARIO_NAME_MAX_LENGTH)
 ]
@@ -99,7 +99,6 @@ class ShiftScenarioOut(BaseModel):
     estimate_low: Decimal | None = Field(description="Low end of the net-profit range (historical only)")
     estimate_high: Decimal | None
     estimate_details: dict[str, Any]
-    model_version_id: uuid.UUID | None
     actual_work_session_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime

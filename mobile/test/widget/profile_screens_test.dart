@@ -378,9 +378,7 @@ void main() {
   });
 
   group('about', () {
-    testWidgets('credits the photo classifier data and its licences', (
-      tester,
-    ) async {
+    testWidgets('analysis uses only the rider data; licences', (tester) async {
       await pumpScreen(
         tester,
         path: Routes.about,
@@ -388,9 +386,10 @@ void main() {
         overrides: fakeRepositories(auth, profiles),
       );
       expect(find.text(t.aboutDataTitle), findsOneWidget);
-      expect(find.textContaining('RDD2022'), findsOneWidget);
-      expect(find.textContaining('CC BY-NC 4.0'), findsOneWidget);
-      expect(find.textContaining('Meituan'), findsNothing);
+      expect(find.text(t.aboutDataBody), findsOneWidget);
+      for (final dataset in ['RDD2022', 'Flood10k', 'Meituan']) {
+        expect(find.textContaining(dataset), findsNothing);
+      }
       await tapKey(tester, 'about.licenses');
       expect(find.byType(LicensePage), findsOneWidget);
     });

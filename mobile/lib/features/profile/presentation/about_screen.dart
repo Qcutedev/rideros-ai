@@ -6,7 +6,7 @@ import '../../../core/widgets/app_cards.dart';
 import '../../../core/widgets/form_layout.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// `/profile/about`: what the app is, the data behind the photo classifier, licences.
+/// `/profile/about`: what the app is, where its analysis comes from, licences.
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 

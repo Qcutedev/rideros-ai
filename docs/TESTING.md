@@ -1,5 +1,7 @@
 # Testing — RiderOS AI (Phase 6 · P6c)
 
+> **อัปเดต 2026-11-19:** ชุด ML (`ml/`) และ CV (`cv_service/`) ถูกลบพร้อม RoadContext (`docs/HANDOFF.md` §4.21) สคริปต์เหลือ Backend + Mobile (8 ขั้น)
+>
 > **อัปเดต 2026-11-18:** Test ของ Pickup ถูกลบไปพร้อมฟีเจอร์ (`docs/HANDOFF.md` §4.20) ตัวเลขด้านล่างที่เป็นของ Phase เก่ายังนับ Pickup อยู่
 
 - การตัดสินใจที่ใช้: HANDOFF §4.13 ข้อ 7–8 (Regression script ในเครื่องเท่านั้น · GitHub Actions → Phase 7 · Coverage gate = ค่าปัจจุบัน − 2%)
@@ -9,15 +11,15 @@
 
 ```powershell
 cd "C:\dev\RiderOS AI"
-.\scripts\regression.ps1              # Backend + ML + CV + Mobile
-.\scripts\regression.ps1 -Skip ml,cv  # ข้ามบางชุด (backend, ml, cv, mobile)
+.\scripts\regression.ps1              # Backend + Mobile
+.\scripts\regression.ps1 -Skip mobile # ข้ามบางชุด (backend, mobile)
 .\scripts\regression.ps1 -E2E         # เพิ่ม E2E บน emulator-5554 (ต้องเปิด Stack + Emulator ก่อน)
 .\scripts\regression.ps1 -FailFast    # หยุดที่ขั้นแรกที่ Fail
 ```
 
 - ทุกขั้นรันต่อแม้ขั้นก่อนหน้า Fail (ยกเว้น `-FailFast`) แล้วพิมพ์ตารางสรุป · Exit code 0 = ผ่านทุกขั้น, 1 = มีขั้นที่ Fail
 - ต้องมี: Docker Desktop (Backend tests ใช้ Service `db` และ `valkey` ของ Compose — สคริปต์สั่ง `docker compose up -d --wait db valkey` เอง) · uv (บน PATH หรือ `python -m uv`; ถ้า `python` ชี้ venv ที่ไม่มี uv ให้ตั้ง `$env:RIDEROS_PYTHON` หรือ `-Python` เป็น Interpreter ที่มี uv) · Flutter บน PATH
-- Python ทุกชุดรันด้วย `uv run --locked` → ถ้า `uv.lock` ไม่ตรง `pyproject.toml` จะ Fail แทนที่จะเขียน Lock ใหม่
+- Backend รันด้วย `uv run --locked` → ถ้า `uv.lock` ไม่ตรง `pyproject.toml` จะ Fail แทนที่จะเขียน Lock ใหม่
 - ถ้า Shell เปิด venv ค้างไว้ (เช่น `ml/.venv` ที่ไม่มี uv) สคริปต์จะเอา `Scripts` ของ venv ออกจาก `PATH` และล้าง `VIRTUAL_ENV` ระหว่างรัน (เหมือน `deactivate`) แล้วคืนค่าเดิมตอนจบ · หา uv ตามลำดับ: `uv` → `python -m uv` → `py -3 -m uv`
 - Windows PowerShell 5.1 แปลง stderr ของคำสั่งภายนอก (Progress ของ docker/flutter) เป็น Error → สคริปต์ตัดสินผลจาก Exit code อย่างเดียว · Output ทุกบรรทัดออกทาง `Write-Host` จึงเก็บ Log ได้ด้วย `.\scripts\regression.ps1 *> regression.log`
 - ห้ามรัน Backend pytest สองชุดพร้อมกัน: ใช้ Test DB `rideros_test` เดียวกันและ DROP ทิ้งตอนเริ่ม
@@ -28,8 +30,6 @@ cd "C:\dev\RiderOS AI"
 |---|---|---|
 | backend | `ruff check .` · `ruff format --check .` | ไม่มีปัญหา |
 | backend | `pytest --cov=app/modules --cov=app/core --cov-fail-under=96` | ทุก Test ผ่าน + Coverage ≥ 96% |
-| ml | `ruff check .` · `ruff format --check .` · `pytest` | ไม่มีปัญหา + ทุก Test ผ่าน |
-| cv | `ruff check .` · `ruff format --check .` · `pytest` | ไม่มีปัญหา + ทุก Test ผ่าน |
 | mobile | `flutter analyze` | No issues |
 | mobile | `dart format --output=none --set-exit-if-changed lib test integration_test test_driver` | ไม่มีไฟล์ที่ต้องจัดรูปแบบ |
 | mobile | `flutter test --coverage` | ทุก Test ผ่าน |
@@ -44,61 +44,48 @@ cd "C:\dev\RiderOS AI"
 | Mobile | `lib/` ไม่รวม `*.g.dart`, `*.freezed.dart`, `lib/l10n/` (Line) | 96.7% (6,524/6,748) | 94.7% (`-MobileCoverageGate`) |
 
 - ไม่รวม Generated code (json_serializable, freezed, gen-l10n) เพราะไม่ได้เขียนเอง
-- ML และ CV ไม่มี Coverage gate: Test ส่วนใหญ่ตรวจ Pipeline กับข้อมูล/โมเดลจริง และบางตัว Skip เมื่อไม่มีไฟล์ (§2.2–2.3) ตัวเลข Coverage จึงขึ้นกับเครื่องที่รัน
 - ขึ้น Gate ได้เมื่อ Coverage สูงขึ้น · ห้ามลด Gate เพื่อให้ผ่าน
 
-### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `feat/timer-income-chain` ต่อจาก `1665855`)
+### 1.3 ผลล่าสุด (2026-11-19, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `chore/refocus-analytics` ต่อจาก `4aafa51`)
 
 | ชุด | ผล | เวลา |
 |---|---|---|
-| Backend | ruff สะอาด (102 ไฟล์) · **463 passed** · Coverage 98.23% (Gate 96%) | ~173 s |
-| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~156 s |
-| CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~22 s |
-| Mobile | `flutter analyze` No issues · `dart format` 183 ไฟล์ไม่เปลี่ยน · **526 passed** · Coverage 96.86% (7,339/7,577, Gate 94.7%) | ~137 s |
-| รวม | **REGRESSION PASSED: 14 step(s)** | ~8 นาที |
+| Backend | ruff สะอาด (90 ไฟล์) · **382 passed** · Coverage 98.65% (Gate 96%) | ~126 s |
+| Mobile | `flutter analyze` No issues · `dart format` 164 ไฟล์ไม่เปลี่ยน · **462 passed** · Coverage 97.18% (6,263/6,445, Gate 94.7%) | ~80 s |
+| รวม | **REGRESSION PASSED: 8 step(s)** · 844 Tests | ~4 นาที |
 
-- Mobile +4 จากตัวจับเวลา → ฟอร์มรายได้ (HANDOFF §4.20 PR 2)
+- Test ลดลงเพราะเอา RoadContext ออก และไม่มีชุด ML/CV แล้ว (HANDOFF §4.21)
+- รอบก่อน (2026-11-18, Branch `feat/timer-income-chain`): Backend 463 · ML 134 · CV 38 · Mobile 526 (Coverage 96.86%, 7,339/7,577) · 14 ขั้น ~8 นาที · Mobile +4 จากตัวจับเวลา → ฟอร์มรายได้ (HANDOFF §4.20 PR 2)
 - รอบก่อน (2026-11-18, Branch `chore/remove-pickup`): Backend 463 · ML 134 · CV 38 · Mobile 522 (Coverage 96.86%, 7,321/7,558) · ~8.5 นาที · Test ลดลงจากรอบก่อนนั้นเพราะเอา Pickup ออก (Backend 523 → 463, Mobile 591 → 522)
 - รอบก่อน (2026-11-18, Branch `feat/profit-heatmap`): Backend 523 · ML 134 · CV 38 · Mobile 591 (Coverage 97.09%) · ~8 นาที
 - รอบก่อนนั้น (2026-11-18, Commit `52d8ab3`): Backend 504 · ML 134 · CV 38 · Mobile 571 (Coverage 96.95%) · ~9 นาที
 - รอบก่อนนั้น (2026-11-14): Backend 478 · ML 134 · CV 38 · Mobile 495 (Coverage 96.68%) · ~4.5 นาที · รอบ 2026-11-18 นานขึ้นเพราะ Test เพิ่มและเครื่องเปิด VS Code + Docker ไว้ด้วย
 - แรมเครื่องไม่พอ (Emulator ~3.7 GB + Android Studio ~1 GB เปิดค้าง) ทำให้รอบ 2026-11-17 ถูกหยุดกลาง Backend pytest → ปิด Emulator/Android Studio ก่อนรัน · รอบแรกของงาน Heatmap (2026-11-18) ก็ถูกหยุดแบบเดียวกันเพราะ Gradle daemon (`java` ~1.9 GB หลัง `flutter build apk`) ค้างอยู่ → `cd mobile\android; .\gradlew --stop` ก่อนรัน (แรมว่าง ≥ 5 GB)
 
-- ตรวจว่า Gate Fail ได้จริง: `-Skip backend,ml,cv -MobileCoverageGate 99` → ขั้น `coverage gate` FAIL + Exit code 1
+- ตรวจว่า Gate Fail ได้จริง: `-Skip backend -MobileCoverageGate 99` → ขั้น `coverage gate` FAIL + Exit code 1
 
 ## 2. ชุด Test
 
 ### 2.1 Backend (`backend/tests/`, pytest + pytest-asyncio)
 
-- Test DB: สร้าง `rideros_test` ใหม่จาก `TEST_DATABASE_URL` ใน `.env` ทุกครั้งที่รัน (ชื่อต้องลงท้าย `_test` ไม่งั้นหยุด) · ใช้ PostGIS ของ Compose `db`
-- API tests ใช้ Artifact ปลอมขนาดเล็ก (`tests/fake_artifact.py`) · `tests/api/test_real_artifact.py` โหลด `ml/artifacts/pickup_o2p/1.0.0` จริงและ Skip ถ้าไม่มี
+- Test DB: สร้าง `rideros_test` ใหม่จาก `TEST_DATABASE_URL` ใน `.env` ทุกครั้งที่รัน (ชื่อต้องลงท้าย `_test` ไม่งั้นหยุด) · ใช้ Compose `db` (Image PostGIS เพราะ Migration เก่าสร้างคอลัมน์ Geography)
 - Rate limit ปิดใน Test settings ยกเว้น `tests/api/test_rate_limits.py`
 
 | กลุ่ม | ไฟล์ | ตรวจอะไร |
 |---|---|---|
 | Unit | `unit/test_config.py`, `test_security.py` | Settings, Argon2id, JWT |
-| Unit | `unit/test_profit_calculator.py`, `test_shift_estimator.py`, `test_work_patterns.py` | สูตร TrueProfit, Shift estimator, K-Means work patterns (ข้อมูลสังเคราะห์: 2 กลุ่มชัด → เจอ 2, สุ่ม → ไม่ชัดเจน) |
-| Unit | `unit/test_registry.py` | Model registry: Hash, Schema, Library version ก่อนโหลด |
+| Unit | `unit/test_profit_calculator.py`, `test_shift_estimator.py`, `test_work_patterns.py`, `test_trend_analysis.py`, `test_profit_heatmap.py` | สูตร TrueProfit, Shift estimator, K-Means work patterns (ข้อมูลสังเคราะห์: 2 กลุ่มชัด → เจอ 2, สุ่ม → ไม่ชัดเจน), Trend, Heatmap |
 | API | `test_auth.py`, `test_tokens.py`, `test_password_reset.py`, `test_profile.py` | Register/Login/Refresh rotation/Logout/Reset/ลบบัญชี |
-| API | `test_trueprofit_crud.py`, `test_profit_reports.py`, `test_profit_patterns.py`, `test_shifts.py` | CRUD + Summary + Patterns + Scenario |
-| API | `test_pickup.py`, `test_real_artifact.py` | Restaurant analytics, Prediction (ช่วง + คำเตือน), Pickup log, Model card |
-| API | `test_road.py`, `test_road_classify.py` | RoadContext report/confirm/nearby/bbox, รูป, Background classify (CV ล่ม → `failed`) |
+| API | `test_trueprofit_crud.py`, `test_profit_reports.py`, `test_profit_patterns.py`, `test_profit_heatmap.py`, `test_shifts.py` | CRUD + Summary + Patterns + Heatmap + Scenario |
 | ความปลอดภัย | `test_cross_user.py` | ผู้ใช้ A อ่าน/แก้/ลบข้อมูลของ B ไม่ได้ทุก Endpoint |
-| ความปลอดภัย | `test_security_audit.py` | Inventory ทุก Route (Public/ต้อง Login) + 401 · Body limit · Log ไม่มี Password/Token/พิกัด |
+| ความปลอดภัย | `test_security_audit.py` | Inventory ทุก Route (Public/ต้อง Login) + 401 · Body limit (JSON และ Multipart ใช้เพดานเดียว) · Log ไม่มี Password/Token |
 | ความปลอดภัย | `test_rate_limits.py` | Register/Login/Forgot/Token เสีย ต่อ IP (Login ต่ออีเมลด้วย) · ค่าเริ่มต้นต่อ User · `/health` ไม่ถูกจำกัด |
 | ความปลอดภัย | `test_rate_limit_storage.py` (P7a) | 2 App บน Valkey เดียวกัน (= 2 Worker) นับรวมกัน · Store ล่ม → 503 + `/ready` 503 · Production ไม่ยอม `memory://` กับหลาย Worker · `X-Forwarded-For` ใช้เฉพาะจาก Caddy (ต้องมี Compose `valkey`, `TEST_REDIS_URL` ค่าเริ่มต้น `redis://127.0.0.1:6379/15`) |
-| Platform | `test_platform.py`, `test_migrations.py` | `/health`, `/ready`, Error envelope, 500 ไม่รั่วรายละเอียด, Request ID, Migration ตรง ORM (ไม่มี Drift) |
+| Platform | `test_platform.py`, `test_migrations.py` | `/health`, `/ready`, Error envelope, 500 ไม่รั่วรายละเอียด, Request ID, Migration ตรง ORM (ไม่มี Drift), Downgrade ถึง Base แล้ว Upgrade ใหม่, ตาราง Pickup/Road/`model_versions` หาย |
 
-### 2.2 ML Pipeline (`ml/tests/`)
+### 2.2–2.3 (ลบแล้ว)
 
-- ตรวจ Download/License, Validate, Build features, Conformal interval, Metrics, Artifact และ Reproducibility
-- Marker: `data` (ต้องมี `ml/data/raw`), `artifact` (ต้องมี `ml/artifacts/pickup_o2p/1.0.0`) → Skip เมื่อไม่มีไฟล์ · `slow` = Reproducibility end-to-end (~1–2 นาที; ข้ามได้ด้วย `-m "not slow"`)
-- Dataset และ Artifact ไม่อยู่ใน Git (License D1/D4) → เครื่องที่ Clone ใหม่จะ Skip ส่วนนี้ ต้องรัน `rideros-ml download` + `train` ก่อนถึงจะครบ
-
-### 2.3 CV Service (`cv_service/tests/`)
-
-- `test_api.py` (`/classify`, `/health`, `/model`, ไม่มีโมเดล → 503, ไม่ใช่รูป → 415, ใหญ่เกิน → 413, ปิด Docs) · `test_classifier.py` · `test_training.py` (หารูปซ้ำด้วย dHash, Group split 70/15/15 คงที่, Quota ต่อแหล่ง, Alley val, ไฟล์ที่ไม่ Pin hash → Fail)
-- Marker `artifact`: ต้องมีโมเดลใน `cv_service/artifacts/` → Skip ถ้าไม่มี (Weights ไม่อยู่ใน Git)
+- ชุด ML Pipeline (`ml/tests/`) และ CV Service (`cv_service/tests/`) ถูกลบพร้อมโฟลเดอร์ 2026-11-19 (HANDOFF §4.21) · ดูของเดิมได้ใน Git history
 
 ### 2.4 Mobile (`mobile/test/`, flutter_test)
 
@@ -106,7 +93,7 @@ cd "C:\dev\RiderOS AI"
 |---|---|---|
 | Unit | `test/unit/app/` | Router redirect (Guard), Brand logo |
 | Unit | `test/unit/core/` | Config, Auth interceptor (Refresh single-flight), Failure mapper, Validators, Formatters/วันที่, Token manager |
-| Unit | `test/unit/features/` | Repository + Notifier ของ Auth, Profile, Profit, Pickup, Shift, Road |
+| Unit | `test/unit/features/` | Repository + Notifier ของ Auth, Profile, Profit, Shift |
 | Widget | `test/widget/*_screen(s)_test.dart`, `*_form_test.dart` | ทุกหน้ามี Loading/Empty/Error/Success · ทุก Form มี Validation |
 | Navigation | `test/widget/navigation_test.dart` | Router จริง + Guard + dio เต็มชุดกับ Fake HTTP adapter |
 | Helper | `test/helpers/` | `pump.dart` (`pumpScreen`, `scrollAndTap`, `t` = ข้อความไทย), Fake repositories ต่อ Feature, `fake_http_adapter.dart` |
@@ -115,9 +102,9 @@ cd "C:\dev\RiderOS AI"
 
 ### 2.5 End-to-end (`mobile/integration_test/` + `mobile/test_driver/`)
 
-- Journey: Register → Onboarding → Logout → Login → Dashboard → Pickup prediction `POI-203` → เพิ่มรายได้ → เพิ่มค่าใช้จ่าย → TrueProfit → 2 Scenario → Compare
+- Journey: Register → Onboarding → Logout → Login → Dashboard → เพิ่มรายได้ → เพิ่มค่าใช้จ่าย → TrueProfit → 2 Scenario → Compare
 - Host driver เทียบตัวเลขบนจอกับ SQL ผ่าน `docker compose exec db psql` แล้วลบบัญชี `e2e+<timestamp>@example.com` ด้วย `DELETE /me` · `$env:E2E_KEEP = "1"` เก็บบัญชีไว้
-- ต้องมี: `docker compose up -d` (`/api/v1/ready` model ok) + `emulator-5554` · ใช้เวลา ~40 s หลัง Build · ไม่อยู่ในชุดปกติเพราะต้องมี Emulator (เปิดด้วย `-E2E`)
+- ต้องมี: `docker compose up -d` (`/api/v1/ready` ok) + `emulator-5554` · ใช้เวลา ~40 s หลัง Build · ไม่อยู่ในชุดปกติเพราะต้องมี Emulator (เปิดด้วย `-E2E`)
 
 ## 3. สิ่งที่ไม่อยู่ในสคริปต์ (รันแยก)
 
@@ -127,8 +114,6 @@ cd "C:\dev\RiderOS AI"
 | gitleaks ก่อน Commit | ทุก Commit | `SECURITY_AUDIT.md` §7 (`dir` + `git`) |
 | วัด Performance API | หลังแก้ Query/Index หรือ Endpoint ใหม่ | `PERFORMANCE.md` §2.3 (สคริปต์ Exit 1 ถ้า p95 เกินเป้า · อย่าลืมเปิด Rate limit กลับ) |
 | Mobile cold start | ก่อน Release | `PERFORMANCE.md` §5 |
-| ML train/evaluate | เปลี่ยน Feature/โมเดล | `ml/README.md` (`rideros-ml train` ~29 นาที) |
-| CV train/evaluate | เปลี่ยนโมเดล CV | `cv_service/README.md` |
 
 ## 4. สิ่งที่ยังตรวจด้วยมือ
 

@@ -1,5 +1,7 @@
 # DEVELOPMENT_ROADMAP.md — RiderOS AI (Phase 0)
 
+> **อัปเดต 2026-11-19:** RoadContext (Phase 5) และ `ml/` (Phase 1) ถูกเอาออกจาก Repo แล้ว (`docs/HANDOFF.md` §4.21) เอกสารนี้คือแผนเดิม
+>
 > **อัปเดต 2026-11-18:** Pickup Intelligence ถูกเอาออกจากแอปแล้ว (`docs/HANDOFF.md` §4.20) เอกสารนี้คือแผนเดิม เก็บไว้เป็นบันทึก
 
 > สถานะ: อนุมัติแล้ว (Phase 0, 2026-11-05) · Phase 1 เริ่ม 2026-11-05 · **Phase 1 อนุมัติแล้ว 2026-11-09** · **Phase 4 อนุมัติแล้ว 2026-11-12 (MVP Freeze)** · **Phase 6 อนุมัติแล้ว 2026-11-14**

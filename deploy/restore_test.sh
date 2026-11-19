@@ -1,15 +1,14 @@
 #!/bin/sh
 # Restore test (docs/DEPLOYMENT.md §Restore): restores a backup into a throw-away PostgreSQL
 # container built from the production db image, then compares it with the live database:
-# row count of every table, the Alembic revision, the PostGIS version, and the photo count.
+# row count of every table, the Alembic revision, and the PostGIS version.
 # Touches nothing in the live stack (reads only). Exit 0 = everything matches.
-#   deploy/restore_test.sh /opt/rideros/backups/db-<ts>.dump [/opt/rideros/backups/images-<ts>.tar.gz]
+#   deploy/restore_test.sh /opt/rideros/backups/db-<ts>.dump
 # Run it right after backup.sh: rows written in between show up as differences.
 set -eu
 
-[ $# -ge 1 ] || { echo "usage: $0 DB_DUMP [IMAGES_TAR]" >&2; exit 2; }
+[ $# -ge 1 ] || { echo "usage: $0 DB_DUMP" >&2; exit 2; }
 dump=$1
-images=${2:-}
 cd "$(dirname "$0")"
 COMPOSE="docker compose -f compose.prod.yml"
 name=rideros-restore-test-$$
@@ -52,13 +51,6 @@ echo "$live" | while IFS="$(printf '\t')" read -r table n; do
     printf '%-28s %12s %12s%s\n' "$table" "$n" "${m:-missing}" "$mark"
 done
 [ "$live" = "$restored" ] || status=1
-
-if [ -n "$images" ]; then
-    live_n=$($COMPOSE exec -T backend sh -c 'find /data/road_images -type f | wc -l' | tr -d ' \r')
-    tar_n=$(tar -tzf - < "$images" | grep -cv '/$' || true)
-    printf '%-28s %12s %12s\n' "photos (files)" "$live_n" "$tar_n"
-    [ "$live_n" = "$tar_n" ] || status=1
-fi
 
 if [ $status -eq 0 ]; then echo "RESTORE TEST PASSED"; else echo "RESTORE TEST FAILED"; fi
 exit $status

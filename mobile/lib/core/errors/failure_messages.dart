@@ -15,37 +15,27 @@ String failureMessage(AppLocalizations l10n, AppFailure failure) =>
       UnknownFailure() => l10n.failureUnknown,
     };
 
-String _apiMessage(
-  AppLocalizations l10n,
-  ApiFailure failure,
-) => switch (failure.code) {
-  ApiErrorCode.invalidCredentials => l10n.failureInvalidCredentials,
-  ApiErrorCode.emailTaken => l10n.failureEmailTaken,
-  ApiErrorCode.weakPassword => l10n.failureWeakPassword,
-  ApiErrorCode.invalidResetToken => l10n.failureInvalidResetToken,
-  ApiErrorCode.passwordResetUnavailable => l10n.failurePasswordResetUnavailable,
-  ApiErrorCode.invalidTimezone => l10n.failureInvalidTimezone,
-  ApiErrorCode.invalidPassword => l10n.failureInvalidPassword,
-  ApiErrorCode.validationError => l10n.failureValidation,
-  ApiErrorCode.workSessionOverlap => l10n.failureWorkSessionOverlap,
-  ApiErrorCode.invalidTimeRange => l10n.failureInvalidTimeRange,
-  ApiErrorCode.workSessionTooLong => l10n.failureWorkSessionTooLong,
-  ApiErrorCode.invalidWorkSession => l10n.failureInvalidWorkSession,
-  ApiErrorCode.invalidShiftLength => l10n.failureInvalidShiftLength,
-  ApiErrorCode.missingAssumption => l10n.failureMissingAssumption,
-  ApiErrorCode.insufficientHistory => l10n.failureInsufficientHistory,
-  ApiErrorCode.estimationMethodUnavailable =>
-    l10n.failureEstimationMethodUnavailable,
-  ApiErrorCode.alreadyReported => l10n.failureAlreadyReported,
-  ApiErrorCode.incidentClosed => l10n.failureIncidentClosed,
-  ApiErrorCode.unsupportedImage => l10n.failureUnsupportedImage,
-  ApiErrorCode.imageTooLarge => l10n.failureImageTooLarge,
-  ApiErrorCode.imageStorageUnavailable => l10n.failureImageStorageUnavailable,
-  ApiErrorCode.invalidBbox => l10n.failureInvalidBbox,
-  // `incident_not_found`, `image_not_found`, `income_not_found`,
-  // `expense_not_found`, `work_session_not_found`,
-  // `shift_scenario_not_found`, `not_found`.
-  _ when failure.statusCode == 404 => l10n.failureNotFound,
-  _ when failure.statusCode >= 500 => l10n.failureServer,
-  _ => l10n.failureUnknown,
-};
+String _apiMessage(AppLocalizations l10n, ApiFailure failure) =>
+    switch (failure.code) {
+      ApiErrorCode.invalidCredentials => l10n.failureInvalidCredentials,
+      ApiErrorCode.emailTaken => l10n.failureEmailTaken,
+      ApiErrorCode.weakPassword => l10n.failureWeakPassword,
+      ApiErrorCode.invalidResetToken => l10n.failureInvalidResetToken,
+      ApiErrorCode.passwordResetUnavailable =>
+        l10n.failurePasswordResetUnavailable,
+      ApiErrorCode.invalidTimezone => l10n.failureInvalidTimezone,
+      ApiErrorCode.invalidPassword => l10n.failureInvalidPassword,
+      ApiErrorCode.validationError => l10n.failureValidation,
+      ApiErrorCode.workSessionOverlap => l10n.failureWorkSessionOverlap,
+      ApiErrorCode.invalidTimeRange => l10n.failureInvalidTimeRange,
+      ApiErrorCode.workSessionTooLong => l10n.failureWorkSessionTooLong,
+      ApiErrorCode.invalidWorkSession => l10n.failureInvalidWorkSession,
+      ApiErrorCode.invalidShiftLength => l10n.failureInvalidShiftLength,
+      ApiErrorCode.missingAssumption => l10n.failureMissingAssumption,
+      ApiErrorCode.insufficientHistory => l10n.failureInsufficientHistory,
+      // `income_not_found`, `expense_not_found`, `work_session_not_found`,
+      // `shift_scenario_not_found`, `not_found`.
+      _ when failure.statusCode == 404 => l10n.failureNotFound,
+      _ when failure.statusCode >= 500 => l10n.failureServer,
+      _ => l10n.failureUnknown,
+    };

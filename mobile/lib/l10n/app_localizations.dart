@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In th, this message translates to:
-  /// **'ผู้ช่วยวางแผนงานและกำไรสำหรับไรเดอร์'**
+  /// **'เข้าใจงานของตัวเอง วิเคราะห์รายได้ ตัดสินใจได้ดีขึ้น'**
   String get appTagline;
 
   /// No description provided for @commonRetry.
@@ -249,12 +249,6 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ลิงก์หรือรหัสรีเซ็ตไม่ถูกต้อง'**
   String get validationResetTokenInvalid;
-
-  /// No description provided for @loginTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'เข้าสู่ระบบ'**
-  String get loginTitle;
 
   /// No description provided for @loginSubmit.
   ///
@@ -562,12 +556,6 @@ abstract class AppLocalizations {
   /// **'กำไร'**
   String get navProfit;
 
-  /// No description provided for @navRoad.
-  ///
-  /// In th, this message translates to:
-  /// **'ถนน'**
-  String get navRoad;
-
   /// No description provided for @homeToday.
   ///
   /// In th, this message translates to:
@@ -604,11 +592,11 @@ abstract class AppLocalizations {
   /// **'ดูกำไรทั้งหมด (TrueProfit)'**
   String get homeOpenProfit;
 
-  /// No description provided for @homeAiTools.
+  /// No description provided for @homePlanTitle.
   ///
   /// In th, this message translates to:
-  /// **'เครื่องมือ AI'**
-  String get homeAiTools;
+  /// **'วางแผนกะงาน'**
+  String get homePlanTitle;
 
   /// No description provided for @homeShiftCardTitle.
   ///
@@ -621,12 +609,6 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'จำลองกะงาน ดูกำไรประมาณก่อนออกวิ่ง'**
   String get homeShiftCardMessage;
-
-  /// No description provided for @homeOpen.
-  ///
-  /// In th, this message translates to:
-  /// **'เปิด'**
-  String get homeOpen;
 
   /// No description provided for @goalSetTitle.
   ///
@@ -1829,19 +1811,19 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDescription.
   ///
   /// In th, this message translates to:
-  /// **'ผู้ช่วยไรเดอร์ส่งอาหาร: บันทึกกำไรจริง วางแผนกะงาน และดูเหตุบนถนนที่ไรเดอร์รายงาน ตัวเลขกำไรมาจากรายการที่คุณบันทึกเอง แอปไม่ได้เชื่อมต่อแพลตฟอร์มส่งอาหารใด'**
+  /// **'แอปส่งอาหารช่วยคุณรับงานและส่งอาหาร RiderOS ช่วยให้คุณเข้าใจการทำงานของตัวเอง วิเคราะห์รายได้ และตัดสินใจได้ดีขึ้น ตัวเลขทั้งหมดมาจากรายการที่คุณบันทึกเอง แอปไม่ได้เชื่อมต่อแพลตฟอร์มส่งอาหารใด'**
   String get aboutDescription;
 
   /// No description provided for @aboutDataTitle.
   ///
   /// In th, this message translates to:
-  /// **'ข้อมูลที่ใช้ฝึกโมเดลจัดประเภทรูปถนน'**
+  /// **'การวิเคราะห์มาจากข้อมูลของคุณเท่านั้น'**
   String get aboutDataTitle;
 
   /// No description provided for @aboutDataBody.
   ///
   /// In th, this message translates to:
-  /// **'RDD2022 (CC BY 4.0) · AlleyFloodNet (CC BY 4.0) · Flood10k (CC BY-NC 4.0, ใช้เพื่อการวิจัย/ไม่ใช่เชิงพาณิชย์) · ไม่มีรูปจากประเทศไทย ผลจัดประเภทจึงเป็นแค่คำแนะนำ · แอปไม่ได้แจกจ่ายชุดข้อมูลเหล่านี้'**
+  /// **'Heatmap กำไร/ชม., รูปแบบการทำงาน (K-Means), แนวโน้มรายได้ และ Shift Simulator แบบ \"จากประวัติ\" คำนวณจากรายได้ รายจ่าย และช่วงทำงานที่คุณบันทึก ไม่ใช้ชุดข้อมูลจากภายนอก ยิ่งบันทึกครบ ผลยิ่งตรงกับงานของคุณ'**
   String get aboutDataBody;
 
   /// No description provided for @aboutFontTitle.
@@ -2011,12 +1993,6 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'จากประวัติของฉัน'**
   String get shiftMethodHistorical;
-
-  /// No description provided for @shiftMethodUnavailable.
-  ///
-  /// In th, this message translates to:
-  /// **'วิธีที่ยังไม่เปิดใช้'**
-  String get shiftMethodUnavailable;
 
   /// No description provided for @shiftNewTitle.
   ///
@@ -2491,648 +2467,6 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ประวัติยังไม่พอ ต้องมีวันที่มีชั่วโมงทำงานอย่างน้อย 5 วันใน 84 วันล่าสุด'**
   String get failureInsufficientHistory;
-
-  /// No description provided for @failureEstimationMethodUnavailable.
-  ///
-  /// In th, this message translates to:
-  /// **'วิธีประมาณนี้ยังไม่เปิดใช้'**
-  String get failureEstimationMethodUnavailable;
-
-  /// No description provided for @homeRoadTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุบนถนนใกล้คุณ'**
-  String get homeRoadTitle;
-
-  /// No description provided for @homeRoadMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'ดูแผนที่เหตุที่ไรเดอร์รายงาน และแจ้งเหตุที่คุณพบ'**
-  String get homeRoadMessage;
-
-  /// No description provided for @roadTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุบนถนน'**
-  String get roadTitle;
-
-  /// No description provided for @roadTabMap.
-  ///
-  /// In th, this message translates to:
-  /// **'แผนที่'**
-  String get roadTabMap;
-
-  /// No description provided for @roadTabNearby.
-  ///
-  /// In th, this message translates to:
-  /// **'ใกล้ฉัน'**
-  String get roadTabNearby;
-
-  /// No description provided for @roadReportAction.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานเหตุ'**
-  String get roadReportAction;
-
-  /// No description provided for @roadMyReports.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานของฉัน'**
-  String get roadMyReports;
-
-  /// No description provided for @roadCategoryFlooding.
-  ///
-  /// In th, this message translates to:
-  /// **'น้ำท่วม'**
-  String get roadCategoryFlooding;
-
-  /// No description provided for @roadCategoryRoadDamage.
-  ///
-  /// In th, this message translates to:
-  /// **'ถนนชำรุด'**
-  String get roadCategoryRoadDamage;
-
-  /// No description provided for @roadCategoryRoadClosure.
-  ///
-  /// In th, this message translates to:
-  /// **'ปิดถนน'**
-  String get roadCategoryRoadClosure;
-
-  /// No description provided for @roadCategoryRoadObstacle.
-  ///
-  /// In th, this message translates to:
-  /// **'สิ่งกีดขวาง'**
-  String get roadCategoryRoadObstacle;
-
-  /// No description provided for @roadCategoryTrafficIncident.
-  ///
-  /// In th, this message translates to:
-  /// **'อุบัติเหตุ'**
-  String get roadCategoryTrafficIncident;
-
-  /// No description provided for @roadStatusUnverified.
-  ///
-  /// In th, this message translates to:
-  /// **'รอผู้รายงานเพิ่ม'**
-  String get roadStatusUnverified;
-
-  /// No description provided for @roadStatusCorroborated.
-  ///
-  /// In th, this message translates to:
-  /// **'มีผู้รายงานหลายคน'**
-  String get roadStatusCorroborated;
-
-  /// No description provided for @roadStatusResolved.
-  ///
-  /// In th, this message translates to:
-  /// **'คลี่คลายแล้ว'**
-  String get roadStatusResolved;
-
-  /// No description provided for @roadStatusExpired.
-  ///
-  /// In th, this message translates to:
-  /// **'หมดอายุ'**
-  String get roadStatusExpired;
-
-  /// No description provided for @roadStatusRejected.
-  ///
-  /// In th, this message translates to:
-  /// **'ผู้ดูแลนำออก'**
-  String get roadStatusRejected;
-
-  /// No description provided for @roadReportedByUsers.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานโดยผู้ใช้ · อัปเดตล่าสุด {ago}'**
-  String roadReportedByUsers(String ago);
-
-  /// No description provided for @roadAgoJustNow.
-  ///
-  /// In th, this message translates to:
-  /// **'เมื่อสักครู่'**
-  String get roadAgoJustNow;
-
-  /// No description provided for @roadAgoMinutes.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} นาทีที่แล้ว'**
-  String roadAgoMinutes(int n);
-
-  /// No description provided for @roadAgoHours.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} ชั่วโมงที่แล้ว'**
-  String roadAgoHours(int n);
-
-  /// No description provided for @roadAgoDays.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} วันที่แล้ว'**
-  String roadAgoDays(int n);
-
-  /// No description provided for @roadDistanceM.
-  ///
-  /// In th, this message translates to:
-  /// **'{m} ม.'**
-  String roadDistanceM(int m);
-
-  /// No description provided for @roadDistanceKm.
-  ///
-  /// In th, this message translates to:
-  /// **'{km} กม.'**
-  String roadDistanceKm(String km);
-
-  /// No description provided for @roadNotice.
-  ///
-  /// In th, this message translates to:
-  /// **'ข้อมูลรายงานโดยไรเดอร์ ไม่ได้ตรวจสอบโดย RiderOS ตำแหน่งและเวลามาจากผู้รายงานและอาจไม่เป็นปัจจุบัน'**
-  String get roadNotice;
-
-  /// No description provided for @roadMapZoomIn.
-  ///
-  /// In th, this message translates to:
-  /// **'ซูมเข้าเพื่อดูเหตุในบริเวณนี้'**
-  String get roadMapZoomIn;
-
-  /// No description provided for @roadMapTruncated.
-  ///
-  /// In th, this message translates to:
-  /// **'มีเหตุมากเกินกว่าจะแสดงทั้งหมด ซูมเข้าเพื่อดูให้ครบ'**
-  String get roadMapTruncated;
-
-  /// No description provided for @roadMapLoadFailed.
-  ///
-  /// In th, this message translates to:
-  /// **'โหลดเหตุบนแผนที่ไม่สำเร็จ'**
-  String get roadMapLoadFailed;
-
-  /// No description provided for @roadMapMyLocation.
-  ///
-  /// In th, this message translates to:
-  /// **'ไปที่ตำแหน่งของฉัน'**
-  String get roadMapMyLocation;
-
-  /// No description provided for @roadMapIncidentCount.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} เหตุในบริเวณนี้'**
-  String roadMapIncidentCount(int n);
-
-  /// No description provided for @roadClusterLabel.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} เหตุอยู่ใกล้กัน แตะเพื่อดู'**
-  String roadClusterLabel(int n);
-
-  /// No description provided for @roadClusterSheetTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} เหตุที่จุดนี้'**
-  String roadClusterSheetTitle(int n);
-
-  /// No description provided for @roadNearbyEmptyTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'ไม่มีเหตุใกล้คุณ'**
-  String get roadNearbyEmptyTitle;
-
-  /// No description provided for @roadNearbyEmptyMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'ไม่มีเหตุที่ยังเปิดอยู่ในระยะ {km} กม. จากตำแหน่งของคุณ'**
-  String roadNearbyEmptyMessage(int km);
-
-  /// No description provided for @roadNearbyHeader.
-  ///
-  /// In th, this message translates to:
-  /// **'ในระยะ {km} กม. · เรียงจากใกล้สุด'**
-  String roadNearbyHeader(int km);
-
-  /// No description provided for @roadLocationFinding.
-  ///
-  /// In th, this message translates to:
-  /// **'กำลังหาตำแหน่ง…'**
-  String get roadLocationFinding;
-
-  /// No description provided for @roadLocationDeniedTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'ยังไม่ได้รับสิทธิ์ตำแหน่ง'**
-  String get roadLocationDeniedTitle;
-
-  /// No description provided for @roadLocationDeniedMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'อนุญาตให้ใช้ตำแหน่งขณะใช้แอป เพื่อดูเหตุใกล้คุณ แอปไม่ติดตามตำแหน่งเบื้องหลัง'**
-  String get roadLocationDeniedMessage;
-
-  /// No description provided for @roadLocationAllow.
-  ///
-  /// In th, this message translates to:
-  /// **'อนุญาตตำแหน่ง'**
-  String get roadLocationAllow;
-
-  /// No description provided for @roadLocationDeniedForeverMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'สิทธิ์ตำแหน่งของแอปถูกปิดไว้ เปิดได้ที่การตั้งค่าแอป'**
-  String get roadLocationDeniedForeverMessage;
-
-  /// No description provided for @roadLocationOpenSettings.
-  ///
-  /// In th, this message translates to:
-  /// **'เปิดการตั้งค่า'**
-  String get roadLocationOpenSettings;
-
-  /// No description provided for @roadLocationServiceOffTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'ตำแหน่งของเครื่องปิดอยู่'**
-  String get roadLocationServiceOffTitle;
-
-  /// No description provided for @roadLocationServiceOffMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'เปิดตำแหน่ง (GPS) ของเครื่อง แล้วลองใหม่'**
-  String get roadLocationServiceOffMessage;
-
-  /// No description provided for @roadLocationUnavailableTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'หาตำแหน่งไม่ได้'**
-  String get roadLocationUnavailableTitle;
-
-  /// No description provided for @roadLocationUnavailableMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'ลองใหม่อีกครั้ง หรือดูเหตุจากแผนที่'**
-  String get roadLocationUnavailableMessage;
-
-  /// No description provided for @roadReportTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานเหตุบนถนน'**
-  String get roadReportTitle;
-
-  /// No description provided for @roadReportCategory.
-  ///
-  /// In th, this message translates to:
-  /// **'ประเภทเหตุ'**
-  String get roadReportCategory;
-
-  /// No description provided for @roadReportCategoryRequired.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกประเภทเหตุ'**
-  String get roadReportCategoryRequired;
-
-  /// No description provided for @roadReportLocation.
-  ///
-  /// In th, this message translates to:
-  /// **'ตำแหน่งของเหตุ'**
-  String get roadReportLocation;
-
-  /// No description provided for @roadReportLocationGps.
-  ///
-  /// In th, this message translates to:
-  /// **'ตำแหน่งปัจจุบันของคุณ'**
-  String get roadReportLocationGps;
-
-  /// No description provided for @roadReportLocationManual.
-  ///
-  /// In th, this message translates to:
-  /// **'ตำแหน่งที่คุณปักหมุด'**
-  String get roadReportLocationManual;
-
-  /// No description provided for @roadReportLocationRequired.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกตำแหน่งของเหตุบนแผนที่'**
-  String get roadReportLocationRequired;
-
-  /// No description provided for @roadReportLocationNoGps.
-  ///
-  /// In th, this message translates to:
-  /// **'ไม่ได้ใช้ตำแหน่งของเครื่อง ปักหมุดเองบนแผนที่ได้'**
-  String get roadReportLocationNoGps;
-
-  /// No description provided for @roadReportChooseLocation.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกบนแผนที่'**
-  String get roadReportChooseLocation;
-
-  /// No description provided for @roadReportChangeLocation.
-  ///
-  /// In th, this message translates to:
-  /// **'เปลี่ยนตำแหน่ง'**
-  String get roadReportChangeLocation;
-
-  /// No description provided for @roadReportLocationHelp.
-  ///
-  /// In th, this message translates to:
-  /// **'ไรเดอร์คนอื่นเห็นตำแหน่งของเหตุ แต่ไม่เห็นว่าใครรายงาน'**
-  String get roadReportLocationHelp;
-
-  /// No description provided for @roadReportPhoto.
-  ///
-  /// In th, this message translates to:
-  /// **'รูปภาพ'**
-  String get roadReportPhoto;
-
-  /// No description provided for @roadReportPhotoHelp.
-  ///
-  /// In th, this message translates to:
-  /// **'แอปย่อรูปก่อนส่ง เซิร์ฟเวอร์ลบข้อมูลตำแหน่งในไฟล์ (EXIF) และรูปนี้เห็นได้เฉพาะคุณ'**
-  String get roadReportPhotoHelp;
-
-  /// No description provided for @roadReportTakePhoto.
-  ///
-  /// In th, this message translates to:
-  /// **'ถ่ายรูป'**
-  String get roadReportTakePhoto;
-
-  /// No description provided for @roadReportPickPhoto.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกจากคลังภาพ'**
-  String get roadReportPickPhoto;
-
-  /// No description provided for @roadReportRemovePhoto.
-  ///
-  /// In th, this message translates to:
-  /// **'ลบรูป'**
-  String get roadReportRemovePhoto;
-
-  /// No description provided for @roadReportPhotoFailed.
-  ///
-  /// In th, this message translates to:
-  /// **'เปิดกล้องหรือคลังภาพไม่ได้ ตรวจสอบสิทธิ์ของแอปแล้วลองใหม่'**
-  String get roadReportPhotoFailed;
-
-  /// No description provided for @roadReportPhotoTooLarge.
-  ///
-  /// In th, this message translates to:
-  /// **'รูปใหญ่เกิน 5 MB กรุณาเลือกรูปอื่น'**
-  String get roadReportPhotoTooLarge;
-
-  /// No description provided for @roadReportDescription.
-  ///
-  /// In th, this message translates to:
-  /// **'รายละเอียด'**
-  String get roadReportDescription;
-
-  /// No description provided for @roadReportSubmit.
-  ///
-  /// In th, this message translates to:
-  /// **'ส่งรายงาน'**
-  String get roadReportSubmit;
-
-  /// No description provided for @roadReportSent.
-  ///
-  /// In th, this message translates to:
-  /// **'ส่งรายงานแล้ว'**
-  String get roadReportSent;
-
-  /// No description provided for @roadReportMerged.
-  ///
-  /// In th, this message translates to:
-  /// **'ส่งแล้ว · รวมกับเหตุเดียวกันที่มีผู้รายงานไว้ใกล้ๆ'**
-  String get roadReportMerged;
-
-  /// No description provided for @roadReportView.
-  ///
-  /// In th, this message translates to:
-  /// **'ดู'**
-  String get roadReportView;
-
-  /// No description provided for @roadAlreadyReported.
-  ///
-  /// In th, this message translates to:
-  /// **'คุณรายงานเหตุนี้ไว้แล้ว แจ้งว่ายังอยู่ได้ที่หน้ารายละเอียด'**
-  String get roadAlreadyReported;
-
-  /// No description provided for @roadOpenIncident.
-  ///
-  /// In th, this message translates to:
-  /// **'เปิดเหตุนี้'**
-  String get roadOpenIncident;
-
-  /// No description provided for @roadPickLocationTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกตำแหน่ง'**
-  String get roadPickLocationTitle;
-
-  /// No description provided for @roadPickLocationHelp.
-  ///
-  /// In th, this message translates to:
-  /// **'เลื่อนแผนที่ให้หมุดอยู่ตรงจุดเกิดเหตุ'**
-  String get roadPickLocationHelp;
-
-  /// No description provided for @roadPickLocationUse.
-  ///
-  /// In th, this message translates to:
-  /// **'ใช้ตำแหน่งนี้'**
-  String get roadPickLocationUse;
-
-  /// No description provided for @roadDetailTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'รายละเอียดเหตุ'**
-  String get roadDetailTitle;
-
-  /// No description provided for @roadDetailReporters.
-  ///
-  /// In th, this message translates to:
-  /// **'ผู้รายงาน'**
-  String get roadDetailReporters;
-
-  /// No description provided for @roadDetailReports.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานทั้งหมด'**
-  String get roadDetailReports;
-
-  /// No description provided for @roadDetailCleared.
-  ///
-  /// In th, this message translates to:
-  /// **'แจ้งว่าคลี่คลาย'**
-  String get roadDetailCleared;
-
-  /// No description provided for @roadDetailFirstReported.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานครั้งแรก'**
-  String get roadDetailFirstReported;
-
-  /// No description provided for @roadDetailExpires.
-  ///
-  /// In th, this message translates to:
-  /// **'หมดอายุ'**
-  String get roadDetailExpires;
-
-  /// No description provided for @roadPeople.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} คน'**
-  String roadPeople(int n);
-
-  /// No description provided for @roadTimes.
-  ///
-  /// In th, this message translates to:
-  /// **'{n} ครั้ง'**
-  String roadTimes(int n);
-
-  /// No description provided for @roadDateTime.
-  ///
-  /// In th, this message translates to:
-  /// **'{date} {time}'**
-  String roadDateTime(String date, String time);
-
-  /// No description provided for @roadConfirmQuestion.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุนี้ยังอยู่ไหม?'**
-  String get roadConfirmQuestion;
-
-  /// No description provided for @roadConfirmStill.
-  ///
-  /// In th, this message translates to:
-  /// **'ยังอยู่'**
-  String get roadConfirmStill;
-
-  /// No description provided for @roadConfirmCleared.
-  ///
-  /// In th, this message translates to:
-  /// **'คลี่คลายแล้ว'**
-  String get roadConfirmCleared;
-
-  /// No description provided for @roadConfirmMineStill.
-  ///
-  /// In th, this message translates to:
-  /// **'คุณแจ้งว่ายังอยู่ · {ago}'**
-  String roadConfirmMineStill(String ago);
-
-  /// No description provided for @roadConfirmMineCleared.
-  ///
-  /// In th, this message translates to:
-  /// **'คุณแจ้งว่าคลี่คลายแล้ว · {ago}'**
-  String roadConfirmMineCleared(String ago);
-
-  /// The server counts 'gone' only after the latest report.
-  ///
-  /// In th, this message translates to:
-  /// **'คุณแจ้งว่าคลี่คลายแล้ว · {ago} แต่มีรายงานใหม่หลังจากนั้น คำตอบเดิมจึงไม่นับ ถ้าคลี่คลายแล้วจริง กด \"คลี่คลายแล้ว\" อีกครั้ง'**
-  String roadConfirmMineClearedStale(String ago);
-
-  /// No description provided for @roadConfirmHelp.
-  ///
-  /// In th, this message translates to:
-  /// **'คำตอบใหม่แทนคำตอบเดิมของคุณ เหตุจะปิดเมื่อมีไรเดอร์หลายคนแจ้งว่าคลี่คลาย'**
-  String get roadConfirmHelp;
-
-  /// No description provided for @roadConfirmSaved.
-  ///
-  /// In th, this message translates to:
-  /// **'บันทึกคำตอบแล้ว'**
-  String get roadConfirmSaved;
-
-  /// No description provided for @roadClosedMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุนี้ปิดแล้ว ({status}) จึงแจ้งเพิ่มไม่ได้'**
-  String roadClosedMessage(String status);
-
-  /// No description provided for @roadMyReport.
-  ///
-  /// In th, this message translates to:
-  /// **'รายงานของคุณ'**
-  String get roadMyReport;
-
-  /// No description provided for @roadPhotoLoadFailed.
-  ///
-  /// In th, this message translates to:
-  /// **'โหลดรูปไม่สำเร็จ'**
-  String get roadPhotoLoadFailed;
-
-  /// No description provided for @roadAiSuggestion.
-  ///
-  /// In th, this message translates to:
-  /// **'AI แนะนำ: {label} ({percent}%)'**
-  String roadAiSuggestion(String label, int percent);
-
-  /// No description provided for @roadAiUnsure.
-  ///
-  /// In th, this message translates to:
-  /// **'AI ไม่แน่ใจประเภทจากรูปนี้'**
-  String get roadAiUnsure;
-
-  /// No description provided for @roadAiPending.
-  ///
-  /// In th, this message translates to:
-  /// **'AI กำลังดูรูปนี้'**
-  String get roadAiPending;
-
-  /// No description provided for @roadAiOther.
-  ///
-  /// In th, this message translates to:
-  /// **'อื่นๆ'**
-  String get roadAiOther;
-
-  /// No description provided for @roadMyReportsEmptyTitle.
-  ///
-  /// In th, this message translates to:
-  /// **'ยังไม่มีรายงาน'**
-  String get roadMyReportsEmptyTitle;
-
-  /// No description provided for @roadMyReportsEmptyMessage.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุที่คุณรายงานจะแสดงที่นี่'**
-  String get roadMyReportsEmptyMessage;
-
-  /// No description provided for @roadHasPhoto.
-  ///
-  /// In th, this message translates to:
-  /// **'มีรูป'**
-  String get roadHasPhoto;
-
-  /// No description provided for @failureAlreadyReported.
-  ///
-  /// In th, this message translates to:
-  /// **'คุณรายงานเหตุนี้ไว้แล้ว'**
-  String get failureAlreadyReported;
-
-  /// No description provided for @failureIncidentClosed.
-  ///
-  /// In th, this message translates to:
-  /// **'เหตุนี้ปิดแล้ว แจ้งเพิ่มไม่ได้'**
-  String get failureIncidentClosed;
-
-  /// No description provided for @failureUnsupportedImage.
-  ///
-  /// In th, this message translates to:
-  /// **'รองรับเฉพาะรูป JPEG, PNG หรือ WebP'**
-  String get failureUnsupportedImage;
-
-  /// No description provided for @failureImageTooLarge.
-  ///
-  /// In th, this message translates to:
-  /// **'รูปใหญ่เกิน 5 MB'**
-  String get failureImageTooLarge;
-
-  /// No description provided for @failureImageStorageUnavailable.
-  ///
-  /// In th, this message translates to:
-  /// **'ตอนนี้เซิร์ฟเวอร์รับรูปไม่ได้ ส่งรายงานโดยไม่แนบรูปได้'**
-  String get failureImageStorageUnavailable;
-
-  /// No description provided for @failureInvalidBbox.
-  ///
-  /// In th, this message translates to:
-  /// **'บริเวณแผนที่กว้างเกินไป ซูมเข้าแล้วลองใหม่'**
-  String get failureInvalidBbox;
 
   /// No description provided for @failureNetwork.
   ///

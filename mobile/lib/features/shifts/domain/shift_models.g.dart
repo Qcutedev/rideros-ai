@@ -178,7 +178,6 @@ _ShiftScenario _$ShiftScenarioFromJson(Map<String, dynamic> json) =>
 const _$EstimationMethodEnumMap = {
   EstimationMethod.assumption: 'assumption',
   EstimationMethod.historical: 'historical',
-  EstimationMethod.ml: 'ml',
 };
 
 _ShiftScenarioInput _$ShiftScenarioInputFromJson(Map<String, dynamic> json) =>
