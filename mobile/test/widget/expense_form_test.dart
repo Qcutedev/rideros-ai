@@ -61,12 +61,16 @@ void main() {
   });
 
   testWidgets('server failure banner', (tester) async {
-    profit.expenses.saveError = const NetworkFailure();
+    // No connection queues the record instead (offline_queue_test.dart).
+    profit.expenses.saveError = const ApiFailure(
+      statusCode: 500,
+      code: 'internal_error',
+    );
     await open(tester);
     await pickCategory(tester, t.expenseCategoryMaintenance);
     await enter(tester, 'expense.amount', '300');
     await tapKey(tester, 'expense.submit');
-    expect(find.text(t.failureNetwork), findsOneWidget);
+    expect(find.text(t.failureServer), findsOneWidget);
     expect(find.byType(ExpenseFormScreen), findsOneWidget);
   });
 

@@ -33,6 +33,21 @@ ToQuery = Annotated[date | None, Query(alias="to", description="Last local date 
 
 _NOT_FOUND = {404: {"description": "Not found, or owned by another user"}}
 
+
+def _create_responses(model: type) -> dict[int | str, dict[str, object]]:
+    return {
+        200: {"model": model, "description": "Resent `id`: the record stored earlier, unchanged"},
+        409: {"description": "`duplicate_id`: another user's record has this `id`"},
+    }
+
+
+def _created[T](stored: tuple[T, bool], response: Response) -> T:
+    record, created = stored
+    if not created:
+        response.status_code = status.HTTP_200_OK
+    return record
+
+
 router = APIRouter()
 
 # ---- work sessions ----
@@ -55,11 +70,16 @@ async def list_work_sessions(
     )
 
 
-@sessions.post("", status_code=status.HTTP_201_CREATED, response_model=WorkSessionOut)
+@sessions.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=WorkSessionOut,
+    responses=_create_responses(WorkSessionOut),
+)
 async def create_work_session(
-    body: WorkSessionCreate, user: CurrentUser, session: SessionDep
+    body: WorkSessionCreate, user: CurrentUser, session: SessionDep, response: Response
 ) -> WorkSessionOut:
-    return await service.create_work_session(session, user.id, body)
+    return _created(await service.create_work_session(session, user.id, body), response)
 
 
 @sessions.get("/{session_id}", response_model=WorkSessionOut, responses=_NOT_FOUND)
@@ -106,9 +126,13 @@ async def list_income(
     )
 
 
-@income.post("", status_code=status.HTTP_201_CREATED, response_model=IncomeOut)
-async def create_income(body: IncomeCreate, user: CurrentUser, session: SessionDep) -> IncomeOut:
-    return await service.create_income(session, user.id, body)
+@income.post(
+    "", status_code=status.HTTP_201_CREATED, response_model=IncomeOut, responses=_create_responses(IncomeOut)
+)
+async def create_income(
+    body: IncomeCreate, user: CurrentUser, session: SessionDep, response: Response
+) -> IncomeOut:
+    return _created(await service.create_income(session, user.id, body), response)
 
 
 @income.get("/{income_id}", response_model=IncomeOut, responses=_NOT_FOUND)
@@ -149,9 +173,16 @@ async def list_expenses(
     )
 
 
-@expenses.post("", status_code=status.HTTP_201_CREATED, response_model=ExpenseOut)
-async def create_expense(body: ExpenseCreate, user: CurrentUser, session: SessionDep) -> ExpenseOut:
-    return await service.create_expense(session, user.id, body)
+@expenses.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ExpenseOut,
+    responses=_create_responses(ExpenseOut),
+)
+async def create_expense(
+    body: ExpenseCreate, user: CurrentUser, session: SessionDep, response: Response
+) -> ExpenseOut:
+    return _created(await service.create_expense(session, user.id, body), response)
 
 
 @expenses.get("/{expense_id}", response_model=ExpenseOut, responses=_NOT_FOUND)

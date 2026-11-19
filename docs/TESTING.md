@@ -46,13 +46,13 @@ cd "C:\dev\RiderOS AI"
 - ไม่รวม Generated code (json_serializable, freezed, gen-l10n) เพราะไม่ได้เขียนเอง
 - ขึ้น Gate ได้เมื่อ Coverage สูงขึ้น · ห้ามลด Gate เพื่อให้ผ่าน
 
-### 1.3 ผลล่าสุด (2026-11-19, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `chore/refocus-analytics` ต่อจาก `4aafa51`)
+### 1.3 ผลล่าสุด (2026-11-19, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `feat/offline-queue` จาก `b989cd4`)
 
 | ชุด | ผล | เวลา |
 |---|---|---|
-| Backend | ruff สะอาด (90 ไฟล์) · **382 passed** · Coverage 98.65% (Gate 96%) | ~126 s |
-| Mobile | `flutter analyze` No issues · `dart format` 164 ไฟล์ไม่เปลี่ยน · **462 passed** · Coverage 97.18% (6,263/6,445, Gate 94.7%) | ~80 s |
-| รวม | **REGRESSION PASSED: 8 step(s)** · 844 Tests | ~4 นาที |
+| Backend | ruff สะอาด (91 ไฟล์) · **402 passed** · Coverage 98.76% (Gate 96%) | ~110 s |
+| Mobile | `flutter analyze` No issues · `dart format` 172 ไฟล์ไม่เปลี่ยน · **491 passed** · Coverage 97.08% (6,618/6,817, Gate 94.7%) | ~95 s |
+| รวม | **REGRESSION PASSED: 8 step(s)** · 893 Tests | ~4 นาที |
 
 - Test ลดลงเพราะเอา RoadContext ออก และไม่มีชุด ML/CV แล้ว (HANDOFF §4.21)
 - รอบก่อน (2026-11-18, Branch `feat/timer-income-chain`): Backend 463 · ML 134 · CV 38 · Mobile 526 (Coverage 96.86%, 7,339/7,577) · 14 ขั้น ~8 นาที · Mobile +4 จากตัวจับเวลา → ฟอร์มรายได้ (HANDOFF §4.20 PR 2)

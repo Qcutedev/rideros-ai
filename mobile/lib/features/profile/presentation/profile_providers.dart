@@ -2,7 +2,9 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/submit_notifier.dart';
+import '../../auth/domain/session_state.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../../profit/data/pending_record_store.dart';
 import '../../profit/presentation/profit_providers.dart';
 import '../data/rider_profile_repository_impl.dart';
 import '../domain/rider_profile.dart';
@@ -58,10 +60,20 @@ final displayNameFormProvider =
     );
 
 /// Deleting the account signs out; the router guard then shows the login screen.
+/// Records still waiting in the offline queue of that account are dropped.
 class DeleteAccountController extends SubmitNotifier {
-  Future<bool> delete(String password) => run(
-    () => ref.read(sessionControllerProvider.notifier).deleteAccount(password),
-  );
+  Future<bool> delete(String password) => run(() async {
+    final session = ref.read(sessionControllerProvider);
+    final userId = session is SignedIn ? session.user.id : null;
+    final queue = ref.read(pendingRecordStoreProvider);
+    await ref.read(sessionControllerProvider.notifier).deleteAccount(password);
+    if (userId == null) return;
+    try {
+      await queue.write(userId, const []);
+    } catch (_) {
+      // The account is gone either way; a leftover entry is never sent.
+    }
+  });
 }
 
 final deleteAccountProvider =

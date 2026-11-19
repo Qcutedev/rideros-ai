@@ -1316,6 +1316,108 @@ abstract class AppLocalizations {
   /// **'บันทึกแล้ว'**
   String get recordSaved;
 
+  /// No description provided for @recordQueued.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่มีเน็ต บันทึกไว้ในเครื่องแล้ว จะส่งให้อัตโนมัติเมื่อออนไลน์'**
+  String get recordQueued;
+
+  /// No description provided for @pendingBannerWaiting.
+  ///
+  /// In th, this message translates to:
+  /// **'รอส่ง {count} รายการ · ตัวเลขยังไม่รวมรายการเหล่านี้'**
+  String pendingBannerWaiting(int count);
+
+  /// No description provided for @pendingBannerFailed.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งไม่สำเร็จ {count} รายการ · แตะเพื่อดู'**
+  String pendingBannerFailed(int count);
+
+  /// No description provided for @pendingTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'รายการรอส่ง'**
+  String get pendingTitle;
+
+  /// No description provided for @pendingIntro.
+  ///
+  /// In th, this message translates to:
+  /// **'รายการที่บันทึกตอนไม่มีเน็ตเก็บอยู่ในเครื่องนี้ แอปจะส่งให้เองเมื่อออนไลน์ ระหว่างนี้ตัวเลขกำไรยังไม่รวมรายการเหล่านี้'**
+  String get pendingIntro;
+
+  /// No description provided for @pendingSendNow.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งตอนนี้'**
+  String get pendingSendNow;
+
+  /// No description provided for @pendingSending.
+  ///
+  /// In th, this message translates to:
+  /// **'กำลังส่ง…'**
+  String get pendingSending;
+
+  /// No description provided for @pendingEmptyTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งครบแล้ว'**
+  String get pendingEmptyTitle;
+
+  /// No description provided for @pendingEmptyMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่มีรายการค้างส่ง'**
+  String get pendingEmptyMessage;
+
+  /// No description provided for @pendingStatusWaiting.
+  ///
+  /// In th, this message translates to:
+  /// **'รอส่ง'**
+  String get pendingStatusWaiting;
+
+  /// No description provided for @pendingStatusFailed.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งไม่สำเร็จ: {reason}'**
+  String pendingStatusFailed(String reason);
+
+  /// No description provided for @pendingFailedHint.
+  ///
+  /// In th, this message translates to:
+  /// **'เซิร์ฟเวอร์ไม่รับรายการที่ส่งไม่สำเร็จ ส่งซ้ำก็ไม่ผ่าน ให้ลบแล้วบันทึกใหม่ให้ถูกต้อง'**
+  String get pendingFailedHint;
+
+  /// No description provided for @pendingDeleteTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ลบรายการที่ยังไม่ได้ส่ง?'**
+  String get pendingDeleteTitle;
+
+  /// No description provided for @pendingDeleteMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'รายการนี้ยังไม่ถึงเซิร์ฟเวอร์ ลบแล้วกู้คืนไม่ได้'**
+  String get pendingDeleteMessage;
+
+  /// No description provided for @pendingDeleteLinkedMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'รายการนี้ยังไม่ถึงเซิร์ฟเวอร์ ลบแล้วกู้คืนไม่ได้ และรายการที่ผูกกับช่วงทำงานนี้อีก {count} รายการจะถูกลบด้วย'**
+  String pendingDeleteLinkedMessage(int count);
+
+  /// No description provided for @pendingLogoutTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังมีรายการที่ยังไม่ได้ส่ง'**
+  String get pendingLogoutTitle;
+
+  /// No description provided for @pendingLogoutMessage.
+  ///
+  /// In th, this message translates to:
+  /// **'{count} รายการเก็บอยู่ในเครื่องนี้ และจะส่งให้เมื่อคุณเข้าสู่ระบบบัญชีนี้อีกครั้งบนเครื่องนี้'**
+  String pendingLogoutMessage(int count);
+
   /// No description provided for @recordDelete.
   ///
   /// In th, this message translates to:
@@ -1879,6 +1981,18 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ไม่พบช่วงทำงานที่เลือก (อาจถูกลบไปแล้ว)'**
   String get failureInvalidWorkSession;
+
+  /// No description provided for @failureLinkedSessionFailed.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วงทำงานที่ผูกไว้ส่งไม่สำเร็จ'**
+  String get failureLinkedSessionFailed;
+
+  /// No description provided for @failureDuplicateId.
+  ///
+  /// In th, this message translates to:
+  /// **'รหัสรายการซ้ำกับรายการอื่น'**
+  String get failureDuplicateId;
 
   /// No description provided for @badgeEstimate.
   ///

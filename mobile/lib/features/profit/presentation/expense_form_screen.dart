@@ -72,7 +72,9 @@ class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
             description: optionalTextOf(_description),
           ),
         );
-    if (saved != null && mounted) closeForm(context, l10n.recordSaved);
+    if (saved != null && mounted) {
+      closeForm(context, saved.queued ? l10n.recordQueued : l10n.recordSaved);
+    }
   }
 
   Future<void> _delete() async {

@@ -4,11 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/utils/clock.dart';
+import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
+import 'package:rideros_ai/features/profit/data/pending_record_store.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
 import 'package:rideros_ai/features/profit/domain/profit_summary.dart';
 import 'package:rideros_ai/features/profit/presentation/profit_providers.dart';
 
+import '../../helpers/fakes.dart';
 import '../../helpers/profit_fakes.dart';
 
 void main() {
@@ -24,6 +27,10 @@ void main() {
           expenseRepositoryProvider.overrideWithValue(fakes.expenses),
           workSessionRepositoryProvider.overrideWithValue(fakes.sessions),
           clockProvider.overrideWithValue(now ?? testNow),
+          // Signed out: a create that fails is never queued here (see pending_sync_test).
+          authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          pendingRecordStoreProvider.overrideWithValue(fakes.pendingStore),
+          pendingRecordSenderProvider.overrideWithValue(fakes.sender),
         ],
       );
 
@@ -191,7 +198,8 @@ void main() {
       final saved = await container
           .read(incomeFormProvider.notifier)
           .save(null, income(10, '800'));
-      expect(saved!.amount, d('800'));
+      expect(saved!.record.amount, d('800'));
+      expect(saved.queued, isFalse);
       expect(container.read(profitDataRevisionProvider), 1);
       final items = (await container.read(incomeListProvider.future)).items;
       expect(items.single.amount, d('800'));
@@ -202,8 +210,8 @@ void main() {
       container.listen(incomeFormProvider, (_, _) {});
       final form = container.read(incomeFormProvider.notifier);
       final updated = await form.save(existing.id, income(9, '50'));
-      expect(updated!.id, existing.id);
-      expect(updated.amount, d('50'));
+      expect(updated!.record.id, existing.id);
+      expect(updated.record.amount, d('50'));
       expect(await form.delete(existing.id), isTrue);
       expect(fakes.income.calls, [
         'update:${existing.id}',

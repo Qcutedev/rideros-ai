@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,9 +12,11 @@ import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/profit_summary.dart';
+import 'pending_sync_controller.dart';
 import 'profit_labels.dart';
 import 'profit_providers.dart';
 import 'widgets/net_profit_chart.dart';
+import 'widgets/pending_sync_banner.dart';
 import 'widgets/profit_heatmap_card.dart';
 import 'widgets/profit_metrics_view.dart';
 import 'widgets/trend_summary.dart';
@@ -44,11 +48,15 @@ class TrueProfitScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(trueProfitDataProvider.future),
+        onRefresh: () {
+          unawaited(ref.read(pendingSyncProvider.notifier).flushIfWaiting());
+          return ref.refresh(trueProfitDataProvider.future);
+        },
         child: PageColumn(
           child: ListView(
             padding: AppSpacing.screen,
             children: [
+              const PendingSyncBanner(bottomGap: AppSpacing.lg),
               SegmentedButton<ProfitPeriod>(
                 key: const Key('profit.period'),
                 showSelectedIcon: false,

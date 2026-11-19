@@ -131,7 +131,11 @@ class _SessionFormState extends ConsumerState<_SessionForm> {
           ),
         );
     if (saved != null && mounted) {
-      closeForm(context, l10n.recordSaved, result: saved);
+      closeForm(
+        context,
+        saved.queued ? l10n.recordQueued : l10n.recordSaved,
+        result: saved.record,
+      );
     }
   }
 

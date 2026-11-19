@@ -4,7 +4,9 @@ import 'package:decimal/decimal.dart';
 import 'package:rideros_ai/core/errors/app_failure.dart';
 import 'package:rideros_ai/core/network/paged_result.dart';
 import 'package:rideros_ai/core/utils/date_json.dart';
+import 'package:rideros_ai/features/profit/data/pending_record_store.dart';
 import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
+import 'package:rideros_ai/features/profit/domain/pending_record.dart';
 import 'package:rideros_ai/features/profit/domain/profit_heatmap.dart';
 import 'package:rideros_ai/features/profit/domain/profit_period.dart';
 import 'package:rideros_ai/features/profit/domain/profit_records.dart';
@@ -288,6 +290,7 @@ class FakeRecordRepository<T, I> implements RecordRepository<T, I> {
   Completer<void>? listGate;
   final calls = <String>[];
   I? lastInput;
+  String? lastCreateId;
   int _next = 1;
 
   String _newId() => 'id-${_next++}';
@@ -334,12 +337,15 @@ class FakeRecordRepository<T, I> implements RecordRepository<T, I> {
   }
 
   @override
-  Future<T> create(I input) async {
+  Future<T> create(I input, {String? id}) async {
     calls.add('create');
     lastInput = input;
+    lastCreateId = id;
     await saveGate?.future;
     if (saveError != null) throw saveError!;
-    return add(input);
+    final record = build(id ?? _newId(), input, null);
+    items.insert(0, record);
+    return record;
   }
 
   @override
@@ -421,6 +427,52 @@ class ProfitFakes {
   final expenses = fakeExpenseRepository();
   final sessions = fakeSessionRepository();
   final timer = MemoryShiftTimerStore();
+  final pendingStore = MemoryPendingRecordStore();
+  final sender = FakePendingRecordSender();
+}
+
+/// The offline queue's storage without the device.
+class MemoryPendingRecordStore implements PendingRecordStore {
+  final entries = <String, String>{};
+  Object? readError;
+  Object? writeError;
+  int writes = 0;
+
+  List<PendingRecord> of(String userId) =>
+      decodePendingRecords(entries[userId]);
+
+  @override
+  Future<List<PendingRecord>> read(String userId) async {
+    if (readError != null) throw readError!;
+    return decodePendingRecords(entries[userId]);
+  }
+
+  @override
+  Future<void> write(String userId, List<PendingRecord> items) async {
+    writes++;
+    if (writeError != null) throw writeError!;
+    final value = encodePendingRecords(items);
+    value == null ? entries.remove(userId) : entries[userId] = value;
+  }
+}
+
+/// Records what the queue sends. [errors]: thrown by the next sends, in order
+/// (`null` = that send succeeds); then [error] for every send.
+class FakePendingRecordSender implements PendingRecordSender {
+  final sent = <PendingRecord>[];
+  final errors = <Object?>[];
+  Object? error;
+  Completer<void>? gate;
+  int attempts = 0;
+
+  @override
+  Future<void> send(PendingRecord item) async {
+    attempts++;
+    await gate?.future;
+    final failure = errors.isNotEmpty ? errors.removeAt(0) : error;
+    if (failure != null) throw failure;
+    sent.add(item);
+  }
 }
 
 /// The Home timer store without the device: entries per user id, as encoded on disk.

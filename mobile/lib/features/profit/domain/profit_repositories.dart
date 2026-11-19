@@ -12,7 +12,9 @@ abstract interface class RecordRepository<T, I> {
 
   Future<T> get(String id);
 
-  Future<T> create(I input);
+  /// [id]: the client-generated id. Sending the same id again returns the
+  /// record stored the first time.
+  Future<T> create(I input, {String? id});
 
   Future<T> update(String id, I input);
 

@@ -98,7 +98,9 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
             notes: optionalTextOf(_notes),
           ),
         );
-    if (saved != null && mounted) closeForm(context, l10n.recordSaved);
+    if (saved != null && mounted) {
+      closeForm(context, saved.queued ? l10n.recordQueued : l10n.recordSaved);
+    }
   }
 
   Future<void> _delete() async {
@@ -174,6 +176,7 @@ class _IncomeFormState extends ConsumerState<_IncomeForm> {
         _SessionPicker(
           date: _date,
           value: _sessionId,
+          justSaved: _forSession,
           enabled: !busy,
           onChanged: (id) => setState(() => _sessionId = id),
         ),
@@ -244,10 +247,16 @@ class _SessionPicker extends ConsumerWidget {
     required this.value,
     required this.enabled,
     required this.onChanged,
+    this.justSaved,
   });
 
   final DateTime date;
   final String? value;
+
+  /// The work session the Home timer just saved. It may still wait in the
+  /// offline queue, so it is offered even when the server's list cannot load or
+  /// does not hold it yet.
+  final WorkSession? justSaved;
   final bool enabled;
   final ValueChanged<String?> onChanged;
 
@@ -259,7 +268,14 @@ class _SessionPicker extends ConsumerWidget {
 
   Widget _field(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final sessions = ref.watch(workSessionsOnDateProvider(date));
+    final justSaved = this.justSaved;
+    final extra = justSaved != null && dateOnly(justSaved.startedAt) == date
+        ? justSaved
+        : null;
+    final loaded = ref.watch(workSessionsOnDateProvider(date));
+    final sessions = loaded is AsyncError && extra != null
+        ? const AsyncData(<WorkSession>[])
+        : loaded;
     final decoration = InputDecoration(
       helperText: l10n.incomeSessionHelper,
       helperMaxLines: 2,
@@ -281,7 +297,11 @@ class _SessionPicker extends ConsumerWidget {
           ),
           child: Text(l10n.incomeSessionNone),
         );
-      case AsyncData(value: final list):
+      case AsyncData(value: final fetched):
+        final list = [
+          ...fetched,
+          if (extra != null && !fetched.any((s) => s.id == extra.id)) extra,
+        ];
         final ids = {for (final s in list) s.id};
         return DropdownButtonFormField<String?>(
           key: const Key('income.session'),

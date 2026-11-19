@@ -106,6 +106,24 @@ test/
 - Income may link to a work session that started on the same date; a linked record sends `working_hours: null`
   (the backend counts the session's hours instead).
 
+## Offline queue (new records only)
+
+- Every create carries an `id` made on the phone (`core/utils/uuid.dart`). The backend stores the record under
+  that id, and the same id again returns the stored record (200), so a resend after a lost response is safe.
+- A create that fails with no connection (or 502/503/504) goes to `pendingSyncProvider`
+  (`features/profit/presentation/pending_sync_controller.dart`), stored per account with `shared_preferences`
+  (`pending_records.<userId>`). The form closes with "บันทึกไว้ในเครื่องแล้ว". A record linked to a work session
+  that is still queued is queued behind it without trying the server.
+- The queue is sent in order, one at a time: when the app starts or comes back to the foreground, after any
+  online save, on pull-to-refresh, from "ส่งตอนนี้", and on a retry timer (15 s, 30 s, 1 min, then every 2 min)
+  while records wait and the app is open. Nothing is sent while the app is closed.
+- A temporary failure (no connection, 429, 5xx, expired session) stops the run and keeps everything. Any other
+  4xx marks the record "ส่งไม่สำเร็จ" with the reason; records linked to a refused session are marked too. The
+  rider can delete queued records (a session takes its linked records along); queued records cannot be edited.
+- Queued records are not in the lists or the figures (the server computes those): Home and TrueProfit show
+  "รอส่ง N รายการ · ตัวเลขยังไม่รวมรายการเหล่านี้". Logout keeps the queue for the next login of the same account
+  and warns first; deleting the account drops it. Edits and deletes still need a connection.
+
 ## Session and tokens
 
 - Access token (15 min) in memory only; refresh token (30 days, rotated) in Android Keystore-backed secure

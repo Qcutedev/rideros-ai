@@ -31,6 +31,12 @@ async def get_owned[T: Owned](
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
+async def get_by_id[T: Owned](session: AsyncSession, model: type[T], row_id: uuid.UUID) -> T | None:
+    """Any user's row. Only for checking a client-generated id on create; never return it as data."""
+    stmt = select(model).where(model.id == row_id)
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
 async def delete_owned(
     session: AsyncSession, model: type[Owned], user_id: uuid.UUID, row_id: uuid.UUID
 ) -> bool:

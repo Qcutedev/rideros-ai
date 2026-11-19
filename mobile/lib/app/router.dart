@@ -20,6 +20,7 @@ import '../features/profit/domain/profit_records.dart';
 import '../features/profit/domain/shift_timer.dart';
 import '../features/profit/presentation/expense_form_screen.dart';
 import '../features/profit/presentation/income_form_screen.dart';
+import '../features/profit/presentation/pending_records_screen.dart';
 import '../features/profit/presentation/records_screen.dart';
 import '../features/profit/presentation/true_profit_screen.dart';
 import '../features/profit/presentation/work_session_form_screen.dart';
@@ -269,6 +270,11 @@ List<GoRoute> formRoutes(GlobalKey<NavigatorState> root) => [
     path: Routes.workSessionEditPattern,
     builder: (context, state) =>
         WorkSessionFormScreen(id: state.pathParameters['id']),
+  ),
+  GoRoute(
+    parentNavigatorKey: root,
+    path: Routes.pendingRecords,
+    builder: (context, state) => const PendingRecordsScreen(),
   ),
 ];
 

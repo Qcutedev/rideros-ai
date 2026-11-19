@@ -19,11 +19,18 @@ RecordDate = Annotated[date, Field(ge=date(2000, 1, 1), le=date(2100, 12, 31))]
 Notes = Annotated[str, StringConstraints(strip_whitespace=True, max_length=NOTES_MAX_LENGTH)]
 SourceLabel = Annotated[str, StringConstraints(strip_whitespace=True, max_length=SOURCE_LABEL_MAX_LENGTH)]
 ExpenseCategory = Literal["fuel", "maintenance", "depreciation", "other"]
+# Optional on create: the app picks the id so it can resend a create whose response it never got
+# (offline queue). The same id again from the same user returns the stored record with 200.
+ClientId = Annotated[
+    uuid.UUID | None,
+    Field(description="Client-generated id. Resending it returns the record stored earlier (200)"),
+]
 
 # ---- work sessions ----
 
 
 class WorkSessionCreate(StrictModel):
+    id: ClientId = None
     started_at: AwareDatetime
     ended_at: AwareDatetime
     distance_km: DistanceKm | None = None
@@ -59,6 +66,7 @@ class WorkSessionOut(BaseModel):
 
 
 class IncomeCreate(StrictModel):
+    id: ClientId = None
     occurred_on: RecordDate
     amount: Money
     work_session_id: uuid.UUID | None = None
@@ -105,6 +113,7 @@ class IncomeOut(BaseModel):
 
 
 class ExpenseCreate(StrictModel):
+    id: ClientId = None
     occurred_on: RecordDate
     category: ExpenseCategory
     amount: Money

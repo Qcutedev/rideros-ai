@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,8 +15,10 @@ import '../../auth/domain/session_state.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../../profit/data/profit_repositories_impl.dart';
 import '../../profit/domain/profit_summary.dart';
+import '../../profit/presentation/pending_sync_controller.dart';
 import '../../profit/presentation/profit_labels.dart';
 import '../../profit/presentation/profit_providers.dart';
+import '../../profit/presentation/widgets/pending_sync_banner.dart';
 import '../../profit/presentation/widgets/profit_metrics_view.dart';
 import 'widgets/daily_goal_panel.dart';
 import 'widgets/rider_banner.dart';
@@ -74,7 +78,10 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(homeSummaryProvider.future),
+        onRefresh: () {
+          unawaited(ref.read(pendingSyncProvider.notifier).flushIfWaiting());
+          return ref.refresh(homeSummaryProvider.future);
+        },
         child: PageColumn(
           child: ListView(
             padding: AppSpacing.screen,
@@ -83,6 +90,7 @@ class HomeScreen extends ConsumerWidget {
                 RevealIn(child: RiderGreetingBanner(name: user.displayName)),
                 const SizedBox(height: AppSpacing.xl),
               ],
+              const PendingSyncBanner(),
               // Outside the summary: the timer works while figures load or fail.
               const RevealIn(child: ShiftTimerCard()),
               const SizedBox(height: AppSpacing.cardGap),
