@@ -49,6 +49,9 @@ abstract final class Routes {
   static const workSessionNew = '/work-sessions/new';
   static const workSessionEditPattern = '/work-sessions/:id';
 
+  /// Records saved without a connection that wait to be sent.
+  static const pendingRecords = '/pending-records';
+
   static String incomeEdit(String id) => '/income/$id';
   static String expenseEdit(String id) => '/expenses/$id';
   static String workSessionEdit(String id) => '/work-sessions/$id';

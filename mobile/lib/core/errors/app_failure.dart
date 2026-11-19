@@ -54,8 +54,9 @@ final class ApiFailure extends AppFailure {
   /// 422 details keyed by the last element of `loc` (e.g. `email`).
   final Map<String, String> fieldErrors;
 
-  /// The envelope's `details` objects as sent, e.g. `[{"incident_id": "…"}]`
-  /// of `already_reported`.
+  /// The envelope's `details` objects as sent, e.g.
+  /// `[{"loc": ["body", "work_session_id"], "msg": "not found"}]` of
+  /// `invalid_work_session`.
   final List<Map<String, Object?>> details;
 
   /// First string value of [key] among [details].
@@ -99,6 +100,7 @@ abstract final class ApiErrorCode {
   static const invalidTimeRange = 'invalid_time_range';
   static const workSessionTooLong = 'work_session_too_long';
   static const invalidWorkSession = 'invalid_work_session';
+  static const duplicateId = 'duplicate_id';
 
   // Shift simulator.
   static const invalidShiftLength = 'invalid_shift_length';

@@ -44,7 +44,7 @@ their work falls into, whether earnings are trending up or down, and what a plan
 
 | The rider wants to… | What the app does | Analytics |
 |---|---|---|
-| **record work with little effort** | Start/stop shift timer on Home: stopping fills in the work session, then opens the income form linked to it (skippable). Income, expense and session forms; a daily net-profit goal with a progress ring. | — |
+| **record work with little effort** | Start/stop shift timer on Home: stopping fills in the work session, then opens the income form linked to it (skippable). Income, expense and session forms; a daily net-profit goal with a progress ring. **Works without signal**: new records wait on the phone ("รอส่ง N รายการ") and are sent in order when the connection is back; a resend after a lost response never creates a duplicate. | — |
 | **understand their own work** | TrueProfit: real net profit after fuel and wear, profit per hour, day/week/month totals. | K-Means **work patterns** (when, how long), shown only when they pass 3 statistical gates. |
 | **analyze their income** | A **profit heat map** of net profit per hour by weekday × 2-hour slot, with the 3 best slots; a weekly trend chart. | Heat map from work sessions; moving average + linear trend, shown only when the slope is significant (p < 0.05). |
 | **decide better** | **Shift Simulator**: plan shifts as scenarios and compare estimated revenue, cost and profit before going out. | Deterministic formulas, or "from my history": the rider's own past sessions (P25–P75 range). |
@@ -204,8 +204,8 @@ All settings are environment variables. [`.env.example`](.env.example) lists the
 
 | Suite | Tests | Gate |
 |---|---|---|
-| Backend (pytest, real PostgreSQL + Valkey) | 382 | coverage of `app/modules` + `app/core`: **98.65%** (gate 96%) |
-| Mobile (unit + widget) | 462 | coverage of `lib/` without generated code: **97.18%** (gate 94.7%) |
+| Backend (pytest, real PostgreSQL + Valkey) | 402 | coverage of `app/modules` + `app/core`: **98.76%** (gate 96%) |
+| Mobile (unit + widget) | 491 | coverage of `lib/` without generated code: **97.08%** (gate 94.7%) |
 | E2E (`flutter drive` on the emulator) | 1 journey | checks 17 database values through SQL, then deletes the test account |
 
 The tests include cross-user access checks on every endpoint, token expiry, reuse and forgery, a check that

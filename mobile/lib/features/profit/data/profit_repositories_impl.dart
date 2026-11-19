@@ -76,10 +76,10 @@ class ApiRecordRepository<T, I> implements RecordRepository<T, I> {
   });
 
   @override
-  Future<T> create(I input) => guardApi(() async {
+  Future<T> create(I input, {String? id}) => guardApi(() async {
     final response = await _dio.post<Map<String, dynamic>>(
       path,
-      data: toJson(input),
+      data: {...toJson(input), 'id': ?id},
     );
     return fromJson(response.data!);
   });

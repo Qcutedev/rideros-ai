@@ -9,7 +9,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 
 - Built **RiderOS AI**, a work-analytics app for food-delivery riders: Grab and LINE MAN handle orders and
   delivery, RiderOS tells riders what their own work earns and when it pays best. Flutter (Android) client,
-  FastAPI + PostgreSQL modular-monolith backend; 844 automated tests and CI on GitHub Actions.
+  FastAPI + PostgreSQL modular-monolith backend; 893 automated tests and CI on GitHub Actions.
 - Turned the rider's own records into decisions: net profit after fuel and wear, a profit-per-hour heat map by
   weekday × 2-hour slot (money placed through work sessions), a significance-gated trend (OLS, p < 0.05), and a
   Shift Simulator that estimates a planned shift from the rider's history (P25–P75 range).
@@ -29,7 +29,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 
 - พัฒนา **RiderOS AI** แอปวิเคราะห์การทำงานของไรเดอร์ส่งอาหาร: Grab/LINE MAN ช่วยรับงานและส่งอาหาร ส่วน RiderOS
   ช่วยให้ไรเดอร์เข้าใจงานของตัวเอง วิเคราะห์รายได้ และตัดสินใจได้ดีขึ้น · Flutter (Android) + FastAPI + PostgreSQL ·
-  มี Test อัตโนมัติ 844 รายการ + CI บน GitHub Actions
+  มี Test อัตโนมัติ 893 รายการ + CI บน GitHub Actions
 - เปลี่ยนข้อมูลที่ไรเดอร์บันทึกเองเป็นข้อมูลช่วยตัดสินใจ: กำไรสุทธิหลังหักค่าน้ำมันและค่าเสื่อม, Heatmap กำไร/ชม.
   ตามวัน × ช่วง 2 ชม., แนวโน้มที่แสดงเฉพาะเมื่อมีนัยสำคัญ (p < 0.05) และ Shift Simulator ที่ประมาณจากประวัติจริง
 - ออกแบบ K-Means "รูปแบบการทำงาน" ที่ผ่านด่านสถิติ 3 ชั้น ลดกลุ่มหลอกเหลือ 1.7% และตรวจพบกลุ่มจริง 99.2% (Benchmark ข้อมูลสังเคราะห์)
@@ -58,7 +58,7 @@ column). Do not round them up and do not add numbers that are not in a report.
 
 | Number | Source |
 |---|---|
-| 844 tests (backend 382, mobile 462) | `scripts/regression.ps1` run 2026-11-19 (HANDOFF §4.21) |
+| 893 tests (backend 402, mobile 491) | `scripts/regression.ps1` run 2026-11-19 (HANDOFF §4.23) |
 | 1.7% / 99.2% | `backend/reports/work_patterns_benchmark.json`, HANDOFF §4.12 |
 | p95 and 5,600 requests (9,600 minus the removed Pickup and Road endpoints) | `docs/PERFORMANCE.md`, `backend/reports/perf_p6b.json` |
 | 0 known vulnerabilities | `docs/SECURITY_AUDIT.md` |

@@ -30,6 +30,7 @@ String _apiMessage(AppLocalizations l10n, ApiFailure failure) =>
       ApiErrorCode.invalidTimeRange => l10n.failureInvalidTimeRange,
       ApiErrorCode.workSessionTooLong => l10n.failureWorkSessionTooLong,
       ApiErrorCode.invalidWorkSession => l10n.failureInvalidWorkSession,
+      ApiErrorCode.duplicateId => l10n.failureDuplicateId,
       ApiErrorCode.invalidShiftLength => l10n.failureInvalidShiftLength,
       ApiErrorCode.missingAssumption => l10n.failureMissingAssumption,
       ApiErrorCode.insufficientHistory => l10n.failureInsufficientHistory,

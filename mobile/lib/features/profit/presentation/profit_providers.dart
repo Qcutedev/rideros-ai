@@ -1,17 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_failure.dart';
 import '../../../core/network/paged_result.dart';
 import '../../../core/presentation/paged_list.dart';
 import '../../../core/presentation/submit_notifier.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/utils/date_json.dart';
+import '../../../core/utils/uuid.dart';
 import '../data/profit_repositories_impl.dart';
+import '../domain/pending_record.dart';
 import '../domain/profit_heatmap.dart';
 import '../domain/profit_period.dart';
 import '../domain/profit_records.dart';
 import '../domain/profit_repositories.dart';
 import '../domain/profit_summary.dart';
 import '../domain/work_patterns.dart';
+import 'pending_sync_controller.dart';
 
 export '../../../core/presentation/paged_list.dart';
 
@@ -188,24 +194,74 @@ final workSessionsOnDateProvider = FutureProvider.autoDispose
 
 // ---- forms ----
 
+/// How a new record of one type goes into the offline queue and comes back out
+/// as the record the form returns.
+class QueuedRecordCodec<T, I> {
+  const QueuedRecordCodec({
+    required this.kind,
+    required this.encode,
+    required this.decode,
+  });
+
+  final PendingKind kind;
+
+  /// The `POST` body (same as the repository sends).
+  final Map<String, Object?> Function(I input) encode;
+  final T Function(Map<String, dynamic> json) decode;
+}
+
+/// A saved record. [queued]: kept on the device for the offline queue (not on
+/// the server yet), so the figures on screen do not include it.
+typedef SavedRecord<T> = ({T record, bool queued});
+
 /// Create/update/delete of one record type. Success bumps [profitDataRevisionProvider].
 class RecordFormController<T, I> extends SubmitNotifier {
-  RecordFormController(this._repository);
+  RecordFormController(this._repository, this._codec);
 
   final Provider<RecordRepository<T, I>> _repository;
+  final QueuedRecordCodec<T, I> _codec;
 
   /// Creates when [id] is `null`, otherwise updates. Returns the stored
   /// record, or `null` when the save failed (the error is in [state]).
-  Future<T?> save(String? id, I input) async {
-    T? saved;
+  Future<SavedRecord<T>?> save(String? id, I input) async {
+    SavedRecord<T>? saved;
     final ok = await run(() async {
-      final repository = ref.read(_repository);
-      saved = id == null
-          ? await repository.create(input)
-          : await repository.update(id, input);
-      ref.read(profitDataRevisionProvider.notifier).bump();
+      final result = id == null
+          ? await _create(input)
+          : (
+              record: await ref.read(_repository).update(id, input),
+              queued: false,
+            );
+      saved = result;
+      // A queued record is not on the server yet: reloading changes nothing.
+      if (!result.queued) ref.read(profitDataRevisionProvider.notifier).bump();
     });
     return ok ? saved : null;
+  }
+
+  /// Sent at once when there is a connection; without one the record waits in
+  /// the offline queue under the same client id.
+  Future<SavedRecord<T>> _create(I input) async {
+    final queue = ref.read(pendingSyncProvider.notifier);
+    final item = PendingRecord(
+      id: ref.read(uuidProvider)(),
+      kind: _codec.kind,
+      body: _codec.encode(input),
+      queuedAt: ref.read(clockProvider)(),
+    );
+    final linked = item.workSessionId;
+    // Its work session still waits in the queue: the server does not know it yet.
+    if (linked == null || !queue.isQueuedSession(linked)) {
+      try {
+        final record = await ref.read(_repository).create(input, id: item.id);
+        unawaited(queue.flushIfWaiting()); // the connection works again
+        return (record: record, queued: false);
+      } on AppFailure catch (failure) {
+        if (!isOfflineFailure(failure)) rethrow;
+      }
+    }
+    await queue.enqueue(item);
+    return (record: _codec.decode(item.asStoredJson), queued: true);
   }
 
   Future<bool> delete(String id) => run(() async {
@@ -218,16 +274,43 @@ final incomeFormProvider =
     NotifierProvider.autoDispose<
       RecordFormController<Income, IncomeInput>,
       AsyncValue<void>
-    >(() => RecordFormController(incomeRepositoryProvider));
+    >(
+      () => RecordFormController(
+        incomeRepositoryProvider,
+        QueuedRecordCodec(
+          kind: PendingKind.income,
+          encode: (input) => input.toJson(),
+          decode: Income.fromJson,
+        ),
+      ),
+    );
 
 final expenseFormProvider =
     NotifierProvider.autoDispose<
       RecordFormController<Expense, ExpenseInput>,
       AsyncValue<void>
-    >(() => RecordFormController(expenseRepositoryProvider));
+    >(
+      () => RecordFormController(
+        expenseRepositoryProvider,
+        QueuedRecordCodec(
+          kind: PendingKind.expense,
+          encode: (input) => input.toJson(),
+          decode: Expense.fromJson,
+        ),
+      ),
+    );
 
 final workSessionFormProvider =
     NotifierProvider.autoDispose<
       RecordFormController<WorkSession, WorkSessionInput>,
       AsyncValue<void>
-    >(() => RecordFormController(workSessionRepositoryProvider));
+    >(
+      () => RecordFormController(
+        workSessionRepositoryProvider,
+        QueuedRecordCodec(
+          kind: PendingKind.workSession,
+          encode: (input) => input.toJson(),
+          decode: WorkSession.fromJson,
+        ),
+      ),
+    );

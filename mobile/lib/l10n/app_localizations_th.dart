@@ -746,6 +746,71 @@ class AppLocalizationsTh extends AppLocalizations {
   String get recordSaved => 'บันทึกแล้ว';
 
   @override
+  String get recordQueued =>
+      'ไม่มีเน็ต บันทึกไว้ในเครื่องแล้ว จะส่งให้อัตโนมัติเมื่อออนไลน์';
+
+  @override
+  String pendingBannerWaiting(int count) {
+    return 'รอส่ง $count รายการ · ตัวเลขยังไม่รวมรายการเหล่านี้';
+  }
+
+  @override
+  String pendingBannerFailed(int count) {
+    return 'ส่งไม่สำเร็จ $count รายการ · แตะเพื่อดู';
+  }
+
+  @override
+  String get pendingTitle => 'รายการรอส่ง';
+
+  @override
+  String get pendingIntro =>
+      'รายการที่บันทึกตอนไม่มีเน็ตเก็บอยู่ในเครื่องนี้ แอปจะส่งให้เองเมื่อออนไลน์ ระหว่างนี้ตัวเลขกำไรยังไม่รวมรายการเหล่านี้';
+
+  @override
+  String get pendingSendNow => 'ส่งตอนนี้';
+
+  @override
+  String get pendingSending => 'กำลังส่ง…';
+
+  @override
+  String get pendingEmptyTitle => 'ส่งครบแล้ว';
+
+  @override
+  String get pendingEmptyMessage => 'ไม่มีรายการค้างส่ง';
+
+  @override
+  String get pendingStatusWaiting => 'รอส่ง';
+
+  @override
+  String pendingStatusFailed(String reason) {
+    return 'ส่งไม่สำเร็จ: $reason';
+  }
+
+  @override
+  String get pendingFailedHint =>
+      'เซิร์ฟเวอร์ไม่รับรายการที่ส่งไม่สำเร็จ ส่งซ้ำก็ไม่ผ่าน ให้ลบแล้วบันทึกใหม่ให้ถูกต้อง';
+
+  @override
+  String get pendingDeleteTitle => 'ลบรายการที่ยังไม่ได้ส่ง?';
+
+  @override
+  String get pendingDeleteMessage =>
+      'รายการนี้ยังไม่ถึงเซิร์ฟเวอร์ ลบแล้วกู้คืนไม่ได้';
+
+  @override
+  String pendingDeleteLinkedMessage(int count) {
+    return 'รายการนี้ยังไม่ถึงเซิร์ฟเวอร์ ลบแล้วกู้คืนไม่ได้ และรายการที่ผูกกับช่วงทำงานนี้อีก $count รายการจะถูกลบด้วย';
+  }
+
+  @override
+  String get pendingLogoutTitle => 'ยังมีรายการที่ยังไม่ได้ส่ง';
+
+  @override
+  String pendingLogoutMessage(int count) {
+    return '$count รายการเก็บอยู่ในเครื่องนี้ และจะส่งให้เมื่อคุณเข้าสู่ระบบบัญชีนี้อีกครั้งบนเครื่องนี้';
+  }
+
+  @override
   String get recordDelete => 'ลบ';
 
   @override
@@ -1069,6 +1134,12 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get failureInvalidWorkSession =>
       'ไม่พบช่วงทำงานที่เลือก (อาจถูกลบไปแล้ว)';
+
+  @override
+  String get failureLinkedSessionFailed => 'ช่วงทำงานที่ผูกไว้ส่งไม่สำเร็จ';
+
+  @override
+  String get failureDuplicateId => 'รหัสรายการซ้ำกับรายการอื่น';
 
   @override
   String get badgeEstimate => 'ค่าประมาณ';

@@ -32,7 +32,7 @@ off in the test settings, except in `tests/api/test_rate_limits.py`.
 docker compose up -d db
 cd backend
 python -m uv sync
-python -m uv run pytest --cov=app/modules     # 382 tests, ~2 min
+python -m uv run pytest --cov=app/modules     # 402 tests, ~2 min
 python -m uv run ruff check . ; python -m uv run ruff format --check .
 ```
 
@@ -88,6 +88,7 @@ Errors always use `{"error": {"code", "message", "details"}}`. Every response ca
 | `GET/POST /work-sessions`, `GET/PATCH/DELETE /work-sessions/{id}` | Aware datetimes, stored in UTC. 400 `invalid_time_range` / `work_session_too_long` (> 24 h), 409 `work_session_overlap` |
 | `GET/POST /income`, `GET/PATCH/DELETE /income/{id}` | Optional `work_session_id` (own sessions only, else 400 `invalid_work_session`) |
 | `GET/POST /expenses`, `GET/PATCH/DELETE /expenses/{id}` | `category`: fuel, maintenance, depreciation, other |
+| Client ids on the three `POST`s above | Optional `id` (UUID) picked by the app, so its offline queue can resend a create whose response never arrived. The same `id` again from the same user returns the stored record unchanged with **200** (the body is not compared); another user's `id` is 409 `duplicate_id`. Without `id` the database generates one |
 | `GET /profit/summary?period=day\|week\|month&date=` | One period containing `date` (default: today in the rider's zone) |
 | `GET /profit/trends?granularity=day\|week\|month&from=&to=` | One point per bucket, empty ones included; at most 366 points (400 `range_too_large`). Each point has `net_profit_moving_average` (trailing mean: 7 days / 4 weeks / 3 months) and `net_profit_trend` (least-squares line, only when the slope is significant at p < 0.05); `analysis` holds `status` (`insufficient_data` below 4 buckets with records), `direction` (`up`/`down`/`flat`), `slope_per_bucket`, `p_value` |
 | `GET /profit/patterns` | K-Means work patterns of the last 180 days: `status` `ok` / `insufficient_data` (< 30 sessions) / `no_clear_pattern`; groups with time-of-day, length and day-type codes plus an estimated net profit/hour from linked records (method: `app/modules/profit/patterns.py`, benchmark: `scripts/evaluate_work_patterns.py` → `reports/work_patterns_benchmark.json`) |

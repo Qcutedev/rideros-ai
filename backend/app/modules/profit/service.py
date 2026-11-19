@@ -66,6 +66,31 @@ def _overlap_error() -> ConflictError:
     return ConflictError("Overlaps another work session", code="work_session_overlap")
 
 
+def _duplicate_id_error() -> ConflictError:
+    return ConflictError("The id is already in use", code="duplicate_id")
+
+
+type Stored[T] = tuple[T, bool]  # (record, False when a resent client id returned an earlier row)
+
+
+async def _resent[T: (WorkSession, IncomeRecord, ExpenseRecord)](
+    session: AsyncSession, model: type[T], user_id: uuid.UUID, row_id: uuid.UUID | None
+) -> T | None:
+    """The caller's row created earlier with this client id (the app resent a create whose response
+    it never got), or None when the id is free. Another user's row with the id is a 409."""
+    if row_id is None:
+        return None
+    row = await repo.get_by_id(session, model, row_id)
+    if row is not None and row.user_id != user_id:
+        raise _duplicate_id_error()
+    return row
+
+
+def _new_row_fields(body: WorkSessionCreate | IncomeCreate | ExpenseCreate) -> dict[str, object]:
+    # Without a client id the database generates one; an explicit None would insert NULL.
+    return body.model_dump(exclude={"id"} if body.id is None else None)
+
+
 def _check_date_range(date_from: date | None, date_to: date | None) -> None:
     if date_from is not None and date_to is not None and date_from > date_to:
         raise InvalidDateRangeError("`from` must be on or before `to`")
@@ -93,15 +118,24 @@ async def _commit_session_write(session: AsyncSession) -> None:
 
 async def create_work_session(
     session: AsyncSession, user_id: uuid.UUID, body: WorkSessionCreate
-) -> WorkSessionOut:
+) -> Stored[WorkSessionOut]:
+    # Before the overlap check: a resent session would overlap itself.
+    if (earlier := await _resent(session, WorkSession, user_id, body.id)) is not None:
+        return WorkSessionOut.model_validate(earlier), False
     _check_span(body.started_at, body.ended_at)
     if await repo.has_overlapping_session(session, user_id, body.started_at, body.ended_at):
         raise _overlap_error()
-    row = WorkSession(user_id=user_id, **body.model_dump())
+    row = WorkSession(user_id=user_id, **_new_row_fields(body))
     session.add(row)
-    await _commit_session_write(session)
+    try:
+        await _commit_session_write(session)  # rolls back on failure
+    except ConflictError, IntegrityError:
+        # The same create arrived twice at once: the second insert hits the first one's id or span.
+        if (earlier := await _resent(session, WorkSession, user_id, body.id)) is not None:
+            return WorkSessionOut.model_validate(earlier), False
+        raise
     await session.refresh(row)
-    return WorkSessionOut.model_validate(row)
+    return WorkSessionOut.model_validate(row), True
 
 
 async def _get_work_session(session: AsyncSession, user_id: uuid.UUID, row_id: uuid.UUID) -> WorkSession:
@@ -208,11 +242,27 @@ def _next_record_cursor(rows: list, limit: int) -> tuple[list, str | None]:
     return rows, encode_cursor([last.occurred_on.isoformat(), last.created_at.isoformat(), str(last.id)])
 
 
-async def create_income(session: AsyncSession, user_id: uuid.UUID, body: IncomeCreate) -> IncomeOut:
+async def _create_record[T: (IncomeRecord, ExpenseRecord)](
+    session: AsyncSession, model: type[T], user_id: uuid.UUID, body: IncomeCreate | ExpenseCreate
+) -> Stored[T]:
+    if (earlier := await _resent(session, model, user_id, body.id)) is not None:
+        return earlier, False
     await _check_work_session_link(session, user_id, body.work_session_id)
-    row = await repo.add(session, IncomeRecord(user_id=user_id, **body.model_dump()))
-    await session.commit()
-    return IncomeOut.model_validate(row)
+    try:
+        row = await repo.add(session, model(user_id=user_id, **_new_row_fields(body)))
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        # The same create arrived twice at once: the second insert hits the first one's id.
+        if (earlier := await _resent(session, model, user_id, body.id)) is not None:
+            return earlier, False
+        raise
+    return row, True
+
+
+async def create_income(session: AsyncSession, user_id: uuid.UUID, body: IncomeCreate) -> Stored[IncomeOut]:
+    row, created = await _create_record(session, IncomeRecord, user_id, body)
+    return IncomeOut.model_validate(row), created
 
 
 async def _get_income(session: AsyncSession, user_id: uuid.UUID, row_id: uuid.UUID) -> IncomeRecord:
@@ -270,11 +320,11 @@ async def list_income(
     return Page[IncomeOut](items=[IncomeOut.model_validate(r) for r in rows], next_cursor=next_cursor)
 
 
-async def create_expense(session: AsyncSession, user_id: uuid.UUID, body: ExpenseCreate) -> ExpenseOut:
-    await _check_work_session_link(session, user_id, body.work_session_id)
-    row = await repo.add(session, ExpenseRecord(user_id=user_id, **body.model_dump()))
-    await session.commit()
-    return ExpenseOut.model_validate(row)
+async def create_expense(
+    session: AsyncSession, user_id: uuid.UUID, body: ExpenseCreate
+) -> Stored[ExpenseOut]:
+    row, created = await _create_record(session, ExpenseRecord, user_id, body)
+    return ExpenseOut.model_validate(row), created
 
 
 async def _get_expense(session: AsyncSession, user_id: uuid.UUID, row_id: uuid.UUID) -> ExpenseRecord:

@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/domain/session_state.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../../profit/presentation/pending_sync_controller.dart';
 import '../domain/rider_profile.dart';
 import 'profile_providers.dart';
 import 'vehicle_type_label.dart';
@@ -29,9 +30,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _loggingOut = false;
 
   Future<void> _logout() async {
+    final pending = await ref.read(pendingSyncProvider.notifier).loadedCount();
+    if (!mounted) return;
+    if (pending > 0 && !await _confirmLogoutWithPending(pending)) return;
+    if (!mounted) return;
     setState(() => _loggingOut = true);
     // Never fails: the local session ends even when the server is unreachable.
     await ref.read(sessionControllerProvider.notifier).logout();
+  }
+
+  /// The queue stays on this phone for this account (see `PendingRecordStore`).
+  Future<bool> _confirmLogoutWithPending(int count) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.cloud_upload_outlined),
+        title: Text(l10n.pendingLogoutTitle),
+        content: Text(l10n.pendingLogoutMessage(count)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            key: const Key('logout.pendingConfirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.logout),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 
   @override

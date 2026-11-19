@@ -10,6 +10,7 @@ import 'package:rideros_ai/app/theme/app_theme.dart';
 import 'package:rideros_ai/core/utils/clock.dart';
 import 'package:rideros_ai/features/auth/data/auth_repository_impl.dart';
 import 'package:rideros_ai/features/profile/data/rider_profile_repository_impl.dart';
+import 'package:rideros_ai/features/profit/data/pending_record_store.dart';
 import 'package:rideros_ai/features/profit/data/profit_repositories_impl.dart';
 import 'package:rideros_ai/features/profit/data/shift_timer_store.dart';
 import 'package:rideros_ai/features/shifts/data/shift_repository_impl.dart';
@@ -39,6 +40,8 @@ List<Override> fakeRepositories(
     expenseRepositoryProvider.overrideWithValue(p.expenses),
     workSessionRepositoryProvider.overrideWithValue(p.sessions),
     shiftTimerStoreProvider.overrideWithValue(p.timer),
+    pendingRecordStoreProvider.overrideWithValue(p.pendingStore),
+    pendingRecordSenderProvider.overrideWithValue(p.sender),
     clockProvider.overrideWithValue(testNow),
   ];
 }
@@ -57,6 +60,7 @@ const allRoutePatterns = [
   Routes.expenseEditPattern,
   Routes.workSessionNew,
   Routes.workSessionEditPattern,
+  Routes.pendingRecords,
   Routes.shifts,
   Routes.shiftDetailPattern,
   Routes.shiftCompare,
