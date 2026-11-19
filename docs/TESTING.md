@@ -47,17 +47,18 @@ cd "C:\dev\RiderOS AI"
 - ML และ CV ไม่มี Coverage gate: Test ส่วนใหญ่ตรวจ Pipeline กับข้อมูล/โมเดลจริง และบางตัว Skip เมื่อไม่มีไฟล์ (§2.2–2.3) ตัวเลข Coverage จึงขึ้นกับเครื่องที่รัน
 - ขึ้น Gate ได้เมื่อ Coverage สูงขึ้น · ห้ามลด Gate เพื่อให้ผ่าน
 
-### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `chore/remove-pickup` ต่อจาก `3f71bf2`)
+### 1.3 ผลล่าสุด (2026-11-18, Windows 11 · Docker Desktop จำกัด WSL 4 GB ด้วย `.wslconfig` · Branch `feat/timer-income-chain` ต่อจาก `1665855`)
 
 | ชุด | ผล | เวลา |
 |---|---|---|
-| Backend | ruff สะอาด (102 ไฟล์) · **463 passed** · Coverage 98.23% (Gate 96%) | ~148 s |
-| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~161 s |
-| CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~24 s |
-| Mobile | `flutter analyze` No issues · `dart format` 183 ไฟล์ไม่เปลี่ยน · **522 passed** · Coverage 96.86% (7,321/7,558, Gate 94.7%) | ~166 s |
-| รวม | **REGRESSION PASSED: 14 step(s)** | ~8.5 นาที |
+| Backend | ruff สะอาด (102 ไฟล์) · **463 passed** · Coverage 98.23% (Gate 96%) | ~173 s |
+| ML | ruff สะอาด (45 ไฟล์) · **134 passed** (มี Dataset + Artifact ในเครื่อง จึงไม่ Skip) | ~156 s |
+| CV | ruff สะอาด (21 ไฟล์) · **38 passed** · Warning 1 ตัวจาก Library (`fastapi.testclient` → Starlette เตือนเรื่อง `httpx`) | ~22 s |
+| Mobile | `flutter analyze` No issues · `dart format` 183 ไฟล์ไม่เปลี่ยน · **526 passed** · Coverage 96.86% (7,339/7,577, Gate 94.7%) | ~137 s |
+| รวม | **REGRESSION PASSED: 14 step(s)** | ~8 นาที |
 
-- Test ลดลงเพราะเอา Pickup ออก (HANDOFF §4.20): Backend 523 → 463, Mobile 591 → 522
+- Mobile +4 จากตัวจับเวลา → ฟอร์มรายได้ (HANDOFF §4.20 PR 2)
+- รอบก่อน (2026-11-18, Branch `chore/remove-pickup`): Backend 463 · ML 134 · CV 38 · Mobile 522 (Coverage 96.86%, 7,321/7,558) · ~8.5 นาที · Test ลดลงจากรอบก่อนนั้นเพราะเอา Pickup ออก (Backend 523 → 463, Mobile 591 → 522)
 - รอบก่อน (2026-11-18, Branch `feat/profit-heatmap`): Backend 523 · ML 134 · CV 38 · Mobile 591 (Coverage 97.09%) · ~8 นาที
 - รอบก่อนนั้น (2026-11-18, Commit `52d8ab3`): Backend 504 · ML 134 · CV 38 · Mobile 571 (Coverage 96.95%) · ~9 นาที
 - รอบก่อนนั้น (2026-11-14): Backend 478 · ML 134 · CV 38 · Mobile 495 (Coverage 96.68%) · ~4.5 นาที · รอบ 2026-11-18 นานขึ้นเพราะ Test เพิ่มและเครื่องเปิด VS Code + Docker ไว้ด้วย

@@ -13,13 +13,15 @@ import '../../../../core/widgets/app_surfaces.dart';
 import '../../../../core/widgets/form_widgets.dart';
 import '../../../../core/widgets/motion.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profit/domain/profit_records.dart';
 import '../../../profit/domain/shift_timer.dart';
 import '../../../profit/presentation/profit_labels.dart';
 import '../../../profit/presentation/shift_timer_controller.dart';
 
 /// Home "start work" card. Start → a live clock; stop → the work session form
 /// opens with the start and end filled in. The work session exists only once
-/// the rider saves that form; until then the timer lives on this device.
+/// the rider saves that form; until then the timer lives on this device. After
+/// that save the income form opens, linked to the new session (skippable).
 class ShiftTimerCard extends ConsumerStatefulWidget {
   const ShiftTimerCard({super.key});
 
@@ -90,8 +92,13 @@ class _ShiftTimerCardState extends ConsumerState<ShiftTimerCard> {
       );
       if (proceed != true || !mounted) return;
     }
-    final saved = await context.push<bool>(Routes.workSessionNew, extra: draft);
-    if (saved == true) await _timer.reset();
+    final saved = await context.push<WorkSession>(
+      Routes.workSessionNew,
+      extra: draft,
+    );
+    if (saved == null) return;
+    await _timer.reset();
+    if (mounted) await context.push(Routes.incomeNew, extra: saved);
   }
 
   Future<void> _discard() async {

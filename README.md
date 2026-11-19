@@ -41,7 +41,7 @@ An order-to-pickup model I also trained is kept as an offline case study in `ml/
 
 | Module | What it does | AI / analytics |
 |---|---|---|
-| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. Set a daily net-profit goal (progress ring on Home) and time a shift with a start/stop button that fills in the work session. | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. A **profit heat map** of net profit per hour by weekday × 2-hour slot, with the 3 best slots. |
+| **TrueProfit** | Log income, expenses and work sessions. See real net profit, profit per hour, and day/week/month totals. Set a daily net-profit goal (progress ring on Home) and time a shift with a start/stop button that fills in the work session, then goes straight to the income form linked to that session (skippable). | Moving average + linear trend, shown only when the slope is significant (p < 0.05). K-Means **work patterns**, shown only when they pass 3 statistical gates. A **profit heat map** of net profit per hour by weekday × 2-hour slot, with the 3 best slots. |
 | **Shift Simulator** | Plan shifts as scenarios and compare estimated revenue, cost and profit. | Deterministic formulas. "From my history" mode uses the rider's own past sessions (P25–P75 range). |
 | **RoadContext** | Report floods, road damage, closures and obstacles on a map. Duplicate reports merge into one incident. | MobileNetV3 photo classifier. It only **suggests** a category with a confidence score; it never changes a report. |
 
@@ -274,7 +274,7 @@ All settings are environment variables. [`.env.example`](.env.example) lists the
 | Backend (pytest, real PostGIS + Valkey) | 463 | coverage of `app/modules` + `app/core`: **98.23%** (gate 96%) |
 | ML pipeline | 134 | ruff + pytest |
 | CV service | 38 | ruff + pytest |
-| Mobile (unit + widget) | 522 | coverage of `lib/` without generated code: **96.86%** (gate 94.7%) |
+| Mobile (unit + widget) | 526 | coverage of `lib/` without generated code: **96.86%** (gate 94.7%) |
 | E2E (`flutter drive` on the emulator) | 1 journey | checks 17 database values through SQL, then deletes the test account |
 
 The tests include cross-user access checks on every endpoint, token expiry, reuse and forgery, a check that

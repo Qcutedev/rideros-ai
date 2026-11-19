@@ -194,16 +194,19 @@ class RecordFormController<T, I> extends SubmitNotifier {
 
   final Provider<RecordRepository<T, I>> _repository;
 
-  /// Creates when [id] is `null`, otherwise updates.
-  Future<bool> save(String? id, I input) => run(() async {
-    final repository = ref.read(_repository);
-    if (id == null) {
-      await repository.create(input);
-    } else {
-      await repository.update(id, input);
-    }
-    ref.read(profitDataRevisionProvider.notifier).bump();
-  });
+  /// Creates when [id] is `null`, otherwise updates. Returns the stored
+  /// record, or `null` when the save failed (the error is in [state]).
+  Future<T?> save(String? id, I input) async {
+    T? saved;
+    final ok = await run(() async {
+      final repository = ref.read(_repository);
+      saved = id == null
+          ? await repository.create(input)
+          : await repository.update(id, input);
+      ref.read(profitDataRevisionProvider.notifier).bump();
+    });
+    return ok ? saved : null;
+  }
 
   Future<bool> delete(String id) => run(() async {
     await ref.read(_repository).delete(id);
