@@ -60,12 +60,13 @@ PendingRecord _income(String id, {String amount = '250', String? session}) =>
       queuedAt: DateTime.utc(2026, 11, 10, 7),
     );
 
+/// 10:00–14:00 in the device's time zone, so the label reads the same on CI (UTC).
 PendingRecord _session(String id) => PendingRecord(
   id: id,
   kind: PendingKind.workSession,
-  body: const {
-    'started_at': '2026-11-10T10:00:00+07:00',
-    'ended_at': '2026-11-10T14:00:00+07:00',
+  body: {
+    'started_at': DateTime(2026, 11, 10, 10).toUtc().toIso8601String(),
+    'ended_at': DateTime(2026, 11, 10, 14).toUtc().toIso8601String(),
   },
   queuedAt: DateTime.utc(2026, 11, 10, 7),
 );
